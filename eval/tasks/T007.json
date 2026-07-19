@@ -1,0 +1,26 @@
+{
+  "id": "T007",
+  "version": "0.0.1",
+  "type": "architecture",
+  "repo": "httpx",
+  "snapshot_ref": "fixtures/repos/httpx.md",
+  "commit_sha": "PIN_ME",
+  "question": "How do sync and async clients relate?",
+  "accepted_answer_criteria": [
+    "Names the primary symbol(s) or modules involved",
+    "Does not contradict repo source at pinned SHA",
+    "Cites evidence spans or graph nodes when Prism is used"
+  ],
+  "necessary_spans": [],
+  "gold_hints": [],
+  "preferred_future_tools": [
+    "communities",
+    "hubs",
+    "overview"
+  ],
+  "baseline_protocols": [
+    "frontier+explore",
+    "medium+explore"
+  ],
+  "notes": "P0 stub \u2014 fill gold hints when pilot SHA is frozen."
+}

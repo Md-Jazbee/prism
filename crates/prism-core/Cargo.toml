@@ -1,0 +1,23 @@
+[package]
+name = "prism-core"
+description = "Workspace manager, content fingerprinting, and incremental index orchestration (P0)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+xxhash-rust = { workspace = true }
+ignore = { workspace = true }
+hex = { workspace = true }
+tracing = { workspace = true }
+prism-ir = { workspace = true }
+prism-store = { workspace = true }
+prism-obs = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

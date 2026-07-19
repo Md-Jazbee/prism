@@ -1,0 +1,33 @@
+# Graphify local KG outputs
+graphify-out/
+
+# Rust
+/target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# Python / eval
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+eval/.venv/
+eval/**/__pycache__/
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Prism runtime (never commit user indexes)
+.prism/
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+credentials.json

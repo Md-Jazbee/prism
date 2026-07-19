@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/fact-schema/v0/fact.schema.json",
+  "title": "Prism fact schema v0",
+  "description": "T1-oriented fact shapes. Semantic (T3/T4) layers are separate artifacts — do not encode CPG here.",
+  "version": "0.0.1",
+  "breaking_change_policy": "Major version bump in schemas/ and prism-ir::FACT_SCHEMA_VERSION.",
+  "confidence": ["extracted", "heuristic", "precise", "observed"],
+  "node_kinds_t1": ["File", "Symbol", "Module", "Package"],
+  "edge_kinds_t1": ["CONTAINS", "IMPORTS", "CALLS", "DEFINES", "REFERENCES"],
+  "required_attributes": {
+    "Symbol": ["name", "span", "language", "analyzer", "tier", "confidence"],
+    "Edge": ["kind", "src", "dst", "confidence", "analyzer", "tier"]
+  },
+  "id_policy": "Prefer readable deterministic syntactic IDs (SCIP-compatible where possible). Avoid opaque integer-only IDs.",
+  "ir_layers": {
+    "L0": "Raw bytes / paths — P0 populates via fingerprint",
+    "L1": "Lexical tokens — optional later",
+    "L2": "Syntactic facts (T1) — P1",
+    "L3": "Precise symbols (T2) — P3",
+    "L4": "CFG/DFG — P4",
+    "L5": "Evidence Pack / plan IR — P2+"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/meta/v0/meta.schema.json",
+  "title": "Prism meta.sqlite schema v0",
+  "description": "Logical tables for workspace metadata. Physical DDL lives in prism-store.",
+  "version": "0.0.1",
+  "tables": {
+    "schema_meta": {
+      "columns": {
+        "key": "TEXT PRIMARY KEY",
+        "value": "TEXT NOT NULL"
+      }
+    },
+    "snapshots": {
+      "columns": {
+        "id": "INTEGER PRIMARY KEY",
+        "git_commit": "TEXT NULLABLE",
+        "dirty": "INTEGER NOT NULL",
+        "tree_fingerprint": "TEXT NOT NULL",
+        "created_at": "TEXT NOT NULL"
+      }
+    },
+    "files": {
+      "columns": {
+        "path": "TEXT PRIMARY KEY",
+        "content_hash": "TEXT NOT NULL",
+        "updated_at": "TEXT NOT NULL"
+      },
+      "notes": "Unit of incremental change = file. content_hash is XXH3-128 hex."
+    },
+    "jobs": {
+      "columns": {
+        "id": "INTEGER PRIMARY KEY",
+        "kind": "TEXT NOT NULL",
+        "status": "TEXT NOT NULL",
+        "detail": "TEXT NULLABLE",
+        "created_at": "TEXT NOT NULL"
+      }
+    }
+  },
+  "transaction_boundary": "replace_file_subgraph — delete prior file-local graph rows, insert new facts, commit (SQLite WAL).",
+  "crash_safety": "PRAGMA journal_mode=WAL; IMMEDIATE transactions for subgraph replace."
+}

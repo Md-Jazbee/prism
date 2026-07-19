@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/events/v0/events.schema.json",
+  "title": "Prism metrics / observability events v0",
+  "version": "0.0.1",
+  "events": {
+    "index_started": {
+      "fields": ["schema_version", "root"]
+    },
+    "index_finished": {
+      "fields": [
+        "files_discovered",
+        "files_skipped_unchanged",
+        "files_hashed",
+        "files_secret_skipped",
+        "wall_time_ms"
+      ]
+    },
+    "file_skipped_secret": {
+      "fields": ["path"]
+    },
+    "parse_hook_stub": {
+      "fields": ["path"],
+      "notes": "Replaced by real extractor events in P1"
+    },
+    "placeholders_later": {
+      "query_latency_ms": "P1+",
+      "tokens_per_task": "eval harness",
+      "tool_calls_per_task": "eval harness"
+    }
+  }
+}

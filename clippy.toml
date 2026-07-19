@@ -1,0 +1,2 @@
+# Prism clippy baseline (P0) — tighten as phases land.
+msrv = "1.85.0"

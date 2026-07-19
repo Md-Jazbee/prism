@@ -1,0 +1,19 @@
+[package]
+name = "prism-cli"
+description = "Prism CLI — index, query, compile, doctor (P0 stubs)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "prism"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+prism-core = { workspace = true }
+prism-ir = { workspace = true }
