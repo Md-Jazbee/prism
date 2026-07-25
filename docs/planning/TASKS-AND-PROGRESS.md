@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-25  
-**Current phase:** **P1 — Syntactic KG + MCP** (Stage A open) · P0 gate passed 2026-07-25  
+**Current phase:** **P1 — Syntactic KG + MCP** (Stage A exited; Stage B open) · P0 gate passed 2026-07-25  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)
 
@@ -14,18 +14,18 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | Phase | Intent | Progress | State |
 |---:|---|---:|---|
 | **P0** | Foundations (identity, hash, schemas, eval) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-25 |
-| **P1** | Syntactic KG + MCP | ░░░░░░░░░░ **0%** | 🟡 Stage A open |
+| **P1** | Syntactic KG + MCP | ▓▓▓░░░░░░░ **25%** | 🟡 Stage B open (A exited) |
 | **P2** | Context Compiler | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P3** | Precise Tier (T2) | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P4** | Semantic Slicing | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P5** | Repo Intelligence + Hardening | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P6** | Team / Distributed (optional) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
 
-**How to read progress:** P0 % is estimated from stage checklists below (done ÷ total). Later phases stay at 0% until their entry gate passes.
+**How to read progress:** P1 % ≈ stages done ÷ 4 (A/B/C/D). Later phases stay at 0% until their entry gate passes.
 
 ```mermaid
 flowchart LR
-    P0[P0 Foundations<br/>✅ done] --> P1[P1 Syntactic KG + MCP<br/>🟡 Stage A]
+    P0[P0 Foundations<br/>✅ done] --> P1[P1 Syntactic KG + MCP<br/>🟡 Stage B]
     P1 --> P2[P2 Context Compiler]
     P2 --> P3[P3 Precise Tier]
     P3 --> P4[P4 Semantic Slicing]
@@ -58,7 +58,7 @@ flowchart LR
 | Capability | P0 | P1 | P2 | P3 | P4 | P5 | P6 | Today |
 |---|---|---|---|---|---|---|---|---|
 | Content-hash incremental store | ● | ● | ● | ● | ● | ● | ● | ✅ live; measured on pilots |
-| Syntactic facts (T1) | ○ | ● | ● | ● | ● | ● | ● | ⬜ parse-hook stub only |
+| Syntactic facts (T1) | ○ | ● | ● | ● | ● | ● | ● | ✅ Python + Rust extractors + goldens |
 | MCP graph tools | ○ | ● | ● | ● | ● | ● | ● | ⬜ |
 | Query plan + Evidence Pack | ○ | ○ | ● | ● | ● | ● | ● | ⬜ |
 | Precise symbol (T2) | ○ | ○ | ○ | ● | ● | ● | ● | ⬜ |
@@ -218,23 +218,44 @@ cd eval && uv sync && uv run prism-eval smoke
 
 ## Phase 1 — Syntactic Knowledge Graph + MCP
 
-**State:** 🟡 **Stage A open** (P0 gate passed 2026-07-25)  
+**State:** 🟡 **Stage B open** (Stage A exited 2026-07-25)  
 **Duration:** 4–6 weeks · **Languages (chosen):** Python + Rust first (match pilots httpx / ripgrep), TS/JS next  
 **Gate:** ≥5× token reduction on structural tasks vs explore; quality within ~10 pts of explore on structural gold subset.
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
-| **A — T1 extractors** | Per-language design docs; symbols/imports/heuristic CALLS; golden fact fixtures; unresolved edges first-class | 🟡 open |
-| **B — KG persist + query** | Real fact write path (replace P0 stub); neighbors/resolve API; reverse-dep dirty lists; index size budget note | ⬜ |
+| **A — T1 extractors** | Per-language design docs; symbols/imports/heuristic CALLS; golden fact fixtures; unresolved edges first-class | ✅ exited 2026-07-25 |
+| **B — KG persist + query** | Real fact write path (thin persist done in A); neighbors/resolve API; reverse-dep dirty lists; index size budget note | 🟡 open |
 | **C — MCP tools** | `index_status`, `resolve_symbol`, `neighbors`, `impact` (heuristic), safety rules | ⬜ |
 | **D — Communities + gate** | Repo orientation / communities stub; Phase 1 scorecard run; pass token gate | ⬜ |
 
 **Phase 1 kickoff checklist:**
 
-- [ ] Freeze LanguageExtractor ABI + fact schema versions used by extractors (ABI draft exists; freeze = version stamp + fixture contract)
+- [x] Freeze LanguageExtractor ABI + fact schema versions used by extractors (ABI frozen; `FACT_SCHEMA_VERSION` 0.0.1)
 - [x] Pick first 2 languages + fixture repos — **Python (httpx `b5addb6`) + Rust (ripgrep `f9c05a9`)**
-- [ ] Stand up golden-fixture conformance harness
-- [ ] Define MCP tool JSON schemas + refusal behaviors
+- [x] Stand up golden-fixture conformance harness (`fixtures/languages/` + crate tests)
+- [ ] Define MCP tool JSON schemas + refusal behaviors (Stage C)
+
+### Stage A — Language extractors (T1) ✅
+
+#### Deliverables
+
+- [x] Extractor design docs — [python.md](../architecture/extractors/python.md), [rust.md](../architecture/extractors/rust.md)
+- [x] Golden fact fixtures — `fixtures/languages/python/`, `fixtures/languages/rust/`
+- [x] Resolution-cheap policy — same-file + unresolved first-class (ABI + extractors)
+- [x] Crates — `prism-extract`, `prism-extract-python`, `prism-extract-rust`
+- [x] Fact IR — `prism-ir::facts` (`FactBundle`, kinds, spans)
+- [x] Indexer wired — parse-hook → extract → `KgStore::insert_facts` + `FileExtracted` events
+
+#### Exit / acceptance
+
+- [x] Each language has golden fixtures passing conformance tests
+- [x] Unresolved edges are first-class, not silent deletes
+- [x] Extractor docs state known failure modes (dynamic imports, macros, generics)
+
+#### Handoff to Stage B
+
+Fact producers live; Stage B owns query API (`neighbors` / `resolve`), reverse-dep dirty lists, and index-size budget note. Thin persist already writes nodes/edges during replace.
 
 ---
 
@@ -311,17 +332,17 @@ cd eval && uv sync && uv run prism-eval smoke
 
 Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 
-| ID | Workstream | P0 status |
+| ID | Workstream | P1 Stage A status |
 |---|---|---|
-| **W-STORE** | Storage & identity | 🟡 meta/graph stubs live |
-| **W-PLUGIN** | Plugin ABI | 🟡 draft doc; no real extractors |
-| **W-KG** | Knowledge graph | 🟡 adjacency stub only |
+| **W-STORE** | Storage & identity | 🟡 fact insert on replace; query API Stage B |
+| **W-PLUGIN** | Plugin ABI | ✅ frozen; Python + Rust native extractors |
+| **W-KG** | Knowledge graph | 🟡 facts persisted; neighbors/resolve Stage B |
 | **W-PLAN** | Query planning | ⬜ |
 | **W-CC** | Context compiler | ⬜ |
 | **W-MCP** | Agent surface | ⬜ (CLI only today) |
 | **W-IDE** | IDE/LSP | ⬜ |
-| **W-EVAL** | Evaluation | 🟡 skeleton + 22 tasks |
-| **W-OBS** | Observability | 🟡 index events schema |
+| **W-EVAL** | Evaluation | 🟡 skeleton + 22 tasks + language goldens |
+| **W-OBS** | Observability | 🟡 `FileExtracted` + unresolved_calls counters |
 | **W-SEC** | Security & privacy | 🟡 secret skip defaults |
 
 ---
@@ -340,3 +361,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 |---|---|
 | 2026-07-19 | Initial board created from plan + repo inventory; P0 ~85% |
 | 2026-07-25 | P0 punch list completed: SHAs frozen (httpx `b5addb6`, ripgrep `f9c05a9`), pilots cold-walked, checklist ticked, gold hints T001–T011. **P0 gate passed**; P1 Stage A opened (Python + Rust extractors) |
+| 2026-07-25 | **P1 Stage A exited:** Fact IR, tree-sitter Python/Rust extractors, golden fixtures, design docs, indexer extract path + `insert_facts`. Stage B opened |

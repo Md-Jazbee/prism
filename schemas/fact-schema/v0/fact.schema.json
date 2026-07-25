@@ -7,7 +7,9 @@
   "breaking_change_policy": "Major version bump in schemas/ and prism-ir::FACT_SCHEMA_VERSION.",
   "confidence": ["extracted", "heuristic", "precise", "observed"],
   "node_kinds_t1": ["File", "Symbol", "Module", "Package"],
-  "edge_kinds_t1": ["CONTAINS", "IMPORTS", "CALLS", "DEFINES", "REFERENCES"],
+  "edge_kinds_t1": ["CONTAINS", "IMPORTS", "CALLS", "DEFINES", "REFERENCES", "EXTENDS", "IMPLEMENTS"],
+  "unresolved_policy": "CALLS that cannot be same-file resolved use dst id unresolved:{name} with confidence heuristic; never silently drop.",
+  "abi_status": "frozen for P1 Stage A (2026-07-25)",
   "required_attributes": {
     "Symbol": ["name", "span", "language", "analyzer", "tier", "confidence"],
     "Edge": ["kind", "src", "dst", "confidence", "analyzer", "tier"]

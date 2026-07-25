@@ -1,0 +1,284 @@
+{
+  "schema_version": "0.0.1",
+  "analyzer": "tree-sitter-rust@0.23",
+  "tier": "T1",
+  "language": "rust",
+  "path": "simple_mod.rs",
+  "nodes": [
+    {
+      "id": "file:simple_mod.rs",
+      "kind": "File",
+      "name": "simple_mod.rs",
+      "file_path": "simple_mod.rs",
+      "span": {
+        "start_byte": 0,
+        "end_byte": 284,
+        "start_line": 0,
+        "start_col": 0,
+        "end_line": 17,
+        "end_col": 0
+      },
+      "language": "rust",
+      "analyzer": "tree-sitter-rust@0.23",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "module:std::collections::HashMap",
+      "kind": "Module",
+      "name": "std::collections::HashMap",
+      "language": "rust",
+      "analyzer": "tree-sitter-rust@0.23",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "sym:simple_mod.rs:function:helper:162",
+      "kind": "Symbol",
+      "name": "helper",
+      "file_path": "simple_mod.rs",
+      "span": {
+        "start_byte": 159,
+        "end_byte": 197,
+        "start_line": 5,
+        "start_col": 0,
+        "end_line": 7,
+        "end_col": 1
+      },
+      "language": "rust",
+      "analyzer": "tree-sitter-rust@0.23",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "symbol_kind": "function"
+      }
+    },
+    {
+      "id": "sym:simple_mod.rs:function:main:232",
+      "kind": "Symbol",
+      "name": "main",
+      "file_path": "simple_mod.rs",
+      "span": {
+        "start_byte": 229,
+        "end_byte": 283,
+        "start_line": 13,
+        "start_col": 0,
+        "end_line": 16,
+        "end_col": 1
+      },
+      "language": "rust",
+      "analyzer": "tree-sitter-rust@0.23",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "symbol_kind": "function"
+      }
+    },
+    {
+      "id": "sym:simple_mod.rs:struct:Point:206",
+      "kind": "Symbol",
+      "name": "Point",
+      "file_path": "simple_mod.rs",
+      "span": {
+        "start_byte": 199,
+        "end_byte": 227,
+        "start_line": 9,
+        "start_col": 0,
+        "end_line": 11,
+        "end_col": 1
+      },
+      "language": "rust",
+      "analyzer": "tree-sitter-rust@0.23",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "symbol_kind": "struct"
+      }
+    },
+    {
+      "id": "unresolved:missing_fn",
+      "kind": "Symbol",
+      "name": "missing_fn",
+      "language": "rust",
+      "analyzer": "tree-sitter-rust@0.23",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "attrs": {
+        "unresolved": true
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge:CALLS:sym:simple_mod.rs:function:main:232:sym:simple_mod.rs:function:helper:162:253",
+      "kind": "Calls",
+      "src": "sym:simple_mod.rs:function:main:232",
+      "dst": "sym:simple_mod.rs:function:helper:162",
+      "file_path": "simple_mod.rs",
+      "span": {
+        "start_byte": 253,
+        "end_byte": 259,
+        "start_line": 14,
+        "start_col": 12,
+        "end_line": 14,
+        "end_col": 18
+      },
+      "analyzer": "tree-sitter-rust@0.23",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "attrs": {
+        "callee": "helper"
+      }
+    },
+    {
+      "id": "edge:CALLS:sym:simple_mod.rs:function:main:232:unresolved:missing_fn:268",
+      "kind": "Calls",
+      "src": "sym:simple_mod.rs:function:main:232",
+      "dst": "unresolved:missing_fn",
+      "file_path": "simple_mod.rs",
+      "span": {
+        "start_byte": 268,
+        "end_byte": 278,
+        "start_line": 15,
+        "start_col": 4,
+        "end_line": 15,
+        "end_col": 14
+      },
+      "analyzer": "tree-sitter-rust@0.23",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "attrs": {
+        "callee": "missing_fn"
+      }
+    },
+    {
+      "id": "edge:CONTAINS:file:simple_mod.rs:sym:simple_mod.rs:function:helper:162:162",
+      "kind": "Contains",
+      "src": "file:simple_mod.rs",
+      "dst": "sym:simple_mod.rs:function:helper:162",
+      "file_path": "simple_mod.rs",
+      "span": {
+        "start_byte": 159,
+        "end_byte": 197,
+        "start_line": 5,
+        "start_col": 0,
+        "end_line": 7,
+        "end_col": 1
+      },
+      "analyzer": "tree-sitter-rust@0.23",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:CONTAINS:file:simple_mod.rs:sym:simple_mod.rs:function:main:232:232",
+      "kind": "Contains",
+      "src": "file:simple_mod.rs",
+      "dst": "sym:simple_mod.rs:function:main:232",
+      "file_path": "simple_mod.rs",
+      "span": {
+        "start_byte": 229,
+        "end_byte": 283,
+        "start_line": 13,
+        "start_col": 0,
+        "end_line": 16,
+        "end_col": 1
+      },
+      "analyzer": "tree-sitter-rust@0.23",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:CONTAINS:file:simple_mod.rs:sym:simple_mod.rs:struct:Point:206:206",
+      "kind": "Contains",
+      "src": "file:simple_mod.rs",
+      "dst": "sym:simple_mod.rs:struct:Point:206",
+      "file_path": "simple_mod.rs",
+      "span": {
+        "start_byte": 199,
+        "end_byte": 227,
+        "start_line": 9,
+        "start_col": 0,
+        "end_line": 11,
+        "end_col": 1
+      },
+      "analyzer": "tree-sitter-rust@0.23",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:DEFINES:file:simple_mod.rs:sym:simple_mod.rs:function:helper:162:162",
+      "kind": "Defines",
+      "src": "file:simple_mod.rs",
+      "dst": "sym:simple_mod.rs:function:helper:162",
+      "file_path": "simple_mod.rs",
+      "span": {
+        "start_byte": 162,
+        "end_byte": 168,
+        "start_line": 5,
+        "start_col": 3,
+        "end_line": 5,
+        "end_col": 9
+      },
+      "analyzer": "tree-sitter-rust@0.23",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:DEFINES:file:simple_mod.rs:sym:simple_mod.rs:function:main:232:232",
+      "kind": "Defines",
+      "src": "file:simple_mod.rs",
+      "dst": "sym:simple_mod.rs:function:main:232",
+      "file_path": "simple_mod.rs",
+      "span": {
+        "start_byte": 232,
+        "end_byte": 236,
+        "start_line": 13,
+        "start_col": 3,
+        "end_line": 13,
+        "end_col": 7
+      },
+      "analyzer": "tree-sitter-rust@0.23",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:DEFINES:file:simple_mod.rs:sym:simple_mod.rs:struct:Point:206:206",
+      "kind": "Defines",
+      "src": "file:simple_mod.rs",
+      "dst": "sym:simple_mod.rs:struct:Point:206",
+      "file_path": "simple_mod.rs",
+      "span": {
+        "start_byte": 206,
+        "end_byte": 211,
+        "start_line": 9,
+        "start_col": 7,
+        "end_line": 9,
+        "end_col": 12
+      },
+      "analyzer": "tree-sitter-rust@0.23",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:IMPORTS:file:simple_mod.rs:module:std::collections::HashMap:127",
+      "kind": "Imports",
+      "src": "file:simple_mod.rs",
+      "dst": "module:std::collections::HashMap",
+      "file_path": "simple_mod.rs",
+      "span": {
+        "start_byte": 127,
+        "end_byte": 157,
+        "start_line": 3,
+        "start_col": 0,
+        "end_line": 3,
+        "end_col": 30
+      },
+      "analyzer": "tree-sitter-rust@0.23",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "raw": "use std::collections::HashMap"
+      }
+    }
+  ]
+}

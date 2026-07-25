@@ -1,0 +1,17 @@
+[package]
+name = "prism-extract-python"
+description = "T1 tree-sitter Python LanguageExtractor"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+serde_json = { workspace = true }
+tree-sitter = { workspace = true }
+tree-sitter-python = { workspace = true }
+prism-ir = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }

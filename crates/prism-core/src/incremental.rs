@@ -1,9 +1,10 @@
-//! Incremental re-index path (P0 gate):
-//! discover → hash → parse-hook stub → txn → invalidate.
+//! Incremental re-index path (P1 Stage A):
+//! discover → hash → extract (T1) → txn → invalidate.
 
 use crate::fingerprint::file_content_hash;
 use crate::workspace::WorkspaceManager;
 use anyhow::Result;
+use prism_extract::extract_file;
 use prism_ir::FileId;
 use prism_obs::{emit_index_event, IndexEvent, IndexStats};
 use prism_store::{KgStore, SqliteKgStore, SqliteMetaStore};
@@ -25,7 +26,7 @@ pub struct IndexResult {
     pub files: Vec<FileId>,
 }
 
-/// Orchestrates the Phase 0 incremental indexing stub.
+/// Orchestrates incremental indexing with T1 extractors.
 pub struct IncrementalIndexer {
     workspace: WorkspaceManager,
     meta: SqliteMetaStore,
@@ -47,7 +48,7 @@ impl IncrementalIndexer {
         })
     }
 
-    /// End-to-end P0 path against the workspace.
+    /// End-to-end index path against the workspace.
     pub fn run(&mut self, opts: &IndexOptions) -> Result<IndexResult> {
         let started = Instant::now();
         let root = self.workspace.root().display().to_string();
@@ -102,14 +103,42 @@ impl IncrementalIndexer {
                 content_hash: content_hash.clone(),
             });
 
-            // parse-hook stub (real extractors arrive in P1)
-            emit_index_event(&IndexEvent::ParseHookStub { path: rel.clone() });
+            let extracted = extract_file(&rel, &bytes)?;
+            match &extracted {
+                Some(bundle) => {
+                    let unresolved = bundle.unresolved_call_count() as u64;
+                    emit_index_event(&IndexEvent::FileExtracted {
+                        path: rel.clone(),
+                        language: bundle.language.clone(),
+                        nodes: bundle.nodes.len() as u64,
+                        edges: bundle.edges.len() as u64,
+                        unresolved_calls: unresolved,
+                    });
+                    stats.files_extracted += 1;
+                    stats.nodes_written += bundle.nodes.len() as u64;
+                    stats.edges_written += bundle.edges.len() as u64;
+                    stats.unresolved_calls += unresolved;
 
-            if !opts.dry_run {
-                // txn: replace file subgraph + update meta hash
-                self.kg.begin_replace_file_subgraph(&rel)?;
-                self.kg.commit_replace_file_subgraph(&rel)?;
-                self.meta.upsert_file_hash(&rel, &content_hash)?;
+                    if !opts.dry_run {
+                        self.kg.begin_replace_file_subgraph(&rel)?;
+                        self.kg.insert_facts(&rel, bundle)?;
+                        self.kg.commit_replace_file_subgraph(&rel)?;
+                        self.meta.upsert_file_hash(&rel, &content_hash)?;
+                    }
+                }
+                None => {
+                    emit_index_event(&IndexEvent::FileExtractSkipped {
+                        path: rel.clone(),
+                        reason: "unsupported_language".into(),
+                    });
+                    stats.files_extract_skipped += 1;
+                    if !opts.dry_run {
+                        // Still record hash so we skip unchanged non-code files.
+                        self.kg.begin_replace_file_subgraph(&rel)?;
+                        self.kg.commit_replace_file_subgraph(&rel)?;
+                        self.meta.upsert_file_hash(&rel, &content_hash)?;
+                    }
+                }
             }
         }
 
@@ -165,6 +194,8 @@ mod tests {
         assert_eq!(first.stats.files_discovered, 2);
         assert_eq!(first.stats.files_skipped_unchanged, 0);
         assert_eq!(first.stats.files_hashed, 2);
+        assert_eq!(first.stats.files_extracted, 2);
+        assert!(first.stats.nodes_written > 0);
 
         let wm2 = WorkspaceManager::open(root).unwrap();
         let mut indexer2 = IncrementalIndexer::open(wm2, &prism).unwrap();
@@ -190,5 +221,20 @@ mod tests {
 
         let meta = SqliteMetaStore::open(prism.join("meta.sqlite")).unwrap();
         assert!(meta.list_file_paths().unwrap().is_empty());
+    }
+
+    #[test]
+    fn extracts_python_and_persists_nodes() {
+        let dir = tempdir().unwrap();
+        fs::write(dir.path().join("m.py"), b"def foo():\n    bar()\n").unwrap();
+        let prism = dir.path().join(".prism");
+        let wm = WorkspaceManager::open(dir.path()).unwrap();
+        let mut indexer = IncrementalIndexer::open(wm, &prism).unwrap();
+        let result = indexer.run(&IndexOptions::default()).unwrap();
+        assert_eq!(result.stats.files_extracted, 1);
+        assert!(result.stats.unresolved_calls >= 1);
+
+        let kg = SqliteKgStore::open(prism.join("graph.sqlite")).unwrap();
+        assert!(kg.count_nodes_for_file("m.py").unwrap() >= 1);
     }
 }

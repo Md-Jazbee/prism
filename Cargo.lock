@@ -400,6 +400,7 @@ dependencies = [
  "anyhow",
  "hex",
  "ignore",
+ "prism-extract",
  "prism-ir",
  "prism-obs",
  "prism-store",
@@ -409,6 +410,41 @@ dependencies = [
  "thiserror",
  "tracing",
  "xxhash-rust",
+]
+
+[[package]]
+name = "prism-extract"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "prism-extract-python",
+ "prism-extract-rust",
+ "prism-ir",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "prism-extract-python"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "prism-ir",
+ "serde_json",
+ "tree-sitter",
+ "tree-sitter-python",
+]
+
+[[package]]
+name = "prism-extract-rust"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "prism-ir",
+ "serde_json",
+ "tree-sitter",
+ "tree-sitter-rust",
 ]
 
 [[package]]
@@ -438,6 +474,7 @@ dependencies = [
  "prism-ir",
  "rusqlite",
  "serde",
+ "serde_json",
  "tempfile",
  "thiserror",
  "tracing",
@@ -466,6 +503,18 @@ name = "r-efi"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
+
+[[package]]
+name = "regex"
+version = "1.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f020237b6c8eed93db2e2cb53c00c60a8e1bc73da7d073199a1180401450218d"
+dependencies = [
+ "aho-corasick",
+ "memchr",
+ "regex-automata",
+ "regex-syntax",
+]
 
 [[package]]
 name = "regex-automata"
@@ -583,6 +632,12 @@ name = "smallvec"
 version = "1.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ed6a63f02c8539c91a8685a86f4099661ba3da017932f6ebbea6de3f0fa7c90"
+
+[[package]]
+name = "streaming-iterator"
+version = "0.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2b2231b7c3057d5e4ad0156fb3dc807d900806020c5ffa3ee6ff2c8c76fb8520"
 
 [[package]]
 name = "strsim"
@@ -726,6 +781,45 @@ dependencies = [
  "tracing-core",
  "tracing-log",
  "tracing-serde",
+]
+
+[[package]]
+name = "tree-sitter"
+version = "0.24.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a5387dffa7ffc7d2dae12b50c6f7aab8ff79d6210147c6613561fc3d474c6f75"
+dependencies = [
+ "cc",
+ "regex",
+ "regex-syntax",
+ "streaming-iterator",
+ "tree-sitter-language",
+]
+
+[[package]]
+name = "tree-sitter-language"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "009994f150cc0cd50ff54917d5bc8bffe8cad10ca10d81c34da2ec421ae61782"
+
+[[package]]
+name = "tree-sitter-python"
+version = "0.23.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3d065aaa27f3aaceaf60c1f0e0ac09e1cb9eb8ed28e7bcdaa52129cffc7f4b04"
+dependencies = [
+ "cc",
+ "tree-sitter-language",
+]
+
+[[package]]
+name = "tree-sitter-rust"
+version = "0.23.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ca8ccb3e3a3495c8a943f6c3fd24c3804c471fd7f4f16087623c7fa4c0068e8a"
+dependencies = [
+ "cc",
+ "tree-sitter-language",
 ]
 
 [[package]]

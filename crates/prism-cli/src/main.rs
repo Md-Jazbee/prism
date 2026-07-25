@@ -1,4 +1,4 @@
-//! `prism` CLI — Phase 0 stubs (`--help`, `index --dry-run`).
+//! `prism` CLI — Phase 1 Stage A (`index` runs T1 extractors).
 
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
@@ -11,7 +11,7 @@ use tracing_subscriber::EnvFilter;
     name = "prism",
     version,
     about = "Prism — Repository Intelligence Platform",
-    long_about = "Pre-LLM repository understanding: index → knowledge graph → context compilation.\nPhase 0: workspace identity, fingerprinting, meta.sqlite stubs."
+    long_about = "Pre-LLM repository understanding: index → knowledge graph → context compilation.\nPhase 1 Stage A: T1 Python/Rust extractors + syntactic fact persistence."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -20,7 +20,7 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    /// Index a workspace (discover → hash → parse-hook stub → txn → invalidate).
+    /// Index a workspace (discover → hash → T1 extract → txn → invalidate).
     Index {
         /// Workspace root (default: cwd).
         #[arg(default_value = ".")]
@@ -50,11 +50,16 @@ fn main() -> Result<()> {
             let mut indexer = IncrementalIndexer::open(wm, &prism_dir)?;
             let result = indexer.run(&IndexOptions { dry_run })?;
             println!(
-                "indexed: discovered={} hashed={} skipped_unchanged={} secret_skipped={} wall_ms={} fingerprint={}{}",
+                "indexed: discovered={} hashed={} extracted={} extract_skipped={} skipped_unchanged={} secret_skipped={} nodes={} edges={} unresolved_calls={} wall_ms={} fingerprint={}{}",
                 result.stats.files_discovered,
                 result.stats.files_hashed,
+                result.stats.files_extracted,
+                result.stats.files_extract_skipped,
                 result.stats.files_skipped_unchanged,
                 result.stats.files_secret_skipped,
+                result.stats.nodes_written,
+                result.stats.edges_written,
+                result.stats.unresolved_calls,
                 result.stats.wall_time_ms,
                 &result.tree_fingerprint[..result.tree_fingerprint.len().min(16)],
                 if dry_run { " (dry-run)" } else { "" }

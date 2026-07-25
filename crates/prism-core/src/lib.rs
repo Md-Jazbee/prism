@@ -1,4 +1,4 @@
-//! Phase 0 foundations: workspace identity, fingerprinting, incremental path.
+//! Phase 0–1: workspace identity, fingerprinting, incremental extract path.
 
 pub mod fingerprint;
 pub mod ignore_policy;

@@ -6,6 +6,9 @@ members = [
     "crates/prism-store",
     "crates/prism-ir",
     "crates/prism-obs",
+    "crates/prism-extract",
+    "crates/prism-extract-python",
+    "crates/prism-extract-rust",
 ]
 default-members = ["crates/prism-cli"]
 
@@ -29,8 +32,14 @@ rusqlite = { version = "0.32", features = ["bundled"] }
 tempfile = "3"
 ignore = "0.4"
 hex = "0.4"
+tree-sitter = "0.24"
+tree-sitter-python = "0.23"
+tree-sitter-rust = "0.23"
 
 prism-ir = { path = "crates/prism-ir" }
 prism-core = { path = "crates/prism-core" }
 prism-store = { path = "crates/prism-store" }
 prism-obs = { path = "crates/prism-obs" }
+prism-extract = { path = "crates/prism-extract" }
+prism-extract-python = { path = "crates/prism-extract-python" }
+prism-extract-rust = { path = "crates/prism-extract-rust" }

@@ -13,18 +13,26 @@
         "files_skipped_unchanged",
         "files_hashed",
         "files_secret_skipped",
+        "files_extracted",
+        "files_extract_skipped",
+        "nodes_written",
+        "edges_written",
+        "unresolved_calls",
         "wall_time_ms"
       ]
     },
     "file_skipped_secret": {
       "fields": ["path"]
     },
-    "parse_hook_stub": {
-      "fields": ["path"],
-      "notes": "Replaced by real extractor events in P1"
+    "file_extract_skipped": {
+      "fields": ["path", "reason"]
+    },
+    "file_extracted": {
+      "fields": ["path", "language", "nodes", "edges", "unresolved_calls"],
+      "notes": "Unresolved call rate = unresolved_calls / CALLS edges (per language dashboards in Stage D)"
     },
     "placeholders_later": {
-      "query_latency_ms": "P1+",
+      "query_latency_ms": "P1 Stage B+",
       "tokens_per_task": "eval harness",
       "tool_calls_per_task": "eval harness"
     }
