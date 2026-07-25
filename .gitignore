@@ -25,6 +25,9 @@ eval/**/__pycache__/
 # Prism runtime (never commit user indexes)
 .prism/
 
+# Pilot repo snapshots (re-clone at pinned SHA; see fixtures/repos/*.md)
+fixtures/repos/snapshots/
+
 # Secrets
 .env
 .env.*

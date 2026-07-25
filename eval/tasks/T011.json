@@ -4,15 +4,21 @@
   "type": "architecture",
   "repo": "ripgrep",
   "snapshot_ref": "fixtures/repos/ripgrep.md",
-  "commit_sha": "PIN_ME",
+  "commit_sha": "f9c05a949d1a0dc8e16dee28ca9605d38611faeb",
   "question": "Orient me: how does searching flow end-to-end?",
   "accepted_answer_criteria": [
     "Names the primary symbol(s) or modules involved",
     "Does not contradict repo source at pinned SHA",
     "Cites evidence spans or graph nodes when Prism is used"
   ],
-  "necessary_spans": [],
-  "gold_hints": [],
+  "necessary_spans": [
+    "crates/core",
+    "crates/ignore/src/walk.rs",
+    "crates/searcher/src/searcher/mod.rs"
+  ],
+  "gold_hints": [
+    "Flow: crates/core (rg CLI) parses args \u2192 ignore::WalkBuilder discovers files \u2192 grep-searcher Searcher runs matcher \u2192 printer crates emit results"
+  ],
   "preferred_future_tools": [
     "communities",
     "hubs",
@@ -22,5 +28,5 @@
     "frontier+explore",
     "medium+explore"
   ],
-  "notes": "P0 stub \u2014 fill gold hints when pilot SHA is frozen."
+  "notes": "SHA frozen 2026-07-25; gold hints v1 (first batch)."
 }

@@ -4,15 +4,20 @@
   "type": "symbol_explain",
   "repo": "ripgrep",
   "snapshot_ref": "fixtures/repos/ripgrep.md",
-  "commit_sha": "PIN_ME",
-  "question": "Explain what GrepWalker does",
+  "commit_sha": "f9c05a949d1a0dc8e16dee28ca9605d38611faeb",
+  "question": "Explain what the ignore crate's Walk / WalkBuilder does",
   "accepted_answer_criteria": [
     "Names the primary symbol(s) or modules involved",
     "Does not contradict repo source at pinned SHA",
     "Cites evidence spans or graph nodes when Prism is used"
   ],
-  "necessary_spans": [],
-  "gold_hints": [],
+  "necessary_spans": [
+    "crates/ignore/src/walk.rs:Walk",
+    "crates/ignore/src/walk.rs:WalkBuilder"
+  ],
+  "gold_hints": [
+    "crates/ignore/src/walk.rs \u2014 Walk (single-threaded) and WalkParallel iterate files honoring .gitignore/ignore rules; WalkBuilder configures them"
+  ],
   "preferred_future_tools": [
     "neighbors",
     "symbol_explain"
@@ -21,5 +26,5 @@
     "frontier+explore",
     "medium+explore"
   ],
-  "notes": "P0 stub \u2014 fill gold hints when pilot SHA is frozen."
+  "notes": "SHA frozen 2026-07-25; gold hints v1 (first batch)."
 }

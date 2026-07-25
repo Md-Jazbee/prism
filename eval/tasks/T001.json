@@ -4,15 +4,20 @@
   "type": "symbol_explain",
   "repo": "httpx",
   "snapshot_ref": "fixtures/repos/httpx.md",
-  "commit_sha": "PIN_ME",
+  "commit_sha": "b5addb64f0161ff6bfe94c124ef76f6a1fba5254",
   "question": "Explain what Client.send does",
   "accepted_answer_criteria": [
     "Names the primary symbol(s) or modules involved",
     "Does not contradict repo source at pinned SHA",
     "Cites evidence spans or graph nodes when Prism is used"
   ],
-  "necessary_spans": [],
-  "gold_hints": [],
+  "necessary_spans": [
+    "httpx/_client.py:Client.send"
+  ],
+  "gold_hints": [
+    "httpx/_client.py \u2014 Client.send (~line 879): follows redirects, manages transport lifecycle, delegates to _send_handling_auth/_send_handling_redirects",
+    "Client extends BaseClient (httpx/_client.py)"
+  ],
   "preferred_future_tools": [
     "neighbors",
     "symbol_explain"
@@ -21,5 +26,5 @@
     "frontier+explore",
     "medium+explore"
   ],
-  "notes": "P0 stub \u2014 fill gold hints when pilot SHA is frozen."
+  "notes": "SHA frozen 2026-07-25; gold hints v1 (first batch)."
 }

@@ -4,7 +4,7 @@
   "type": "debug_stub",
   "repo": "httpx",
   "snapshot_ref": "fixtures/repos/httpx.md",
-  "commit_sha": "PIN_ME",
+  "commit_sha": "b5addb64f0161ff6bfe94c124ef76f6a1fba5254",
   "question": "Stub: debug a timeout failure path",
   "accepted_answer_criteria": [
     "Names the primary symbol(s) or modules involved",
@@ -21,5 +21,5 @@
     "frontier+explore",
     "medium+explore"
   ],
-  "notes": "P0 stub \u2014 fill gold hints when pilot SHA is frozen."
+  "notes": "SHA frozen 2026-07-25; gold hints in progress."
 }

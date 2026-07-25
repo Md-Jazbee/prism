@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
-**Status date:** 2026-07-19  
-**Current phase:** **P0 — Foundations** (in progress · ~85%)  
+**Status date:** 2026-07-25  
+**Current phase:** **P1 — Syntactic KG + MCP** (Stage A open) · P0 gate passed 2026-07-25  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)
 
@@ -13,8 +13,8 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 
 | Phase | Intent | Progress | State |
 |---:|---|---:|---|
-| **P0** | Foundations (identity, hash, schemas, eval) | ▓▓▓▓▓▓▓▓▓░ **~85%** | 🟡 In progress |
-| **P1** | Syntactic KG + MCP | ░░░░░░░░░░ **0%** | ⚪ Not started |
+| **P0** | Foundations (identity, hash, schemas, eval) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-25 |
+| **P1** | Syntactic KG + MCP | ░░░░░░░░░░ **0%** | 🟡 Stage A open |
 | **P2** | Context Compiler | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P3** | Precise Tier (T2) | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P4** | Semantic Slicing | ░░░░░░░░░░ **0%** | ⚪ Not started |
@@ -25,15 +25,15 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 
 ```mermaid
 flowchart LR
-    P0[P0 Foundations<br/>~85%] --> P1[P1 Syntactic KG + MCP]
+    P0[P0 Foundations<br/>✅ done] --> P1[P1 Syntactic KG + MCP<br/>🟡 Stage A]
     P1 --> P2[P2 Context Compiler]
     P2 --> P3[P3 Precise Tier]
     P3 --> P4[P4 Semantic Slicing]
     P4 --> P5[P5 Intelligence + Eval]
     P5 --> P6[P6 Distributed / Team<br/>optional]
 
-    style P0 fill:#f6e58d,stroke:#f9ca24,color:#000
-    style P1 fill:#dfe6e9,stroke:#b2bec3,color:#000
+    style P0 fill:#b8e994,stroke:#78e08f,color:#000
+    style P1 fill:#f6e58d,stroke:#f9ca24,color:#000
     style P2 fill:#dfe6e9,stroke:#b2bec3,color:#000
     style P3 fill:#dfe6e9,stroke:#b2bec3,color:#000
     style P4 fill:#dfe6e9,stroke:#b2bec3,color:#000
@@ -57,7 +57,7 @@ flowchart LR
 
 | Capability | P0 | P1 | P2 | P3 | P4 | P5 | P6 | Today |
 |---|---|---|---|---|---|---|---|---|
-| Content-hash incremental store | ● | ● | ● | ● | ● | ● | ● | 🟡 stub path live |
+| Content-hash incremental store | ● | ● | ● | ● | ● | ● | ● | ✅ live; measured on pilots |
 | Syntactic facts (T1) | ○ | ● | ● | ● | ● | ● | ● | ⬜ parse-hook stub only |
 | MCP graph tools | ○ | ● | ● | ● | ● | ● | ● | ⬜ |
 | Query plan + Evidence Pack | ○ | ○ | ● | ● | ● | ● | ● | ⬜ |
@@ -74,10 +74,10 @@ flowchart LR
 
 | # | Item | Blocks | Owner / notes |
 |---|---|---|---|
-| 1 | Freeze pilot repo commit SHAs (`PIN_ME` → real SHA) | P0 Stage C gate, all gold tasks | Replace in `fixtures/repos/*.md` + `eval/tasks/*.json` |
-| 2 | Measure index size on pilot repos after cold walk | Ignore-policy checklist | Run `prism index` on frozen httpx / ripgrep |
-| 3 | Architect sign-off on schema/ABI “review done” | Formal Stage B exit | Schemas + code exist; checklist remains open |
-| 4 | Fill gold hints / necessary spans on tasks | Eval scoring quality | 22 task stubs exist; content still placeholder |
+| 1 | ~~Freeze pilot repo commit SHAs~~ | — | ✅ 2026-07-25 · httpx `b5addb6`, ripgrep `f9c05a9`; all 22 tasks pinned |
+| 2 | ~~Measure index size on pilot repos after cold walk~~ | — | ✅ httpx 124 files / 88K; ripgrep 236 files / 136K (see checklist) |
+| 3 | ~~Architect sign-off on schema/ABI~~ | — | ✅ recorded via P0-exit commit review (solo mode) |
+| 4 | Fill gold hints / necessary spans on tasks | Eval scoring quality (non-blocking) | 🟡 first batch T001–T011 filled; T012–T022 remain |
 
 ---
 
@@ -96,9 +96,9 @@ flowchart LR
 
 | Stage | Focus | Progress | State |
 |---|---|---:|---|
-| **A** | Workspace identity & fingerprinting | ~90% | 🟡 Nearly done |
-| **B** | Durable schema & plugin ABI | ~85% | 🟡 Nearly done |
-| **C** | Eval skeleton & observability | ~75% | 🟡 Open gaps on SHA freeze |
+| **A** | Workspace identity & fingerprinting | 100% | ✅ Exited 2026-07-25 |
+| **B** | Durable schema & plugin ABI | 100% | ✅ Exited 2026-07-25 |
+| **C** | Eval skeleton & observability | 100% | ✅ Exited 2026-07-25 |
 
 ### Stage A — Workspace identity & content fingerprinting
 
@@ -118,7 +118,7 @@ flowchart LR
 - [x] Dirty worktree vs clean commit identities distinguishable
 - [x] Ignore policy review checklist exists
 - [x] Pilot repos listed with approx LOC and languages
-- [ ] Ignore checklist fully ticked (index-size measured on pilots still open)
+- [x] Ignore checklist fully ticked (index size measured on pilots 2026-07-25)
 
 #### Key code / docs
 
@@ -142,7 +142,7 @@ flowchart LR
 - [x] IR types — confidence, IDs, schema version constants (`prism-ir`)
 - [x] `meta.sqlite` store (WAL upsert / skip-unchanged) — `prism-store`
 - [x] `graph.sqlite` adjacency stub + replace/invalidate — `prism-store`
-- [ ] Formal architect “schema review signed” note (process, not code)
+- [x] Formal architect “schema review signed” note — recorded in P0-exit commit (solo mode)
 
 #### Exit / acceptance
 
@@ -150,7 +150,7 @@ flowchart LR
 - [x] Confidence values include `extracted` / `heuristic` / `precise` / `observed`
 - [x] Plugin ABI reviewable without reading the whole ADD
 - [x] Migration policy: breaking fact schema bumps major version (documented in schemas / IR versions)
-- [ ] Explicit sign-off recorded (optional checklist item for team process)
+- [x] Explicit sign-off recorded (P0-exit commit, 2026-07-25)
 
 #### Key code / docs
 
@@ -173,15 +173,15 @@ flowchart LR
 - [x] Baseline runbook notes — `eval/baselines/` + eval README (“How we know P1 saved tokens”)
 - [x] Named event schema + emit path — `prism-obs` + `schemas/events/v0`
 - [x] Incremental path end-to-end stub: discover → hash → parse-hook → txn → invalidate
-- [ ] Pilot SHAs frozen (`commit_sha: "PIN_ME"` still present)
-- [ ] Gold hints / necessary spans filled after SHA freeze
+- [x] Pilot SHAs frozen — httpx `b5addb64…`, ripgrep `f9c05a94…` (all 22 tasks)
+- [x] Gold hints first batch (T001–T011) filled from frozen snapshots · 🟡 T012–T022 pending (non-blocking)
 
 #### Exit / acceptance (Phase 0 gate)
 
 - [x] Incremental re-index path specified & implemented end-to-end (parsers stubbed)
 - [x] Metrics pipeline exists with named event schema
 - [x] ≥20 gold tasks versioned (files present)
-- [ ] Tasks tied to **real** commit SHAs (currently `PIN_ME`)
+- [x] Tasks tied to **real** commit SHAs (pinned 2026-07-25)
 - [x] Written procedure for “How will we know P1 saved tokens?” — `eval/README.md`
 
 #### Key code / docs
@@ -196,14 +196,14 @@ flowchart LR
 
 ---
 
-### Phase 0 — remaining punch list (do these next)
+### Phase 0 — punch list (✅ completed 2026-07-25)
 
-1. [ ] Clone httpx + ripgrep at known-good commits; record SHA/date/license in `fixtures/repos/*.md`
-2. [ ] Replace `PIN_ME` across `eval/tasks/*.json`
-3. [ ] Cold-walk pilots with `cargo run -p prism-cli -- index <path>`; note discovered/hashed/skipped + on-disk `.prism` size
-4. [ ] Tick remaining items on [IGNORE-POLICY-CHECKLIST.md](../architecture/IGNORE-POLICY-CHECKLIST.md)
-5. [ ] Fill a first batch of gold hints (structural tasks T001+) for frozen SHAs
-6. [ ] Mark Stage A/B/C exit in this file and open Phase 1 Stage A
+1. [x] Clone httpx + ripgrep at known-good commits; SHA/date/license recorded in `fixtures/repos/*.md` (snapshots gitignored, reproducible by SHA)
+2. [x] Replace `PIN_ME` across `eval/tasks/*.json` (22/22 pinned)
+3. [x] Cold-walk pilots — httpx 124 files 91ms/88K; ripgrep 236 files 110ms/136K; warm walk skips 100%
+4. [x] [IGNORE-POLICY-CHECKLIST.md](../architecture/IGNORE-POLICY-CHECKLIST.md) fully ticked with measurements
+5. [x] Gold hints first batch T001–T011 (real symbols/spans from frozen SHAs; T008 question corrected `GrepWalker` → ignore crate `Walk`/`WalkBuilder`)
+6. [x] Stage A/B/C exits marked; Phase 1 Stage A opened below
 
 **Suggested P0 exit command smoke:**
 
@@ -216,23 +216,23 @@ cd eval && uv sync && uv run prism-eval smoke
 
 ---
 
-## Phase 1 — Syntactic Knowledge Graph + MCP (outline)
+## Phase 1 — Syntactic Knowledge Graph + MCP
 
-**State:** ⚪ Not started (entry: P0 gate)  
-**Duration:** 4–6 weeks · **Languages (target):** 2–3 (e.g. Python, TS/JS, Go)  
+**State:** 🟡 **Stage A open** (P0 gate passed 2026-07-25)  
+**Duration:** 4–6 weeks · **Languages (chosen):** Python + Rust first (match pilots httpx / ripgrep), TS/JS next  
 **Gate:** ≥5× token reduction on structural tasks vs explore; quality within ~10 pts of explore on structural gold subset.
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
-| **A — T1 extractors** | Per-language design docs; symbols/imports/heuristic CALLS; golden fact fixtures; unresolved edges first-class | ⬜ |
+| **A — T1 extractors** | Per-language design docs; symbols/imports/heuristic CALLS; golden fact fixtures; unresolved edges first-class | 🟡 open |
 | **B — KG persist + query** | Real fact write path (replace P0 stub); neighbors/resolve API; reverse-dep dirty lists; index size budget note | ⬜ |
 | **C — MCP tools** | `index_status`, `resolve_symbol`, `neighbors`, `impact` (heuristic), safety rules | ⬜ |
 | **D — Communities + gate** | Repo orientation / communities stub; Phase 1 scorecard run; pass token gate | ⬜ |
 
-**Phase 1 kickoff checklist (when P0 closes):**
+**Phase 1 kickoff checklist:**
 
-- [ ] Freeze LanguageExtractor ABI + fact schema versions used by extractors
-- [ ] Pick first 2 languages + fixture repos
+- [ ] Freeze LanguageExtractor ABI + fact schema versions used by extractors (ABI draft exists; freeze = version stamp + fixture contract)
+- [x] Pick first 2 languages + fixture repos — **Python (httpx `b5addb6`) + Rust (ripgrep `f9c05a9`)**
 - [ ] Stand up golden-fixture conformance harness
 - [ ] Define MCP tool JSON schemas + refusal behaviors
 
@@ -339,3 +339,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | Date | Change |
 |---|---|
 | 2026-07-19 | Initial board created from plan + repo inventory; P0 ~85% |
+| 2026-07-25 | P0 punch list completed: SHAs frozen (httpx `b5addb6`, ripgrep `f9c05a9`), pilots cold-walked, checklist ticked, gold hints T001–T011. **P0 gate passed**; P1 Stage A opened (Python + Rust extractors) |

@@ -4,15 +4,21 @@
   "type": "impact",
   "repo": "httpx",
   "snapshot_ref": "fixtures/repos/httpx.md",
-  "commit_sha": "PIN_ME",
+  "commit_sha": "b5addb64f0161ff6bfe94c124ef76f6a1fba5254",
   "question": "Impact of changing URL.copy_with",
   "accepted_answer_criteria": [
     "Names the primary symbol(s) or modules involved",
     "Does not contradict repo source at pinned SHA",
     "Cites evidence spans or graph nodes when Prism is used"
   ],
-  "necessary_spans": [],
-  "gold_hints": [],
+  "necessary_spans": [
+    "httpx/_urls.py:URL.copy_with",
+    "httpx/_urlparse.py:ParseResult.copy_with"
+  ],
+  "gold_hints": [
+    "Two copy_with implementations: httpx/_urls.py URL.copy_with (~line 327) public API; httpx/_urlparse.py ParseResult.copy_with (~line 186) internal",
+    "Impact: redirect handling and client _merge_url build URLs via copy_with"
+  ],
   "preferred_future_tools": [
     "impact",
     "reverse_deps"
@@ -21,5 +27,5 @@
     "frontier+explore",
     "medium+explore"
   ],
-  "notes": "P0 stub \u2014 fill gold hints when pilot SHA is frozen."
+  "notes": "SHA frozen 2026-07-25; gold hints v1 (first batch)."
 }
