@@ -31,8 +31,11 @@
       "fields": ["path", "language", "nodes", "edges", "unresolved_calls"],
       "notes": "Unresolved call rate = unresolved_calls / CALLS edges (per language dashboards in Stage D)"
     },
+    "query_finished": {
+      "fields": ["op", "latency_ms", "hit_count"],
+      "notes": "Track toward local structural query P95 <50ms (design NFR)"
+    },
     "placeholders_later": {
-      "query_latency_ms": "P1 Stage B+",
       "tokens_per_task": "eval harness",
       "tool_calls_per_task": "eval harness"
     }

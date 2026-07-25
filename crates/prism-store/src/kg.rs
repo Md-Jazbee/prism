@@ -1,4 +1,4 @@
-//! Graph store trait + SQLite adjacency (P1 Stage A writes real facts).
+//! Graph store trait + SQLite adjacency (P1 Stage A/B).
 
 use anyhow::{Context, Result};
 use prism_ir::FactBundle;
@@ -16,7 +16,7 @@ pub trait KgStore {
 
 /// SQLite adjacency store.
 pub struct SqliteKgStore {
-    conn: Connection,
+    pub(crate) conn: Connection,
     /// Paths currently mid-replace inside an open transaction.
     pending: Option<String>,
 }
@@ -41,6 +41,7 @@ impl SqliteKgStore {
             CREATE TABLE IF NOT EXISTS nodes (
                 id TEXT PRIMARY KEY,
                 kind TEXT NOT NULL,
+                name TEXT,
                 file_path TEXT,
                 attrs_json TEXT NOT NULL DEFAULT '{}'
             );
@@ -54,9 +55,23 @@ impl SqliteKgStore {
                 attrs_json TEXT NOT NULL DEFAULT '{}'
             );
             CREATE INDEX IF NOT EXISTS idx_nodes_file ON nodes(file_path);
+            CREATE INDEX IF NOT EXISTS idx_nodes_name ON nodes(name);
             CREATE INDEX IF NOT EXISTS idx_edges_file ON edges(file_path);
+            CREATE INDEX IF NOT EXISTS idx_edges_src ON edges(src);
+            CREATE INDEX IF NOT EXISTS idx_edges_dst ON edges(dst);
+            CREATE INDEX IF NOT EXISTS idx_edges_kind ON edges(kind);
             ",
         )?;
+        // Migrate older Stage A DBs that lack `name`.
+        let has_name: bool = conn
+            .prepare("PRAGMA table_info(nodes)")?
+            .query_map([], |r| r.get::<_, String>(1))?
+            .filter_map(|c| c.ok())
+            .any(|c| c == "name");
+        if !has_name {
+            conn.execute_batch("ALTER TABLE nodes ADD COLUMN name TEXT;")?;
+            conn.execute_batch("CREATE INDEX IF NOT EXISTS idx_nodes_name ON nodes(name);")?;
+        }
         Ok(Self {
             conn,
             pending: None,
@@ -86,13 +101,10 @@ impl SqliteKgStore {
 impl KgStore for SqliteKgStore {
     fn begin_replace_file_subgraph(&mut self, file_path: &str) -> Result<()> {
         self.conn.execute_batch("BEGIN IMMEDIATE;")?;
-        // Crash-safe replace: delete prior file-local facts, then insert.
         self.conn
             .execute("DELETE FROM nodes WHERE file_path = ?1", params![file_path])?;
         self.conn
             .execute("DELETE FROM edges WHERE file_path = ?1", params![file_path])?;
-        // Also drop unresolved nodes that were only referenced from this file's edges
-        // (unresolved nodes have file_path NULL — leave them; Stage B GC can prune).
         self.pending = Some(file_path.to_string());
         Ok(())
     }
@@ -103,7 +115,6 @@ impl KgStore for SqliteKgStore {
         }
         for node in &bundle.nodes {
             let attrs = serde_json::to_string(node).unwrap_or_else(|_| "{}".into());
-            // Prefer node.file_path; unresolved nodes stay with NULL file_path.
             let fp = node.file_path.as_deref().or(
                 if node.id.starts_with("unresolved:") || node.id.starts_with("module:") {
                     None
@@ -112,12 +123,13 @@ impl KgStore for SqliteKgStore {
                 },
             );
             self.conn.execute(
-                "INSERT INTO nodes(id, kind, file_path, attrs_json) VALUES (?1, ?2, ?3, ?4)
+                "INSERT INTO nodes(id, kind, name, file_path, attrs_json) VALUES (?1, ?2, ?3, ?4, ?5)
                  ON CONFLICT(id) DO UPDATE SET
                    kind = excluded.kind,
+                   name = excluded.name,
                    file_path = COALESCE(excluded.file_path, nodes.file_path),
                    attrs_json = excluded.attrs_json",
-                params![node.id, node.kind.as_str(), fp, attrs],
+                params![node.id, node.kind.as_str(), node.name, fp, attrs],
             )?;
         }
         for edge in &bundle.edges {

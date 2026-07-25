@@ -4,6 +4,11 @@
 
 pub mod kg;
 pub mod meta;
+pub mod query;
 
 pub use kg::{KgStore, SqliteKgStore};
 pub use meta::SqliteMetaStore;
+pub use query::{
+    parse_edge_kinds, EdgeDirection, GraphEdgeView, GraphNodeView, ImpactHit, IndexSizeStats,
+    NeighborHit,
+};

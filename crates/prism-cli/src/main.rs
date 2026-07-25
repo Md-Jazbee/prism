@@ -1,9 +1,12 @@
-//! `prism` CLI — Phase 1 Stage A (`index` runs T1 extractors).
+//! `prism` CLI — Phase 1 Stage B (`index` + structural `query`).
 
-use anyhow::{Context, Result};
-use clap::{Parser, Subcommand};
+use anyhow::{bail, Context, Result};
+use clap::{Parser, Subcommand, ValueEnum};
 use prism_core::{IncrementalIndexer, IndexOptions, WorkspaceManager};
+use prism_obs::{emit_index_event, IndexEvent};
+use prism_store::{parse_edge_kinds, EdgeDirection, SqliteKgStore, SqliteMetaStore};
 use std::path::PathBuf;
+use std::time::Instant;
 use tracing_subscriber::EnvFilter;
 
 #[derive(Parser, Debug)]
@@ -11,7 +14,7 @@ use tracing_subscriber::EnvFilter;
     name = "prism",
     version,
     about = "Prism — Repository Intelligence Platform",
-    long_about = "Pre-LLM repository understanding: index → knowledge graph → context compilation.\nPhase 1 Stage A: T1 Python/Rust extractors + syntactic fact persistence."
+    long_about = "Pre-LLM repository understanding: index → knowledge graph → context compilation.\nPhase 1 Stage B: T1 extractors + KG query (resolve / neighbors / impact)."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -34,6 +37,86 @@ enum Commands {
         #[arg(default_value = ".")]
         path: PathBuf,
     },
+    /// Show index freshness and graph cardinality.
+    #[command(name = "index-status")]
+    IndexStatus {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
+    /// Structural KG queries (Stage B).
+    Query {
+        #[command(subcommand)]
+        query: QueryCmd,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+enum QueryCmd {
+    /// Lookup symbols by exact name.
+    Resolve {
+        name: String,
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        /// Optional path substring filter.
+        #[arg(long)]
+        file: Option<String>,
+        #[arg(long, default_value_t = 20)]
+        limit: usize,
+    },
+    /// 1-hop neighbors of a node id.
+    Neighbors {
+        id: String,
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        /// Comma-separated edge kinds (e.g. CALLS,IMPORTS).
+        #[arg(long)]
+        kind: Option<String>,
+        #[arg(long, value_enum, default_value_t = DirArg::Outgoing)]
+        dir: DirArg,
+        #[arg(long, default_value_t = 50)]
+        limit: usize,
+    },
+    /// Depth-limited heuristic impact candidates from a seed node id.
+    Impact {
+        id: String,
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long, default_value_t = 2)]
+        depth: u32,
+        #[arg(long, default_value_t = 100)]
+        limit: usize,
+    },
+    /// Files that should be rechecked when a path changes (reverse-dep dirty list).
+    Dirty {
+        /// Changed repo-relative path.
+        changed: String,
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
+}
+
+#[derive(Debug, Clone, Copy, ValueEnum)]
+enum DirArg {
+    Outgoing,
+    Incoming,
+    Both,
+}
+
+impl From<DirArg> for EdgeDirection {
+    fn from(d: DirArg) -> Self {
+        match d {
+            DirArg::Outgoing => EdgeDirection::Outgoing,
+            DirArg::Incoming => EdgeDirection::Incoming,
+            DirArg::Both => EdgeDirection::Both,
+        }
+    }
+}
+
+fn open_kg(workspace: &PathBuf) -> Result<(WorkspaceManager, SqliteKgStore)> {
+    let wm = WorkspaceManager::open(workspace)
+        .with_context(|| format!("open workspace {}", workspace.display()))?;
+    let kg = SqliteKgStore::open(wm.root().join(".prism/graph.sqlite"))?;
+    Ok((wm, kg))
 }
 
 fn main() -> Result<()> {
@@ -82,6 +165,113 @@ fn main() -> Result<()> {
                 prism_ir::EVENTS_SCHEMA_VERSION
             );
         }
+        Commands::IndexStatus { path } => {
+            let wm = WorkspaceManager::open(&path)?;
+            let prism = wm.root().join(".prism");
+            if !prism.join("graph.sqlite").exists() {
+                bail!("no index at {} — run `prism index` first", prism.display());
+            }
+            let meta = SqliteMetaStore::open(prism.join("meta.sqlite"))?;
+            let kg = SqliteKgStore::open(prism.join("graph.sqlite"))?;
+            let stats = kg.index_stats()?;
+            let files = meta.list_file_paths()?.len();
+            let id = wm.identity()?;
+            let graph_bytes = std::fs::metadata(prism.join("graph.sqlite"))
+                .map(|m| m.len())
+                .unwrap_or(0);
+            let meta_bytes = std::fs::metadata(prism.join("meta.sqlite"))
+                .map(|m| m.len())
+                .unwrap_or(0);
+            println!("root: {}", wm.root().display());
+            println!(
+                "git_commit: {}",
+                id.snapshot.git_commit.as_deref().unwrap_or("(none)")
+            );
+            println!("dirty_worktree: {}", id.snapshot.dirty);
+            println!("tree_fingerprint: {}", id.snapshot.tree_fingerprint);
+            println!("files_hashed: {files}");
+            println!(
+                "graph: nodes={} edges={} files_indexed={} graph_sqlite_bytes={} meta_sqlite_bytes={}",
+                stats.nodes, stats.edges, stats.files_indexed, graph_bytes, meta_bytes
+            );
+            println!(
+                "nfr_note: design targets local query P95 <50ms; index size ~3–10% of source (see docs/architecture/INDEX-SIZE-BUDGET.md)"
+            );
+        }
+        Commands::Query { query } => match query {
+            QueryCmd::Resolve {
+                name,
+                path,
+                file,
+                limit,
+            } => {
+                let (_wm, kg) = open_kg(&path)?;
+                let started = Instant::now();
+                let hits = kg.resolve_symbol(&name, file.as_deref(), limit)?;
+                let ms = started.elapsed().as_millis() as u64;
+                emit_index_event(&IndexEvent::QueryFinished {
+                    op: "resolve".into(),
+                    latency_ms: ms,
+                    hit_count: hits.len() as u64,
+                });
+                println!("{}", serde_json::to_string_pretty(&hits)?);
+                eprintln!("# resolve hits={} latency_ms={ms}", hits.len());
+            }
+            QueryCmd::Neighbors {
+                id,
+                path,
+                kind,
+                dir,
+                limit,
+            } => {
+                let (_wm, kg) = open_kg(&path)?;
+                let kinds = parse_edge_kinds(kind.as_deref());
+                let started = Instant::now();
+                let hits = kg.neighbors(&id, kinds.as_deref(), dir.into(), limit)?;
+                let ms = started.elapsed().as_millis() as u64;
+                emit_index_event(&IndexEvent::QueryFinished {
+                    op: "neighbors".into(),
+                    latency_ms: ms,
+                    hit_count: hits.len() as u64,
+                });
+                println!("{}", serde_json::to_string_pretty(&hits)?);
+                eprintln!("# neighbors hits={} latency_ms={ms}", hits.len());
+            }
+            QueryCmd::Impact {
+                id,
+                path,
+                depth,
+                limit,
+            } => {
+                let (_wm, kg) = open_kg(&path)?;
+                let started = Instant::now();
+                let hits = kg.impact(&id, depth, limit)?;
+                let ms = started.elapsed().as_millis() as u64;
+                emit_index_event(&IndexEvent::QueryFinished {
+                    op: "impact".into(),
+                    latency_ms: ms,
+                    hit_count: hits.len() as u64,
+                });
+                println!("{}", serde_json::to_string_pretty(&hits)?);
+                eprintln!(
+                    "# impact hits={} depth={depth} latency_ms={ms} (heuristic T1)",
+                    hits.len()
+                );
+            }
+            QueryCmd::Dirty { changed, path } => {
+                let (_wm, kg) = open_kg(&path)?;
+                let started = Instant::now();
+                let dirty = kg.reverse_dep_files(&changed)?;
+                let ms = started.elapsed().as_millis() as u64;
+                emit_index_event(&IndexEvent::QueryFinished {
+                    op: "dirty".into(),
+                    latency_ms: ms,
+                    hit_count: dirty.len() as u64,
+                });
+                println!("{}", serde_json::to_string_pretty(&dirty)?);
+                eprintln!("# dirty files={} latency_ms={ms}", dirty.len());
+            }
+        },
     }
     Ok(())
 }

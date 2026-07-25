@@ -389,6 +389,9 @@ dependencies = [
  "clap",
  "prism-core",
  "prism-ir",
+ "prism-obs",
+ "prism-store",
+ "serde_json",
  "tracing",
  "tracing-subscriber",
 ]

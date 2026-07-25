@@ -44,6 +44,12 @@ pub enum IndexEvent {
         edges: u64,
         unresolved_calls: u64,
     },
+    /// Structural query latency (design NFR: local P95 &lt;50ms).
+    QueryFinished {
+        op: String,
+        latency_ms: u64,
+        hit_count: u64,
+    },
 }
 
 /// Emit an index event via `tracing` (JSON-friendly fields).
@@ -102,6 +108,19 @@ pub fn emit_index_event(event: &IndexEvent) {
                 edges = edges,
                 unresolved_calls = unresolved_calls,
                 "file extracted"
+            );
+        }
+        IndexEvent::QueryFinished {
+            op,
+            latency_ms,
+            hit_count,
+        } => {
+            info!(
+                event = "query_finished",
+                op = %op,
+                latency_ms = latency_ms,
+                hit_count = hit_count,
+                "query finished"
             );
         }
     }

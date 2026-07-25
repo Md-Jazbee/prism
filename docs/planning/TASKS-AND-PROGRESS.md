@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-25  
-**Current phase:** **P1 — Syntactic KG + MCP** (Stage A exited; Stage B open) · P0 gate passed 2026-07-25  
+**Current phase:** **P1 — Syntactic KG + MCP** (Stage B exited; Stage C open) · P0 gate passed 2026-07-25  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)
 
@@ -14,7 +14,7 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | Phase | Intent | Progress | State |
 |---:|---|---:|---|
 | **P0** | Foundations (identity, hash, schemas, eval) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-25 |
-| **P1** | Syntactic KG + MCP | ▓▓▓░░░░░░░ **25%** | 🟡 Stage B open (A exited) |
+| **P1** | Syntactic KG + MCP | ▓▓▓▓▓▓░░░░ **50%** | 🟡 Stage C open (A+B exited) |
 | **P2** | Context Compiler | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P3** | Precise Tier (T2) | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P4** | Semantic Slicing | ░░░░░░░░░░ **0%** | ⚪ Not started |
@@ -25,7 +25,7 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 
 ```mermaid
 flowchart LR
-    P0[P0 Foundations<br/>✅ done] --> P1[P1 Syntactic KG + MCP<br/>🟡 Stage B]
+    P0[P0 Foundations<br/>✅ done] --> P1[P1 Syntactic KG + MCP<br/>🟡 Stage C]
     P1 --> P2[P2 Context Compiler]
     P2 --> P3[P3 Precise Tier]
     P3 --> P4[P4 Semantic Slicing]
@@ -218,15 +218,15 @@ cd eval && uv sync && uv run prism-eval smoke
 
 ## Phase 1 — Syntactic Knowledge Graph + MCP
 
-**State:** 🟡 **Stage B open** (Stage A exited 2026-07-25)  
+**State:** 🟡 **Stage C open** (Stage B exited 2026-07-25)  
 **Duration:** 4–6 weeks · **Languages (chosen):** Python + Rust first (match pilots httpx / ripgrep), TS/JS next  
 **Gate:** ≥5× token reduction on structural tasks vs explore; quality within ~10 pts of explore on structural gold subset.
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
 | **A — T1 extractors** | Per-language design docs; symbols/imports/heuristic CALLS; golden fact fixtures; unresolved edges first-class | ✅ exited 2026-07-25 |
-| **B — KG persist + query** | Real fact write path (thin persist done in A); neighbors/resolve API; reverse-dep dirty lists; index size budget note | 🟡 open |
-| **C — MCP tools** | `index_status`, `resolve_symbol`, `neighbors`, `impact` (heuristic), safety rules | ⬜ |
+| **B — KG persist + query** | Fact persist; neighbors/resolve/impact API; reverse-dep dirty lists; size budget + failure docs | ✅ exited 2026-07-25 |
+| **C — MCP tools** | `index_status`, `resolve_symbol`, `neighbors`, `impact` (heuristic), safety rules | 🟡 open |
 | **D — Communities + gate** | Repo orientation / communities stub; Phase 1 scorecard run; pass token gate | ⬜ |
 
 **Phase 1 kickoff checklist:**
@@ -256,6 +256,27 @@ cd eval && uv sync && uv run prism-eval smoke
 #### Handoff to Stage B
 
 Fact producers live; Stage B owns query API (`neighbors` / `resolve`), reverse-dep dirty lists, and index-size budget note. Thin persist already writes nodes/edges during replace.
+
+### Stage B — KG persistence & query API ✅
+
+#### Deliverables
+
+- [x] KG query API — [KG-QUERY-API.md](../architecture/KG-QUERY-API.md); `resolve` / `neighbors` / `impact` / `dirty` in `prism-store` + CLI
+- [x] Incremental update sequence — [INCREMENTAL-UPDATE.md](../architecture/INCREMENTAL-UPDATE.md)
+- [x] Index size budget note — [INDEX-SIZE-BUDGET.md](../architecture/INDEX-SIZE-BUDGET.md); `prism index-status`
+- [x] Failure modes — [KG-FAILURE-MODES.md](../architecture/KG-FAILURE-MODES.md)
+- [x] Reverse-dep dirty lists — `SqliteKgStore::reverse_dep_files` / `dirty_set_for_paths`
+- [x] Query latency tracking — `query_finished` obs event
+
+#### Exit / acceptance
+
+- [x] Documented that a single-file edit does not require full rebuild
+- [x] Query API can express: symbol lookup, 1-hop neighbors, depth-limited impact candidates
+- [x] Latency/size NFRs are tracked (even if not yet met)
+
+#### Handoff to Stage C
+
+CLI query surface is the contract MCP tools should mirror (`index_status`, `resolve_symbol`, `neighbors`, `impact`). Bind via `rmcp` next; keep confidence fields and heuristic labeling.
 
 ---
 
@@ -332,17 +353,17 @@ Fact producers live; Stage B owns query API (`neighbors` / `resolve`), reverse-d
 
 Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 
-| ID | Workstream | P1 Stage A status |
+| ID | Workstream | P1 Stage B status |
 |---|---|---|
-| **W-STORE** | Storage & identity | 🟡 fact insert on replace; query API Stage B |
+| **W-STORE** | Storage & identity | ✅ fact insert + name index + reverse-dep dirty lists |
 | **W-PLUGIN** | Plugin ABI | ✅ frozen; Python + Rust native extractors |
-| **W-KG** | Knowledge graph | 🟡 facts persisted; neighbors/resolve Stage B |
+| **W-KG** | Knowledge graph | ✅ resolve / neighbors / impact query API |
 | **W-PLAN** | Query planning | ⬜ |
 | **W-CC** | Context compiler | ⬜ |
-| **W-MCP** | Agent surface | ⬜ (CLI only today) |
+| **W-MCP** | Agent surface | 🟡 CLI query ready; MCP Stage C |
 | **W-IDE** | IDE/LSP | ⬜ |
 | **W-EVAL** | Evaluation | 🟡 skeleton + 22 tasks + language goldens |
-| **W-OBS** | Observability | 🟡 `FileExtracted` + unresolved_calls counters |
+| **W-OBS** | Observability | ✅ extract + `query_finished` latency |
 | **W-SEC** | Security & privacy | 🟡 secret skip defaults |
 
 ---
@@ -362,3 +383,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-19 | Initial board created from plan + repo inventory; P0 ~85% |
 | 2026-07-25 | P0 punch list completed: SHAs frozen (httpx `b5addb6`, ripgrep `f9c05a9`), pilots cold-walked, checklist ticked, gold hints T001–T011. **P0 gate passed**; P1 Stage A opened (Python + Rust extractors) |
 | 2026-07-25 | **P1 Stage A exited:** Fact IR, tree-sitter Python/Rust extractors, golden fixtures, design docs, indexer extract path + `insert_facts`. Stage B opened |
+| 2026-07-25 | **P1 Stage B exited:** KG query API (resolve/neighbors/impact/dirty), `index-status`, reverse-dep lists, size/failure docs, `query_finished` metrics. Stage C opened |
