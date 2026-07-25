@@ -2,10 +2,12 @@
 //!
 //! All graph access goes through [`KgStore`] so SQLite → Kuzu is a later switch.
 
+pub mod communities;
 pub mod kg;
 pub mod meta;
 pub mod query;
 
+pub use communities::{Community, Hub, RepoMap};
 pub use kg::{KgStore, SqliteKgStore};
 pub use meta::SqliteMetaStore;
 pub use query::{

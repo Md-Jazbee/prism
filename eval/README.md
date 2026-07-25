@@ -22,6 +22,16 @@ pinned repo snapshots and emits scorecards (structural metrics first; LLM judges
 3. Run the same tasks with Prism MCP tools only (P1).
 4. Compare `tokens_per_task` and `tool_calls_per_task` on the structural subset; target ≥5× reduction with quality within ~10 pts of explore.
 
+Until live LLM baselines exist under `baselines/`, use structural proxies:
+
+```bash
+uv run prism-eval tool-hops
+uv run prism-eval p1-scorecard
+```
+
+See `scorecards/p1-phase-gate.md`.
+
+
 ## Smoke
 
 ```bash

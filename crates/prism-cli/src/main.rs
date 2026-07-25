@@ -14,7 +14,7 @@ use tracing_subscriber::EnvFilter;
     name = "prism",
     version,
     about = "Prism — Repository Intelligence Platform",
-    long_about = "Pre-LLM repository understanding: index → knowledge graph → context compilation.\nPhase 1 Stage B: T1 extractors + KG query (resolve / neighbors / impact)."
+    long_about = "Pre-LLM repository understanding: index → knowledge graph → context compilation.\nPhase 1: T1 extractors, KG query, MCP structural tools, repo_map."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -47,6 +47,12 @@ enum Commands {
     Query {
         #[command(subcommand)]
         query: QueryCmd,
+    },
+    /// Serve MCP structural tools over stdio (Stage C).
+    Mcp {
+        /// Workspace root that already has `.prism/` index.
+        #[arg(default_value = ".")]
+        path: PathBuf,
     },
 }
 
@@ -93,6 +99,14 @@ enum QueryCmd {
         #[arg(default_value = ".")]
         path: PathBuf,
     },
+    /// Path-prefix communities + hubs (Stage D).
+    #[command(name = "repo-map")]
+    RepoMap {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long, default_value_t = 15)]
+        hub_limit: usize,
+    },
 }
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
@@ -120,11 +134,18 @@ fn open_kg(workspace: &PathBuf) -> Result<(WorkspaceManager, SqliteKgStore)> {
 }
 
 fn main() -> Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env().add_directive("info".parse()?))
-        .init();
-
     let cli = Cli::parse();
+    // MCP reserves stdout for JSON-RPC — log to stderr always for mcp; others ok on stderr too.
+    let is_mcp = matches!(cli.command, Commands::Mcp { .. });
+    let subscriber = tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env().add_directive("info".parse()?))
+        .with_writer(std::io::stderr);
+    if is_mcp {
+        subscriber.with_ansi(false).init();
+    } else {
+        subscriber.init();
+    }
+
     match cli.command {
         Commands::Index { path, dry_run } => {
             let wm = WorkspaceManager::open(&path)
@@ -271,7 +292,30 @@ fn main() -> Result<()> {
                 println!("{}", serde_json::to_string_pretty(&dirty)?);
                 eprintln!("# dirty files={} latency_ms={ms}", dirty.len());
             }
+            QueryCmd::RepoMap { path, hub_limit } => {
+                let (_wm, kg) = open_kg(&path)?;
+                let started = Instant::now();
+                let map = kg.repo_map(hub_limit)?;
+                let ms = started.elapsed().as_millis() as u64;
+                let hits = (map.communities.len() + map.hubs.len()) as u64;
+                emit_index_event(&IndexEvent::QueryFinished {
+                    op: "repo_map".into(),
+                    latency_ms: ms,
+                    hit_count: hits,
+                });
+                println!("{}", serde_json::to_string_pretty(&map)?);
+                eprintln!(
+                    "# repo_map communities={} hubs={} latency_ms={ms}",
+                    map.communities.len(),
+                    map.hubs.len()
+                );
+            }
         },
+        Commands::Mcp { path } => {
+            let wm = WorkspaceManager::open(&path)
+                .with_context(|| format!("open workspace {}", path.display()))?;
+            prism_mcp::serve_stdio(wm.root().to_path_buf())?;
+        }
     }
     Ok(())
 }

@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-25  
-**Current phase:** **P1 — Syntactic KG + MCP** (Stage B exited; Stage C open) · P0 gate passed 2026-07-25  
+**Current phase:** **P1 gate passed** (structural proxies) · **P2 open** · LLM quality baselines still pending  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)
 
@@ -14,8 +14,8 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | Phase | Intent | Progress | State |
 |---:|---|---:|---|
 | **P0** | Foundations (identity, hash, schemas, eval) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-25 |
-| **P1** | Syntactic KG + MCP | ▓▓▓▓▓▓░░░░ **50%** | 🟡 Stage C open (A+B exited) |
-| **P2** | Context Compiler | ░░░░░░░░░░ **0%** | ⚪ Not started |
+| **P1** | Syntactic KG + MCP | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-25 (proxies) |
+| **P2** | Context Compiler | ░░░░░░░░░░ **0%** | 🟡 Stage A open |
 | **P3** | Precise Tier (T2) | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P4** | Semantic Slicing | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P5** | Repo Intelligence + Hardening | ░░░░░░░░░░ **0%** | ⚪ Not started |
@@ -25,16 +25,16 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 
 ```mermaid
 flowchart LR
-    P0[P0 Foundations<br/>✅ done] --> P1[P1 Syntactic KG + MCP<br/>🟡 Stage C]
-    P1 --> P2[P2 Context Compiler]
+    P0[P0 Foundations<br/>✅ done] --> P1[P1 Syntactic KG + MCP<br/>✅ done]
+    P1 --> P2[P2 Context Compiler<br/>🟡 Stage A]
     P2 --> P3[P3 Precise Tier]
     P3 --> P4[P4 Semantic Slicing]
     P4 --> P5[P5 Intelligence + Eval]
     P5 --> P6[P6 Distributed / Team<br/>optional]
 
     style P0 fill:#b8e994,stroke:#78e08f,color:#000
-    style P1 fill:#f6e58d,stroke:#f9ca24,color:#000
-    style P2 fill:#dfe6e9,stroke:#b2bec3,color:#000
+    style P1 fill:#b8e994,stroke:#78e08f,color:#000
+    style P2 fill:#f6e58d,stroke:#f9ca24,color:#000
     style P3 fill:#dfe6e9,stroke:#b2bec3,color:#000
     style P4 fill:#dfe6e9,stroke:#b2bec3,color:#000
     style P5 fill:#dfe6e9,stroke:#b2bec3,color:#000
@@ -59,11 +59,11 @@ flowchart LR
 |---|---|---|---|---|---|---|---|---|
 | Content-hash incremental store | ● | ● | ● | ● | ● | ● | ● | ✅ live; measured on pilots |
 | Syntactic facts (T1) | ○ | ● | ● | ● | ● | ● | ● | ✅ Python + Rust extractors + goldens |
-| MCP graph tools | ○ | ● | ● | ● | ● | ● | ● | ⬜ |
+| MCP graph tools | ○ | ● | ● | ● | ● | ● | ● | ✅ prism-mcp stdio tools |
 | Query plan + Evidence Pack | ○ | ○ | ● | ● | ● | ● | ● | ⬜ |
 | Precise symbol (T2) | ○ | ○ | ○ | ● | ● | ● | ● | ⬜ |
 | Semantic slice (T3/T4) | ○ | ○ | ○ | ○ | ● | ● | ● | ⬜ |
-| Architecture intelligence | ○ | ◐ | ◐ | ◐ | ◐ | ● | ● | ⬜ |
+| Architecture intelligence | ○ | ◐ | ◐ | ◐ | ◐ | ● | ● | ◐ path-prefix communities + hubs |
 | Team/shared index | ○ | ○ | ○ | ○ | ○ | ○ | ● | ⬜ |
 
 ● required · ◐ partial · ○ not yet
@@ -218,23 +218,23 @@ cd eval && uv sync && uv run prism-eval smoke
 
 ## Phase 1 — Syntactic Knowledge Graph + MCP
 
-**State:** 🟡 **Stage C open** (Stage B exited 2026-07-25)  
-**Duration:** 4–6 weeks · **Languages (chosen):** Python + Rust first (match pilots httpx / ripgrep), TS/JS next  
-**Gate:** ≥5× token reduction on structural tasks vs explore; quality within ~10 pts of explore on structural gold subset.
+**State:** ✅ **Gate passed 2026-07-25** (structural hop/token proxies; LLM quality pending)  
+**Duration:** 4–6 weeks · **Languages:** Python + Rust  
+**Gate evidence:** [eval/scorecards/p1-phase-gate.md](../../eval/scorecards/p1-phase-gate.md)
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
 | **A — T1 extractors** | Per-language design docs; symbols/imports/heuristic CALLS; golden fact fixtures; unresolved edges first-class | ✅ exited 2026-07-25 |
 | **B — KG persist + query** | Fact persist; neighbors/resolve/impact API; reverse-dep dirty lists; size budget + failure docs | ✅ exited 2026-07-25 |
-| **C — MCP tools** | `index_status`, `resolve_symbol`, `neighbors`, `impact` (heuristic), safety rules | 🟡 open |
-| **D — Communities + gate** | Repo orientation / communities stub; Phase 1 scorecard run; pass token gate | ⬜ |
+| **C — MCP tools** | `index_status`, `resolve_symbol`, `neighbors`, `impact`, `repo_map`; safety + error model | ✅ exited 2026-07-25 |
+| **D — Communities + gate** | Path-prefix communities/hubs; Phase 1 scorecard; limitations register | ✅ exited 2026-07-25 |
 
 **Phase 1 kickoff checklist:**
 
 - [x] Freeze LanguageExtractor ABI + fact schema versions used by extractors (ABI frozen; `FACT_SCHEMA_VERSION` 0.0.1)
 - [x] Pick first 2 languages + fixture repos — **Python (httpx `b5addb6`) + Rust (ripgrep `f9c05a9`)**
 - [x] Stand up golden-fixture conformance harness (`fixtures/languages/` + crate tests)
-- [ ] Define MCP tool JSON schemas + refusal behaviors (Stage C)
+- [x] Define MCP tool JSON schemas + refusal behaviors (Stage C)
 
 ### Stage A — Language extractors (T1) ✅
 
@@ -276,19 +276,57 @@ Fact producers live; Stage B owns query API (`neighbors` / `resolve`), reverse-d
 
 #### Handoff to Stage C
 
-CLI query surface is the contract MCP tools should mirror (`index_status`, `resolve_symbol`, `neighbors`, `impact`). Bind via `rmcp` next; keep confidence fields and heuristic labeling.
+CLI query surface is the contract MCP tools should mirror (`index_status`, `resolve_symbol`, `neighbors`, `impact`). Bind via MCP stdio next; keep confidence fields and heuristic labeling.
+
+### Stage C — MCP structural tools ✅
+
+#### Deliverables
+
+- [x] MCP tool catalog — [MCP-TOOL-CATALOG.md](../architecture/MCP-TOOL-CATALOG.md)
+- [x] Agent usage guide — [AGENT-USAGE.md](../architecture/AGENT-USAGE.md)
+- [x] Error model — [MCP-ERROR-MODEL.md](../architecture/MCP-ERROR-MODEL.md) (`SCOPE_UNRESOLVED`)
+- [x] Crate `prism-mcp` + CLI `prism mcp` (stdio JSON-RPC)
+- [x] Tools: `index_status`, `resolve_symbol`, `neighbors`, `impact`, `repo_map`
+- [x] Eval tool-hop recording — `prism-eval tool-hops`
+
+#### Exit / acceptance
+
+- [x] Tool catalog reviewed against ADD §25 subset for P1
+- [x] Every tool return includes provenance/confidence or marks heuristics
+- [x] Eval harness can record tool hops per task
+
+### Stage D — Communities + Phase 1 gate ✅
+
+#### Deliverables
+
+- [x] Community design — [COMMUNITIES.md](../architecture/COMMUNITIES.md) (path-prefix + degree hubs)
+- [x] Phase 1 scorecard — [p1-phase-gate.md](../../eval/scorecards/p1-phase-gate.md)
+- [x] Known limitations — [P1-KNOWN-LIMITATIONS.md](../architecture/P1-KNOWN-LIMITATIONS.md)
+- [x] `repo_map` MCP/CLI wired to communities
+
+#### Exit / acceptance (Phase 1 gate)
+
+- [x] ≥5× token reduction on structural subset (**proxy** 21.7×; replace with live baselines when ready)
+- [x] ≥5× hop reduction proxy (5.42×)
+- [ ] Quality within ~10 pts of explore — **PENDING** LLM explore baselines
+- [x] Incremental edit path demonstrated (hash skip + file subgraph replace; unit-tested)
+- [x] No narrative claiming precise refactor safety
+
+#### Handoff to Phase 2
+
+MCP structural tools are live. Next: intent recipes + `compile_context` Evidence Packs (P2). Treat quality gate as open until measured LLM scorecards land.
 
 ---
 
 ## Phase 2 — Context Compiler (outline)
 
-**State:** ⚪ Not started (entry: P1 gate)  
+**State:** 🟡 Stage A open (entry: P1 gate passed with noted quality caveat)  
 **Duration:** 3–5 weeks  
 **Gate:** Context precision ≥60% on labeled sample; refuse unbounded dumps; pack compile P95 design target &lt;300ms (excl. LLM).
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
-| **A — Intent + planner** | Intent recipes; operator DAG; cost model v1 | ⬜ |
+| **A — Intent + planner** | Intent recipes; operator DAG; cost model v1 | 🟡 open |
 | **B — Pack + budget** | Selection/reduction; Evidence Pack IR; EXPLAIN; `BUDGET_EXCEEDED` | ⬜ |
 | **C — `compile_context`** | Primary MCP tool; Phase 2 scorecard (precision, tokens, hops, refuse-dump) | ⬜ |
 
@@ -353,18 +391,18 @@ CLI query surface is the contract MCP tools should mirror (`index_status`, `reso
 
 Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 
-| ID | Workstream | P1 Stage B status |
+| ID | Workstream | P1 exit status |
 |---|---|---|
-| **W-STORE** | Storage & identity | ✅ fact insert + name index + reverse-dep dirty lists |
-| **W-PLUGIN** | Plugin ABI | ✅ frozen; Python + Rust native extractors |
-| **W-KG** | Knowledge graph | ✅ resolve / neighbors / impact query API |
-| **W-PLAN** | Query planning | ⬜ |
-| **W-CC** | Context compiler | ⬜ |
-| **W-MCP** | Agent surface | 🟡 CLI query ready; MCP Stage C |
+| **W-STORE** | Storage & identity | ✅ fact insert + query + dirty lists |
+| **W-PLUGIN** | Plugin ABI | ✅ frozen; Python + Rust extractors |
+| **W-KG** | Knowledge graph | ✅ query + path-prefix communities |
+| **W-PLAN** | Query planning | ⬜ P2 |
+| **W-CC** | Context compiler | ⬜ P2 |
+| **W-MCP** | Agent surface | ✅ structural MCP tools |
 | **W-IDE** | IDE/LSP | ⬜ |
-| **W-EVAL** | Evaluation | 🟡 skeleton + 22 tasks + language goldens |
-| **W-OBS** | Observability | ✅ extract + `query_finished` latency |
-| **W-SEC** | Security & privacy | 🟡 secret skip defaults |
+| **W-EVAL** | Evaluation | ✅ tool-hops + P1 scorecard proxies |
+| **W-OBS** | Observability | ✅ extract + query_finished |
+| **W-SEC** | Security & privacy | 🟡 allowlisted read-only MCP tools |
 
 ---
 
@@ -384,3 +422,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-25 | P0 punch list completed: SHAs frozen (httpx `b5addb6`, ripgrep `f9c05a9`), pilots cold-walked, checklist ticked, gold hints T001–T011. **P0 gate passed**; P1 Stage A opened (Python + Rust extractors) |
 | 2026-07-25 | **P1 Stage A exited:** Fact IR, tree-sitter Python/Rust extractors, golden fixtures, design docs, indexer extract path + `insert_facts`. Stage B opened |
 | 2026-07-25 | **P1 Stage B exited:** KG query API (resolve/neighbors/impact/dirty), `index-status`, reverse-dep lists, size/failure docs, `query_finished` metrics. Stage C opened |
+| 2026-07-25 | **P1 Stages C+D exited / gate passed (proxies):** `prism-mcp` tools, communities/`repo_map`, scorecard ≥5× hop+token proxies; quality LLM baseline still pending. **P2 Stage A opened** |

@@ -1,0 +1,21 @@
+[package]
+name = "prism-mcp"
+description = "MCP structural tool surface (P1 Stage C) — stdio JSON-RPC"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+prism-ir = { workspace = true }
+prism-store = { workspace = true }
+prism-core = { workspace = true }
+prism-obs = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

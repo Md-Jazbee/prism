@@ -1,0 +1,293 @@
+[
+  {
+    "task_id": "T001",
+    "type": "symbol_explain",
+    "repo": "httpx",
+    "structural": true,
+    "explore_tool_hops_proxy": 16,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "neighbors",
+      "symbol_explain"
+    ],
+    "hop_reduction_ratio": 5.33
+  },
+  {
+    "task_id": "T002",
+    "type": "symbol_explain",
+    "repo": "httpx",
+    "structural": true,
+    "explore_tool_hops_proxy": 16,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "neighbors",
+      "symbol_explain"
+    ],
+    "hop_reduction_ratio": 5.33
+  },
+  {
+    "task_id": "T003",
+    "type": "symbol_explain",
+    "repo": "httpx",
+    "structural": true,
+    "explore_tool_hops_proxy": 16,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "neighbors",
+      "symbol_explain"
+    ],
+    "hop_reduction_ratio": 5.33
+  },
+  {
+    "task_id": "T004",
+    "type": "impact",
+    "repo": "httpx",
+    "structural": true,
+    "explore_tool_hops_proxy": 18,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "impact",
+      "reverse_deps"
+    ],
+    "hop_reduction_ratio": 6.0
+  },
+  {
+    "task_id": "T005",
+    "type": "impact",
+    "repo": "httpx",
+    "structural": true,
+    "explore_tool_hops_proxy": 18,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "impact",
+      "reverse_deps"
+    ],
+    "hop_reduction_ratio": 6.0
+  },
+  {
+    "task_id": "T006",
+    "type": "architecture",
+    "repo": "httpx",
+    "structural": true,
+    "explore_tool_hops_proxy": 20,
+    "prism_tool_hops_expected": 4,
+    "preferred_tools": [
+      "communities",
+      "hubs",
+      "overview"
+    ],
+    "hop_reduction_ratio": 5.0
+  },
+  {
+    "task_id": "T007",
+    "type": "architecture",
+    "repo": "httpx",
+    "structural": true,
+    "explore_tool_hops_proxy": 20,
+    "prism_tool_hops_expected": 4,
+    "preferred_tools": [
+      "communities",
+      "hubs",
+      "overview"
+    ],
+    "hop_reduction_ratio": 5.0
+  },
+  {
+    "task_id": "T008",
+    "type": "symbol_explain",
+    "repo": "ripgrep",
+    "structural": true,
+    "explore_tool_hops_proxy": 16,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "neighbors",
+      "symbol_explain"
+    ],
+    "hop_reduction_ratio": 5.33
+  },
+  {
+    "task_id": "T009",
+    "type": "symbol_explain",
+    "repo": "ripgrep",
+    "structural": true,
+    "explore_tool_hops_proxy": 16,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "neighbors",
+      "symbol_explain"
+    ],
+    "hop_reduction_ratio": 5.33
+  },
+  {
+    "task_id": "T010",
+    "type": "impact",
+    "repo": "ripgrep",
+    "structural": true,
+    "explore_tool_hops_proxy": 18,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "impact",
+      "reverse_deps"
+    ],
+    "hop_reduction_ratio": 6.0
+  },
+  {
+    "task_id": "T011",
+    "type": "architecture",
+    "repo": "ripgrep",
+    "structural": true,
+    "explore_tool_hops_proxy": 20,
+    "prism_tool_hops_expected": 4,
+    "preferred_tools": [
+      "communities",
+      "hubs",
+      "overview"
+    ],
+    "hop_reduction_ratio": 5.0
+  },
+  {
+    "task_id": "T012",
+    "type": "symbol_explain",
+    "repo": "httpx",
+    "structural": true,
+    "explore_tool_hops_proxy": 16,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "neighbors",
+      "symbol_explain"
+    ],
+    "hop_reduction_ratio": 5.33
+  },
+  {
+    "task_id": "T013",
+    "type": "debug_stub",
+    "repo": "httpx",
+    "structural": false,
+    "explore_tool_hops_proxy": 15,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "slice",
+      "compile_context"
+    ],
+    "hop_reduction_ratio": 5.0
+  },
+  {
+    "task_id": "T014",
+    "type": "refactor_stub",
+    "repo": "httpx",
+    "structural": false,
+    "explore_tool_hops_proxy": 15,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "impact",
+      "compile_context"
+    ],
+    "hop_reduction_ratio": 5.0
+  },
+  {
+    "task_id": "T015",
+    "type": "symbol_explain",
+    "repo": "ripgrep",
+    "structural": true,
+    "explore_tool_hops_proxy": 16,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "neighbors",
+      "symbol_explain"
+    ],
+    "hop_reduction_ratio": 5.33
+  },
+  {
+    "task_id": "T016",
+    "type": "impact",
+    "repo": "ripgrep",
+    "structural": true,
+    "explore_tool_hops_proxy": 18,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "impact",
+      "reverse_deps"
+    ],
+    "hop_reduction_ratio": 6.0
+  },
+  {
+    "task_id": "T017",
+    "type": "architecture",
+    "repo": "httpx",
+    "structural": true,
+    "explore_tool_hops_proxy": 20,
+    "prism_tool_hops_expected": 4,
+    "preferred_tools": [
+      "communities",
+      "hubs",
+      "overview"
+    ],
+    "hop_reduction_ratio": 5.0
+  },
+  {
+    "task_id": "T018",
+    "type": "symbol_explain",
+    "repo": "httpx",
+    "structural": true,
+    "explore_tool_hops_proxy": 16,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "neighbors",
+      "symbol_explain"
+    ],
+    "hop_reduction_ratio": 5.33
+  },
+  {
+    "task_id": "T019",
+    "type": "impact",
+    "repo": "httpx",
+    "structural": true,
+    "explore_tool_hops_proxy": 18,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "impact",
+      "reverse_deps"
+    ],
+    "hop_reduction_ratio": 6.0
+  },
+  {
+    "task_id": "T020",
+    "type": "architecture",
+    "repo": "ripgrep",
+    "structural": true,
+    "explore_tool_hops_proxy": 20,
+    "prism_tool_hops_expected": 4,
+    "preferred_tools": [
+      "communities",
+      "hubs",
+      "overview"
+    ],
+    "hop_reduction_ratio": 5.0
+  },
+  {
+    "task_id": "T021",
+    "type": "symbol_explain",
+    "repo": "httpx",
+    "structural": true,
+    "explore_tool_hops_proxy": 16,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "neighbors",
+      "symbol_explain"
+    ],
+    "hop_reduction_ratio": 5.33
+  },
+  {
+    "task_id": "T022",
+    "type": "debug_stub",
+    "repo": "ripgrep",
+    "structural": false,
+    "explore_tool_hops_proxy": 15,
+    "prism_tool_hops_expected": 3,
+    "preferred_tools": [
+      "slice",
+      "compile_context"
+    ],
+    "hop_reduction_ratio": 5.0
+  }
+]

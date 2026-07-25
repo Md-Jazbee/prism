@@ -20,3 +20,4 @@ prism-core = { workspace = true }
 prism-ir = { workspace = true }
 prism-store = { workspace = true }
 prism-obs = { workspace = true }
+prism-mcp = { workspace = true }

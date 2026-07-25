@@ -9,6 +9,7 @@ members = [
     "crates/prism-extract",
     "crates/prism-extract-python",
     "crates/prism-extract-rust",
+    "crates/prism-mcp",
 ]
 default-members = ["crates/prism-cli"]
 
@@ -43,3 +44,4 @@ prism-obs = { path = "crates/prism-obs" }
 prism-extract = { path = "crates/prism-extract" }
 prism-extract-python = { path = "crates/prism-extract-python" }
 prism-extract-rust = { path = "crates/prism-extract-rust" }
+prism-mcp = { path = "crates/prism-mcp" }
