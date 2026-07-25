@@ -1,0 +1,6 @@
+{
+  "question": "What is the impact of changing `WalkBuilder`?",
+  "intent": "impact",
+  "anchors": ["WalkBuilder"],
+  "budget_tokens": 4000
+}

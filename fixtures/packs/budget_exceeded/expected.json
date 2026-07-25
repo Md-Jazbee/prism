@@ -1,0 +1,13 @@
+{
+  "status": "budget_exceeded",
+  "data": {
+    "code": "BUDGET_EXCEEDED",
+    "reason": "must-include fragments need 50 tokens but budget is 10",
+    "budget_tokens": 10,
+    "must_include_tokens": 50,
+    "must_include_ids": [
+      "frag:must:huge"
+    ],
+    "plan_id": "plan:repo_qa:246f57ea37528464"
+  }
+}

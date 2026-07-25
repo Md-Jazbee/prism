@@ -1,0 +1,292 @@
+{
+  "status": "ok",
+  "data": {
+    "meta": {
+      "intent": "repo_qa",
+      "budget_tokens": 4000,
+      "tokens_used": 95,
+      "question": "What does `Helper` do?",
+      "plan_id": "plan:repo_qa:2ebb291c4daaf487",
+      "schema_version": "0.0.1"
+    },
+    "hierarchy": {
+      "l_mod": [
+        "frag:must:1:primary_symbol_signature"
+      ],
+      "l_core": [
+        "frag:must:0:primary_symbol_definition"
+      ],
+      "l_nbr": [
+        "frag:opt:0:architecture_prose",
+        "frag:opt:1:depth_3_plus_neighbors",
+        "frag:opt:2:embedding_fallback_seeds",
+        "frag:opt:3:neighbor_bodies",
+        "frag:opt:4:secondary_exemplars"
+      ]
+    },
+    "fragments": [
+      {
+        "id": "frag:must:0:primary_symbol_definition",
+        "kind": "slice",
+        "layer": "core",
+        "text": "// must-include `primary_symbol_definition` locus near Helper\n",
+        "token_estimate": 16,
+        "provenance": {
+          "node_ids": [
+            "synthetic:primary_symbol_definition"
+          ],
+          "analyzer": "prism-compile@0.0.1",
+          "tier": "T1"
+        },
+        "confidence": "extracted",
+        "why_included": "primary_symbol_definition",
+        "drop_priority": 0,
+        "roles": [
+          "primary_symbol_definition"
+        ],
+        "must_include": true
+      },
+      {
+        "id": "frag:must:1:primary_symbol_signature",
+        "kind": "signature",
+        "layer": "mod",
+        "text": "signature: Helper",
+        "token_estimate": 5,
+        "provenance": {
+          "node_ids": [
+            "synthetic:primary_symbol_signature"
+          ],
+          "analyzer": "prism-compile@0.0.1",
+          "tier": "T1"
+        },
+        "confidence": "extracted",
+        "why_included": "primary_symbol_signature",
+        "drop_priority": 0,
+        "roles": [
+          "primary_symbol_signature"
+        ],
+        "must_include": true
+      },
+      {
+        "id": "frag:opt:0:architecture_prose",
+        "kind": "signature",
+        "layer": "nbr",
+        "text": "[optional:architecture_prose] related context for Helper",
+        "token_estimate": 14,
+        "provenance": {
+          "node_ids": [
+            "synthetic:architecture_prose"
+          ],
+          "analyzer": "prism-compile@0.0.1",
+          "tier": "T1"
+        },
+        "confidence": "heuristic",
+        "why_included": "optional:architecture_prose",
+        "drop_priority": 10,
+        "roles": [
+          "architecture_prose"
+        ],
+        "must_include": false
+      },
+      {
+        "id": "frag:opt:1:depth_3_plus_neighbors",
+        "kind": "signature",
+        "layer": "nbr",
+        "text": "[optional:depth_3_plus_neighbors] related context for Helper",
+        "token_estimate": 15,
+        "provenance": {
+          "node_ids": [
+            "synthetic:depth_3_plus_neighbors"
+          ],
+          "analyzer": "prism-compile@0.0.1",
+          "tier": "T1"
+        },
+        "confidence": "heuristic",
+        "why_included": "optional:depth_3_plus_neighbors",
+        "drop_priority": 20,
+        "roles": [
+          "depth_3_plus_neighbors"
+        ],
+        "must_include": false
+      },
+      {
+        "id": "frag:opt:2:embedding_fallback_seeds",
+        "kind": "signature",
+        "layer": "nbr",
+        "text": "[optional:embedding_fallback_seeds] related context for Helper",
+        "token_estimate": 16,
+        "provenance": {
+          "node_ids": [
+            "synthetic:embedding_fallback_seeds"
+          ],
+          "analyzer": "prism-compile@0.0.1",
+          "tier": "T1"
+        },
+        "confidence": "heuristic",
+        "why_included": "optional:embedding_fallback_seeds",
+        "drop_priority": 30,
+        "roles": [
+          "embedding_fallback_seeds"
+        ],
+        "must_include": false
+      },
+      {
+        "id": "frag:opt:3:neighbor_bodies",
+        "kind": "signature",
+        "layer": "nbr",
+        "text": "[optional:neighbor_bodies] related context for Helper",
+        "token_estimate": 14,
+        "provenance": {
+          "node_ids": [
+            "synthetic:neighbor_bodies"
+          ],
+          "analyzer": "prism-compile@0.0.1",
+          "tier": "T1"
+        },
+        "confidence": "heuristic",
+        "why_included": "optional:neighbor_bodies",
+        "drop_priority": 40,
+        "roles": [
+          "neighbor_bodies"
+        ],
+        "must_include": false
+      },
+      {
+        "id": "frag:opt:4:secondary_exemplars",
+        "kind": "signature",
+        "layer": "nbr",
+        "text": "[optional:secondary_exemplars] related context for Helper",
+        "token_estimate": 15,
+        "provenance": {
+          "node_ids": [
+            "synthetic:secondary_exemplars"
+          ],
+          "analyzer": "prism-compile@0.0.1",
+          "tier": "T1"
+        },
+        "confidence": "heuristic",
+        "why_included": "optional:secondary_exemplars",
+        "drop_priority": 50,
+        "roles": [
+          "secondary_exemplars"
+        ],
+        "must_include": false
+      }
+    ],
+    "citations": [
+      {
+        "id": "C1",
+        "fragment_id": "frag:must:0:primary_symbol_definition",
+        "node_ids": [
+          "synthetic:primary_symbol_definition"
+        ]
+      },
+      {
+        "id": "C2",
+        "fragment_id": "frag:must:1:primary_symbol_signature",
+        "node_ids": [
+          "synthetic:primary_symbol_signature"
+        ]
+      },
+      {
+        "id": "C3",
+        "fragment_id": "frag:opt:0:architecture_prose",
+        "node_ids": [
+          "synthetic:architecture_prose"
+        ]
+      },
+      {
+        "id": "C4",
+        "fragment_id": "frag:opt:1:depth_3_plus_neighbors",
+        "node_ids": [
+          "synthetic:depth_3_plus_neighbors"
+        ]
+      },
+      {
+        "id": "C5",
+        "fragment_id": "frag:opt:2:embedding_fallback_seeds",
+        "node_ids": [
+          "synthetic:embedding_fallback_seeds"
+        ]
+      },
+      {
+        "id": "C6",
+        "fragment_id": "frag:opt:3:neighbor_bodies",
+        "node_ids": [
+          "synthetic:neighbor_bodies"
+        ]
+      },
+      {
+        "id": "C7",
+        "fragment_id": "frag:opt:4:secondary_exemplars",
+        "node_ids": [
+          "synthetic:secondary_exemplars"
+        ]
+      }
+    ],
+    "gaps": [],
+    "drops": [],
+    "explain": {
+      "plan_id": "plan:repo_qa:2ebb291c4daaf487",
+      "budget_tokens": 4000,
+      "tokens_used": 95,
+      "must_include_ok": true,
+      "fragments": [
+        {
+          "fragment_id": "frag:must:0:primary_symbol_definition",
+          "why_included": "primary_symbol_definition",
+          "token_estimate": 16,
+          "must_include": true,
+          "kept": true
+        },
+        {
+          "fragment_id": "frag:must:1:primary_symbol_signature",
+          "why_included": "primary_symbol_signature",
+          "token_estimate": 5,
+          "must_include": true,
+          "kept": true
+        },
+        {
+          "fragment_id": "frag:opt:0:architecture_prose",
+          "why_included": "optional:architecture_prose",
+          "token_estimate": 14,
+          "must_include": false,
+          "kept": true
+        },
+        {
+          "fragment_id": "frag:opt:1:depth_3_plus_neighbors",
+          "why_included": "optional:depth_3_plus_neighbors",
+          "token_estimate": 15,
+          "must_include": false,
+          "kept": true
+        },
+        {
+          "fragment_id": "frag:opt:2:embedding_fallback_seeds",
+          "why_included": "optional:embedding_fallback_seeds",
+          "token_estimate": 16,
+          "must_include": false,
+          "kept": true
+        },
+        {
+          "fragment_id": "frag:opt:3:neighbor_bodies",
+          "why_included": "optional:neighbor_bodies",
+          "token_estimate": 14,
+          "must_include": false,
+          "kept": true
+        },
+        {
+          "fragment_id": "frag:opt:4:secondary_exemplars",
+          "why_included": "optional:secondary_exemplars",
+          "token_estimate": 15,
+          "must_include": false,
+          "kept": true
+        }
+      ],
+      "drops": [],
+      "notes": [
+        "must-include fragments cannot be budget-evicted",
+        "extractive default; no abstractive code summaries"
+      ]
+    }
+  }
+}

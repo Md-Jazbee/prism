@@ -1,0 +1,6 @@
+{
+  "question": "What does `Helper` do?",
+  "intent": "repo_qa",
+  "anchors": ["Helper"],
+  "budget_tokens": 4000
+}

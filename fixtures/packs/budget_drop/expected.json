@@ -1,0 +1,131 @@
+{
+  "status": "ok",
+  "data": {
+    "meta": {
+      "intent": "repo_qa",
+      "budget_tokens": 60,
+      "tokens_used": 15,
+      "question": "What does `Helper` do?",
+      "plan_id": "plan:repo_qa:abe95879f0ce1535",
+      "schema_version": "0.0.1"
+    },
+    "hierarchy": {
+      "l_mod": [
+        "frag:must:1:primary_symbol_signature"
+      ],
+      "l_core": [
+        "frag:must:0:primary_symbol_definition"
+      ]
+    },
+    "fragments": [
+      {
+        "id": "frag:must:0:primary_symbol_definition",
+        "kind": "slice",
+        "layer": "core",
+        "text": "def Helper():\n    return 1\n",
+        "token_estimate": 10,
+        "provenance": {
+          "node_ids": [
+            "sym:Helper"
+          ],
+          "analyzer": "fixture",
+          "tier": "T1"
+        },
+        "confidence": "extracted",
+        "why_included": "primary_symbol_definition",
+        "drop_priority": 0,
+        "roles": [
+          "primary_symbol_definition"
+        ],
+        "must_include": true
+      },
+      {
+        "id": "frag:must:1:primary_symbol_signature",
+        "kind": "signature",
+        "layer": "mod",
+        "text": "signature: Helper",
+        "token_estimate": 5,
+        "provenance": {
+          "node_ids": [
+            "sym:Helper"
+          ],
+          "analyzer": "fixture",
+          "tier": "T1"
+        },
+        "confidence": "extracted",
+        "why_included": "primary_symbol_signature",
+        "drop_priority": 0,
+        "roles": [
+          "primary_symbol_signature"
+        ],
+        "must_include": true
+      }
+    ],
+    "citations": [
+      {
+        "id": "C1",
+        "fragment_id": "frag:must:0:primary_symbol_definition",
+        "node_ids": [
+          "sym:Helper"
+        ]
+      },
+      {
+        "id": "C2",
+        "fragment_id": "frag:must:1:primary_symbol_signature",
+        "node_ids": [
+          "sym:Helper"
+        ]
+      }
+    ],
+    "gaps": [],
+    "drops": [
+      {
+        "fragment_id": "frag:opt:noise",
+        "reason": "budget_pressure: drop_priority=90 (ADD §18.1 / plan drop_order)",
+        "drop_priority": 90,
+        "token_estimate": 80
+      }
+    ],
+    "explain": {
+      "plan_id": "plan:repo_qa:abe95879f0ce1535",
+      "budget_tokens": 60,
+      "tokens_used": 15,
+      "must_include_ok": true,
+      "fragments": [
+        {
+          "fragment_id": "frag:must:0:primary_symbol_definition",
+          "why_included": "primary_symbol_definition",
+          "token_estimate": 10,
+          "must_include": true,
+          "kept": true
+        },
+        {
+          "fragment_id": "frag:must:1:primary_symbol_signature",
+          "why_included": "primary_symbol_signature",
+          "token_estimate": 5,
+          "must_include": true,
+          "kept": true
+        },
+        {
+          "fragment_id": "frag:opt:noise",
+          "why_included": "optional:neighbor_bodies",
+          "token_estimate": 80,
+          "must_include": false,
+          "kept": false
+        }
+      ],
+      "drops": [
+        {
+          "fragment_id": "frag:opt:noise",
+          "reason": "budget_pressure: drop_priority=90 (ADD §18.1 / plan drop_order)",
+          "drop_priority": 90,
+          "token_estimate": 80
+        }
+      ],
+      "notes": [
+        "must-include fragments cannot be budget-evicted",
+        "extractive default; no abstractive code summaries"
+      ]
+    }
+  }
+}

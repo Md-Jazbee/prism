@@ -1,0 +1,19 @@
+[package]
+name = "prism-compile"
+description = "Evidence Pack selection, reduction, budget, EXPLAIN (P2 Stage B)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+prism-ir = { workspace = true }
+prism-plan = { workspace = true }
+prism-store = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

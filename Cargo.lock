@@ -387,6 +387,7 @@ version = "0.0.1"
 dependencies = [
  "anyhow",
  "clap",
+ "prism-compile",
  "prism-core",
  "prism-ir",
  "prism-mcp",
@@ -396,6 +397,20 @@ dependencies = [
  "serde_json",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "prism-compile"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "prism-ir",
+ "prism-plan",
+ "prism-store",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror",
 ]
 
 [[package]]

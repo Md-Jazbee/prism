@@ -22,3 +22,4 @@ prism-store = { workspace = true }
 prism-obs = { workspace = true }
 prism-mcp = { workspace = true }
 prism-plan = { workspace = true }
+prism-compile = { workspace = true }

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/evidence-pack/v0/evidence-pack.schema.json",
+  "title": "Prism Evidence Pack v0",
+  "description": "Budgeted hierarchical context with citations and EXPLAIN (P2 Stage B).",
+  "version": "0.0.1",
+  "breaking_change_policy": "Major bump in schemas/evidence-pack/ and prism-ir::PACK_SCHEMA_VERSION.",
+  "layers": ["L_arch", "L_mod", "L_core", "L_nbr", "L_diff", "L_run"],
+  "fragment_kinds": [
+    "slice",
+    "signature",
+    "diff",
+    "cfg_summary",
+    "community",
+    "trace",
+    "error_verbatim"
+  ],
+  "invariants": [
+    "Every kept fragment has provenance (node/edge ids, analyzer, tier).",
+    "must-include fragments cannot be budget-evicted; otherwise BUDGET_EXCEEDED.",
+    "Extractive code by default; no abstractive code summaries in v0."
+  ],
+  "outcomes": {
+    "ok": "EvidencePack",
+    "scope_unresolved": "planner refuse (no unbounded dump)",
+    "budget_exceeded": "must-include does not fit budget"
+  },
+  "api": {
+    "http": "POST /v1/context/compile",
+    "cli": "prism compile \"<question>\" [--budget N] [--synthetic]"
+  }
+}

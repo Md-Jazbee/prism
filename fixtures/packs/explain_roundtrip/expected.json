@@ -1,0 +1,290 @@
+{
+  "status": "ok",
+  "data": {
+    "meta": {
+      "intent": "impact",
+      "budget_tokens": 4000,
+      "tokens_used": 110,
+      "question": "What is the impact of changing `WalkBuilder`?",
+      "plan_id": "plan:impact:ec16f5b85a1b400b",
+      "schema_version": "0.0.1"
+    },
+    "hierarchy": {
+      "l_core": [
+        "frag:must:0:impact_cone_depth_1",
+        "frag:must:1:seed_symbols"
+      ],
+      "l_nbr": [
+        "frag:opt:0:architecture_prose",
+        "frag:opt:1:depth_3_plus_impact",
+        "frag:opt:2:embedding_fallback_seeds",
+        "frag:opt:3:neighbor_bodies",
+        "frag:opt:4:secondary_exemplars"
+      ]
+    },
+    "fragments": [
+      {
+        "id": "frag:must:0:impact_cone_depth_1",
+        "kind": "slice",
+        "layer": "core",
+        "text": "// must-include `impact_cone_depth_1` locus near WalkBuilder\n",
+        "token_estimate": 16,
+        "provenance": {
+          "node_ids": [
+            "synthetic:impact_cone_depth_1"
+          ],
+          "analyzer": "prism-compile@0.0.1",
+          "tier": "T1"
+        },
+        "confidence": "extracted",
+        "why_included": "impact_cone_depth_1",
+        "drop_priority": 0,
+        "roles": [
+          "impact_cone_depth_1"
+        ],
+        "must_include": true
+      },
+      {
+        "id": "frag:must:1:seed_symbols",
+        "kind": "slice",
+        "layer": "core",
+        "text": "// must-include `seed_symbols` locus near WalkBuilder\n",
+        "token_estimate": 14,
+        "provenance": {
+          "node_ids": [
+            "synthetic:seed_symbols"
+          ],
+          "analyzer": "prism-compile@0.0.1",
+          "tier": "T1"
+        },
+        "confidence": "extracted",
+        "why_included": "seed_symbols",
+        "drop_priority": 0,
+        "roles": [
+          "seed_symbols"
+        ],
+        "must_include": true
+      },
+      {
+        "id": "frag:opt:0:architecture_prose",
+        "kind": "signature",
+        "layer": "nbr",
+        "text": "[optional:architecture_prose] related context for WalkBuilder",
+        "token_estimate": 16,
+        "provenance": {
+          "node_ids": [
+            "synthetic:architecture_prose"
+          ],
+          "analyzer": "prism-compile@0.0.1",
+          "tier": "T1"
+        },
+        "confidence": "heuristic",
+        "why_included": "optional:architecture_prose",
+        "drop_priority": 10,
+        "roles": [
+          "architecture_prose"
+        ],
+        "must_include": false
+      },
+      {
+        "id": "frag:opt:1:depth_3_plus_impact",
+        "kind": "signature",
+        "layer": "nbr",
+        "text": "[optional:depth_3_plus_impact] related context for WalkBuilder",
+        "token_estimate": 16,
+        "provenance": {
+          "node_ids": [
+            "synthetic:depth_3_plus_impact"
+          ],
+          "analyzer": "prism-compile@0.0.1",
+          "tier": "T1"
+        },
+        "confidence": "heuristic",
+        "why_included": "optional:depth_3_plus_impact",
+        "drop_priority": 20,
+        "roles": [
+          "depth_3_plus_impact"
+        ],
+        "must_include": false
+      },
+      {
+        "id": "frag:opt:2:embedding_fallback_seeds",
+        "kind": "signature",
+        "layer": "nbr",
+        "text": "[optional:embedding_fallback_seeds] related context for WalkBuilder",
+        "token_estimate": 17,
+        "provenance": {
+          "node_ids": [
+            "synthetic:embedding_fallback_seeds"
+          ],
+          "analyzer": "prism-compile@0.0.1",
+          "tier": "T1"
+        },
+        "confidence": "heuristic",
+        "why_included": "optional:embedding_fallback_seeds",
+        "drop_priority": 30,
+        "roles": [
+          "embedding_fallback_seeds"
+        ],
+        "must_include": false
+      },
+      {
+        "id": "frag:opt:3:neighbor_bodies",
+        "kind": "signature",
+        "layer": "nbr",
+        "text": "[optional:neighbor_bodies] related context for WalkBuilder",
+        "token_estimate": 15,
+        "provenance": {
+          "node_ids": [
+            "synthetic:neighbor_bodies"
+          ],
+          "analyzer": "prism-compile@0.0.1",
+          "tier": "T1"
+        },
+        "confidence": "heuristic",
+        "why_included": "optional:neighbor_bodies",
+        "drop_priority": 40,
+        "roles": [
+          "neighbor_bodies"
+        ],
+        "must_include": false
+      },
+      {
+        "id": "frag:opt:4:secondary_exemplars",
+        "kind": "signature",
+        "layer": "nbr",
+        "text": "[optional:secondary_exemplars] related context for WalkBuilder",
+        "token_estimate": 16,
+        "provenance": {
+          "node_ids": [
+            "synthetic:secondary_exemplars"
+          ],
+          "analyzer": "prism-compile@0.0.1",
+          "tier": "T1"
+        },
+        "confidence": "heuristic",
+        "why_included": "optional:secondary_exemplars",
+        "drop_priority": 50,
+        "roles": [
+          "secondary_exemplars"
+        ],
+        "must_include": false
+      }
+    ],
+    "citations": [
+      {
+        "id": "C1",
+        "fragment_id": "frag:must:0:impact_cone_depth_1",
+        "node_ids": [
+          "synthetic:impact_cone_depth_1"
+        ]
+      },
+      {
+        "id": "C2",
+        "fragment_id": "frag:must:1:seed_symbols",
+        "node_ids": [
+          "synthetic:seed_symbols"
+        ]
+      },
+      {
+        "id": "C3",
+        "fragment_id": "frag:opt:0:architecture_prose",
+        "node_ids": [
+          "synthetic:architecture_prose"
+        ]
+      },
+      {
+        "id": "C4",
+        "fragment_id": "frag:opt:1:depth_3_plus_impact",
+        "node_ids": [
+          "synthetic:depth_3_plus_impact"
+        ]
+      },
+      {
+        "id": "C5",
+        "fragment_id": "frag:opt:2:embedding_fallback_seeds",
+        "node_ids": [
+          "synthetic:embedding_fallback_seeds"
+        ]
+      },
+      {
+        "id": "C6",
+        "fragment_id": "frag:opt:3:neighbor_bodies",
+        "node_ids": [
+          "synthetic:neighbor_bodies"
+        ]
+      },
+      {
+        "id": "C7",
+        "fragment_id": "frag:opt:4:secondary_exemplars",
+        "node_ids": [
+          "synthetic:secondary_exemplars"
+        ]
+      }
+    ],
+    "gaps": [],
+    "drops": [],
+    "explain": {
+      "plan_id": "plan:impact:ec16f5b85a1b400b",
+      "budget_tokens": 4000,
+      "tokens_used": 110,
+      "must_include_ok": true,
+      "fragments": [
+        {
+          "fragment_id": "frag:must:0:impact_cone_depth_1",
+          "why_included": "impact_cone_depth_1",
+          "token_estimate": 16,
+          "must_include": true,
+          "kept": true
+        },
+        {
+          "fragment_id": "frag:must:1:seed_symbols",
+          "why_included": "seed_symbols",
+          "token_estimate": 14,
+          "must_include": true,
+          "kept": true
+        },
+        {
+          "fragment_id": "frag:opt:0:architecture_prose",
+          "why_included": "optional:architecture_prose",
+          "token_estimate": 16,
+          "must_include": false,
+          "kept": true
+        },
+        {
+          "fragment_id": "frag:opt:1:depth_3_plus_impact",
+          "why_included": "optional:depth_3_plus_impact",
+          "token_estimate": 16,
+          "must_include": false,
+          "kept": true
+        },
+        {
+          "fragment_id": "frag:opt:2:embedding_fallback_seeds",
+          "why_included": "optional:embedding_fallback_seeds",
+          "token_estimate": 17,
+          "must_include": false,
+          "kept": true
+        },
+        {
+          "fragment_id": "frag:opt:3:neighbor_bodies",
+          "why_included": "optional:neighbor_bodies",
+          "token_estimate": 15,
+          "must_include": false,
+          "kept": true
+        },
+        {
+          "fragment_id": "frag:opt:4:secondary_exemplars",
+          "why_included": "optional:secondary_exemplars",
+          "token_estimate": 16,
+          "must_include": false,
+          "kept": true
+        }
+      ],
+      "drops": [],
+      "notes": [
+        "must-include fragments cannot be budget-evicted",
+        "extractive default; no abstractive code summaries"
+      ]
+    }
+  }
+}

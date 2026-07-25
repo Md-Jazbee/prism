@@ -1,0 +1,25 @@
+{
+  "question": "What does `Helper` do?",
+  "intent": "repo_qa",
+  "anchors": ["Helper"],
+  "budget_tokens": 10,
+  "candidates": [
+    {
+      "id": "frag:must:huge",
+      "kind": "slice",
+      "layer": "core",
+      "text": "HUGE_MUST_INCLUDE_BODY",
+      "token_estimate": 50,
+      "provenance": {
+        "node_ids": ["sym:Helper"],
+        "analyzer": "fixture",
+        "tier": "T1"
+      },
+      "confidence": "extracted",
+      "why_included": "primary_symbol_definition",
+      "drop_priority": 0,
+      "roles": ["primary_symbol_definition", "primary_symbol_signature"],
+      "must_include": true
+    }
+  ]
+}

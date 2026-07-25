@@ -1,7 +1,8 @@
-//! `prism` CLI — Phase 2 Stage A (`index` + structural `query` + `query plan`).
+//! `prism` CLI — Phase 2 (`index` + query + `query plan` + `compile`).
 
 use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
+use prism_compile::CompileOutcome;
 use prism_core::{IncrementalIndexer, IndexOptions, WorkspaceManager};
 use prism_obs::{emit_index_event, IndexEvent};
 use prism_plan::{plan_query, Intent, PlanHints, PlanOutcome};
@@ -16,7 +17,7 @@ use tracing_subscriber::EnvFilter;
     name = "prism",
     version,
     about = "Prism — Repository Intelligence Platform",
-    long_about = "Pre-LLM repository understanding: index → knowledge graph → context compilation.\nPhase 2 Stage A: deterministic query plans (`prism query plan`)."
+    long_about = "Pre-LLM repository understanding: index → knowledge graph → context compilation.\nPhase 2: query plans + Evidence Pack compile (`prism compile`)."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -45,10 +46,38 @@ enum Commands {
         #[arg(default_value = ".")]
         path: PathBuf,
     },
-    /// Structural KG queries (Stage B).
+    /// Structural KG queries + plan-only.
     Query {
         #[command(subcommand)]
         query: QueryCmd,
+    },
+    /// Compile an Evidence Pack under token budget (P2 Stage B).
+    Compile {
+        /// Natural-language or agent question.
+        question: String,
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        /// Force intent: repo_qa|debug|impact|refactor|generate|review|architecture
+        #[arg(long)]
+        intent: Option<String>,
+        /// Token budget (default 4000).
+        #[arg(long, default_value_t = 4000)]
+        budget: u32,
+        /// Explicit anchors (repeatable).
+        #[arg(long = "anchor")]
+        anchors: Vec<String>,
+        /// Stack frame strings (debug).
+        #[arg(long = "stack")]
+        stack_frames: Vec<String>,
+        /// Error / exception text (debug).
+        #[arg(long)]
+        error: Option<String>,
+        /// Changed paths for review/impact (repeatable).
+        #[arg(long = "changed")]
+        changed_paths: Vec<String>,
+        /// Offline synthetic pack (no KG) — for fixtures / budget demos.
+        #[arg(long)]
+        synthetic: bool,
     },
     /// Serve MCP structural tools over stdio (Stage C).
     Mcp {
@@ -207,11 +236,12 @@ fn main() -> Result<()> {
             println!("dirty: {}", id.snapshot.dirty);
             println!("tree_fingerprint: {}", id.snapshot.tree_fingerprint);
             println!(
-                "schema: meta={} fact={} events={} plan={}",
+                "schema: meta={} fact={} events={} plan={} pack={}",
                 prism_ir::META_SCHEMA_VERSION,
                 prism_ir::FACT_SCHEMA_VERSION,
                 prism_ir::EVENTS_SCHEMA_VERSION,
-                prism_ir::PLAN_SCHEMA_VERSION
+                prism_ir::PLAN_SCHEMA_VERSION,
+                prism_ir::PACK_SCHEMA_VERSION
             );
         }
         Commands::IndexStatus { path } => {
@@ -390,6 +420,72 @@ fn main() -> Result<()> {
                 }
             }
         },
+        Commands::Compile {
+            question,
+            path,
+            intent,
+            budget,
+            anchors,
+            stack_frames,
+            error,
+            changed_paths,
+            synthetic,
+        } => {
+            let mut hints = PlanHints {
+                anchors,
+                stack_frames,
+                error_text: error,
+                changed_paths,
+                budget_tokens: Some(budget),
+                ..Default::default()
+            };
+            if let Some(raw) = intent {
+                hints.intent_override = Some(
+                    Intent::from_str(&raw)
+                        .map_err(|e| anyhow::anyhow!(e))
+                        .with_context(|| format!("invalid --intent {raw}"))?,
+                );
+            }
+            let started = Instant::now();
+            let outcome = if synthetic {
+                match plan_query(&question, &hints)? {
+                    PlanOutcome::ScopeUnresolved(u) => CompileOutcome::ScopeUnresolved(u),
+                    PlanOutcome::Ok(plan) => prism_compile::compile_synthetic(&plan),
+                }
+            } else {
+                let wm = WorkspaceManager::open(&path)
+                    .with_context(|| format!("open workspace {}", path.display()))?;
+                prism_compile::compile_context(wm.root(), &question, &hints)?
+            };
+            let ms = started.elapsed().as_millis() as u64;
+            let hit_count = match &outcome {
+                CompileOutcome::Ok(p) => p.fragments.len() as u64,
+                _ => 0,
+            };
+            emit_index_event(&IndexEvent::QueryFinished {
+                op: "compile".into(),
+                latency_ms: ms,
+                hit_count,
+            });
+            println!("{}", serde_json::to_string_pretty(&outcome)?);
+            match &outcome {
+                CompileOutcome::Ok(p) => eprintln!(
+                    "# compile status=ok intent={} fragments={} tokens={}/{} latency_ms={ms}",
+                    p.meta.intent,
+                    p.fragments.len(),
+                    p.meta.tokens_used,
+                    p.meta.budget_tokens
+                ),
+                CompileOutcome::ScopeUnresolved(e) => eprintln!(
+                    "# compile status=scope_unresolved code={} latency_ms={ms}",
+                    e.code
+                ),
+                CompileOutcome::BudgetExceeded(e) => eprintln!(
+                    "# compile status=budget_exceeded must={} budget={} latency_ms={ms}",
+                    e.must_include_tokens, e.budget_tokens
+                ),
+            }
+        }
         Commands::Mcp { path } => {
             let wm = WorkspaceManager::open(&path)
                 .with_context(|| format!("open workspace {}", path.display()))?;
