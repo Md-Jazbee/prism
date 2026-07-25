@@ -11,6 +11,7 @@ Open-source **developer intelligence** that understands a repository *before* an
 | [Architecture Design Document](docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md) | What & why |
 | [Tech Stack & Project Structure](docs/architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md) | How it is built |
 | [Planning & Implementation](docs/planning/PLANNING-AND-IMPLEMENTATION.md) | Phases & gates |
+| [Tasks & Progress](docs/planning/TASKS-AND-PROGRESS.md) | Living checklist + progress board |
 | [Fingerprint algorithm](docs/architecture/FINGERPRINT.md) | XXH3 + Merkle |
 | [Ignore policy checklist](docs/architecture/IGNORE-POLICY-CHECKLIST.md) | Stage A review |
 
