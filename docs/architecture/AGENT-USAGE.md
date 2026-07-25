@@ -1,27 +1,37 @@
-# Agent usage guide (P1 Stage C)
+# Agent usage guide (P2 Stage C)
 
-## Prefer structural tools over explore loops
+## Primary path: `compile_context` first
 
-For symbol location, call graphs, blast radius, and repo orientation:
+For almost all repo Q&A, impact, architecture, review, and generate intents:
 
-1. `index_status` — confirm an index exists  
-2. `resolve_symbol` — get a stable node id  
-3. `neighbors` and/or `impact` — expand structure  
-4. `repo_map` — only when you need orientation / hubs  
+1. **`compile_context`** — one call returns a budgeted Evidence Pack + EXPLAIN  
+2. Answer from the pack citations; inspect `gaps` / `explain.drops` if unsure  
+3. Only then use micro-tools (`resolve_symbol`, `neighbors`, `impact`, `repo_map`) for a *targeted* follow-up  
 
-Do **not** open dozens of files via grep/read when these tools answer the question.
+Do **not** open dozens of files via grep/read when `compile_context` can answer.
+
+Optional: `query_plan` to inspect the operator DAG without packing.
 
 ## Anti-patterns
 
 | Anti-pattern | Do instead |
 |---|---|
-| Grep for every call site first | `resolve_symbol` → `neighbors` kind=CALLS |
-| Recursive directory listing for architecture | `repo_map` |
+| Ten reads / greps to “explore” | One `compile_context` |
+| Grep for every call site first | `compile_context` (impact intent) or `resolve`→`neighbors` |
+| Recursive directory listing for architecture | `compile_context` (architecture) or `repo_map` |
 | Claiming rename safety from `impact` | Wait for T2 (P3); treat impact as heuristic |
-| Dumping whole modules when scope is unclear | Expect `SCOPE_UNRESOLVED`; ask user for an anchor |
+| Dumping whole modules when scope is unclear | Expect `SCOPE_UNRESOLVED`; ask for an anchor |
 
 ## Hop budget
 
-Structural gold tasks should complete in **1–4** Prism tool calls. If you exceed ~8 hops, stop and re-scope — Phase 2 `compile_context` will replace multi-hop thrash.
+Prefer **1** `compile_context` hop. Structural micro-tool chains should stay in **1–4** calls. If you exceed ~8 hops, stop and re-scope.
 
-**P2 Stage A:** Prefer `prism query plan "<question>"` (or future MCP plan tool) to inspect the operator DAG before multi-hop explore. Ambiguous questions without anchors return `SCOPE_UNRESOLVED` instead of dumping the repo.
+Ambiguous questions without anchors return `SCOPE_UNRESOLVED` instead of dumping the repo.
+
+## Errors to honor
+
+| Code | Agent action |
+|---|---|
+| `SCOPE_UNRESOLVED` | Ask user for symbol / path / stack / error |
+| `BUDGET_EXCEEDED` | Raise `budget_tokens` or narrow anchors |
+| `INDEX_UNAVAILABLE` | Ask user to run `prism index` |

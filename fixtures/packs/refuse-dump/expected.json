@@ -1,0 +1,15 @@
+{
+  "status": "scope_unresolved",
+  "data": {
+    "code": "SCOPE_UNRESOLVED",
+    "reason": "Intent `repo_qa` needs anchors (symbol, path, stack frame, error, or changed path); none found in question or hints",
+    "ask_for": [
+      "symbol name or qualified path",
+      "file path",
+      "stack frame / error text",
+      "changed path or diff hint"
+    ],
+    "intent": "repo_qa",
+    "question": "tell me about the code"
+  }
+}

@@ -70,7 +70,7 @@ fn handle_request(ctx: &ToolContext, req: Value) -> Option<Value> {
                 "name": "prism",
                 "version": env!("CARGO_PKG_VERSION")
             },
-            "instructions": "Prefer Prism structural tools (resolve_symbol, neighbors, impact, repo_map) over grep/read loops. Always check index_status first. impact is HEURISTIC at T1."
+            "instructions": "PRIMARY: call compile_context first for repo Q&A / impact / architecture (one Evidence Pack beats ten reads). Use query_plan to inspect the DAG. Fall back to resolve_symbol/neighbors/impact only for targeted hops. Ambiguous questions without anchors return SCOPE_UNRESOLVED — ask for anchors; never dump the repo. impact remains HEURISTIC at T1."
         }),
         "ping" => json!({}),
         "tools/list" => json!({ "tools": list_tools_schema() }),

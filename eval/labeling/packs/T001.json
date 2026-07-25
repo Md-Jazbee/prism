@@ -1,0 +1,14 @@
+{
+  "task_id": "T001",
+  "pack_schema": "0.0.1",
+  "intent": "repo_qa",
+  "reviewer": "proxy-v0",
+  "notes": "Seed labels for P2 precision proxy — replace with dual human review",
+  "fragments": [
+    { "fragment_id": "frag:must:0:primary_symbol_definition", "label": "necessary", "note": "gold locus" },
+    { "fragment_id": "frag:must:1:primary_symbol_signature", "label": "necessary", "note": "" },
+    { "fragment_id": "frag:opt:0:embedding_fallback_seeds", "label": "unnecessary", "note": "noise" },
+    { "fragment_id": "frag:opt:1:depth_3_plus_neighbors", "label": "unnecessary", "note": "" },
+    { "fragment_id": "frag:opt:2:neighbor_bodies", "label": "necessary", "note": "1-hop caller useful" }
+  ]
+}

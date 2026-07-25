@@ -481,9 +481,11 @@ name = "prism-mcp"
 version = "0.0.1"
 dependencies = [
  "anyhow",
+ "prism-compile",
  "prism-core",
  "prism-ir",
  "prism-obs",
+ "prism-plan",
  "prism-store",
  "serde",
  "serde_json",

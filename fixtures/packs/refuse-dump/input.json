@@ -1,0 +1,5 @@
+{
+  "question": "tell me about the code",
+  "budget_tokens": 4000,
+  "note": "Ambiguous question with no anchors must refuse unbounded dump (SCOPE_UNRESOLVED). Covered by fixtures/plans/ambiguous + MCP compile_context test."
+}

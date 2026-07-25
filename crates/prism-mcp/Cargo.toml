@@ -1,6 +1,6 @@
 [package]
 name = "prism-mcp"
-description = "MCP structural tool surface (P1 Stage C) — stdio JSON-RPC"
+description = "MCP tool surface (P1 structural + P2 compile_context) — stdio JSON-RPC"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -16,6 +16,8 @@ prism-ir = { workspace = true }
 prism-store = { workspace = true }
 prism-core = { workspace = true }
 prism-obs = { workspace = true }
+prism-plan = { workspace = true }
+prism-compile = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }

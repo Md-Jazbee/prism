@@ -1,0 +1,13 @@
+{
+  "task_id": "T002",
+  "pack_schema": "0.0.1",
+  "intent": "impact",
+  "reviewer": "proxy-v0",
+  "fragments": [
+    { "fragment_id": "frag:must:0:seed_symbols", "label": "necessary", "note": "" },
+    { "fragment_id": "frag:must:1:impact_cone_depth_1", "label": "necessary", "note": "" },
+    { "fragment_id": "frag:opt:0:embedding_fallback_seeds", "label": "unnecessary", "note": "" },
+    { "fragment_id": "frag:opt:1:depth_3_plus_impact", "label": "unnecessary", "note": "" },
+    { "fragment_id": "frag:opt:2:neighbor_bodies", "label": "necessary", "note": "" }
+  ]
+}

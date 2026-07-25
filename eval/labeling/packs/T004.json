@@ -1,0 +1,13 @@
+{
+  "task_id": "T004",
+  "pack_schema": "0.0.1",
+  "intent": "repo_qa",
+  "reviewer": "proxy-v0",
+  "fragments": [
+    { "fragment_id": "frag:must:0:primary_symbol_definition", "label": "necessary", "note": "" },
+    { "fragment_id": "frag:must:1:primary_symbol_signature", "label": "necessary", "note": "" },
+    { "fragment_id": "frag:opt:0:embedding_fallback_seeds", "label": "unnecessary", "note": "" },
+    { "fragment_id": "frag:opt:2:neighbor_bodies", "label": "necessary", "note": "" },
+    { "fragment_id": "frag:opt:3:secondary_exemplars", "label": "unnecessary", "note": "" }
+  ]
+}

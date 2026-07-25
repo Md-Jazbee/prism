@@ -1,4 +1,4 @@
-//! MCP / product error model (P1 Stage C).
+//! MCP / product error model (P1–P2).
 
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -9,6 +9,8 @@ use thiserror::Error;
 pub enum ToolErrorCode {
     /// Ambiguous or missing anchors — refuse unbounded dump; ask for a symbol/path.
     ScopeUnresolved,
+    /// Must-include evidence cannot fit the token budget.
+    BudgetExceeded,
     /// Index missing or stale relative to expected snapshot.
     IndexUnavailable,
     /// Tool arguments invalid.
@@ -32,7 +34,18 @@ impl ToolError {
             code: ToolErrorCode::ScopeUnresolved,
             message: message.into(),
             hint: Some(
-                "Provide a concrete symbol name or node id; do not dump the whole repository."
+                "Provide a concrete symbol name, path, stack frame, or error text; do not dump the whole repository."
+                    .into(),
+            ),
+        }
+    }
+
+    pub fn budget_exceeded(message: impl Into<String>) -> Self {
+        Self {
+            code: ToolErrorCode::BudgetExceeded,
+            message: message.into(),
+            hint: Some(
+                "Raise budget_tokens or narrow anchors; must-include fragments cannot be dropped."
                     .into(),
             ),
         }

@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P2 Stage B exited** · Stage C open · LLM quality baselines still pending  
+**Current phase:** **P2 gate passed** (precision proxies) · **P3 open** · LLM quality / dual-review labels still pending  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)
 
@@ -15,27 +15,27 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 |---:|---|---:|---|
 | **P0** | Foundations (identity, hash, schemas, eval) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-25 |
 | **P1** | Syntactic KG + MCP | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-25 (proxies) |
-| **P2** | Context Compiler | ▓▓▓▓▓▓░░░░ **67%** | 🟡 Stage C open (A+B exited) |
-| **P3** | Precise Tier (T2) | ░░░░░░░░░░ **0%** | ⚪ Not started |
+| **P2** | Context Compiler | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 (proxies) |
+| **P3** | Precise Tier (T2) | ░░░░░░░░░░ **0%** | 🟡 Stage A open |
 | **P4** | Semantic Slicing | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P5** | Repo Intelligence + Hardening | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P6** | Team / Distributed (optional) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
 
-**How to read progress:** P2 % ≈ stages done ÷ 3 (A/B/C). Later phases stay at 0% until their entry gate passes.
+**How to read progress:** P3 % ≈ stages done ÷ 3 (A/B/C). Later phases stay at 0% until their entry gate passes.
 
 ```mermaid
 flowchart LR
     P0[P0 Foundations<br/>✅ done] --> P1[P1 Syntactic KG + MCP<br/>✅ done]
-    P1 --> P2[P2 Context Compiler<br/>🟡 Stage C]
-    P2 --> P3[P3 Precise Tier]
+    P1 --> P2[P2 Context Compiler<br/>✅ done]
+    P2 --> P3[P3 Precise Tier<br/>🟡 Stage A]
     P3 --> P4[P4 Semantic Slicing]
     P4 --> P5[P5 Intelligence + Eval]
     P5 --> P6[P6 Distributed / Team<br/>optional]
 
     style P0 fill:#b8e994,stroke:#78e08f,color:#000
     style P1 fill:#b8e994,stroke:#78e08f,color:#000
-    style P2 fill:#f6e58d,stroke:#f9ca24,color:#000
-    style P3 fill:#dfe6e9,stroke:#b2bec3,color:#000
+    style P2 fill:#b8e994,stroke:#78e08f,color:#000
+    style P3 fill:#f6e58d,stroke:#f9ca24,color:#000
     style P4 fill:#dfe6e9,stroke:#b2bec3,color:#000
     style P5 fill:#dfe6e9,stroke:#b2bec3,color:#000
     style P6 fill:#dfe6e9,stroke:#b2bec3,color:#000
@@ -60,7 +60,7 @@ flowchart LR
 | Content-hash incremental store | ● | ● | ● | ● | ● | ● | ● | ✅ live; measured on pilots |
 | Syntactic facts (T1) | ○ | ● | ● | ● | ● | ● | ● | ✅ Python + Rust extractors + goldens |
 | MCP graph tools | ○ | ● | ● | ● | ● | ● | ● | ✅ prism-mcp stdio tools |
-| Query plan + Evidence Pack | ○ | ○ | ● | ● | ● | ● | ● | ◐ plan + pack + EXPLAIN; MCP `compile_context` pending Stage C |
+| Query plan + Evidence Pack | ○ | ○ | ● | ● | ● | ● | ● | ✅ plan + pack + EXPLAIN + MCP `compile_context` |
 | Precise symbol (T2) | ○ | ○ | ○ | ● | ● | ● | ● | ⬜ |
 | Semantic slice (T3/T4) | ○ | ○ | ○ | ○ | ● | ● | ● | ⬜ |
 | Architecture intelligence | ○ | ◐ | ◐ | ◐ | ◐ | ● | ● | ◐ path-prefix communities + hubs |
@@ -320,15 +320,15 @@ MCP structural tools are live. Next: intent recipes + `compile_context` Evidence
 
 ## Phase 2 — Context Compiler
 
-**State:** 🟡 **Stage B exited 2026-07-26** · Stage C open  
+**State:** ✅ **Gate passed 2026-07-26** (precision proxies; dual-review labels pending)  
 **Duration:** 3–5 weeks  
-**Gate:** Context precision ≥60% on labeled sample; refuse unbounded dumps; pack compile P95 design target &lt;300ms (excl. LLM).
+**Gate evidence:** [eval/scorecards/p2-phase-gate.md](../../eval/scorecards/p2-phase-gate.md)
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
 | **A — Intent + planner** | Intent recipes; operator DAG; cost model v1; plan-only API | ✅ exited 2026-07-26 |
 | **B — Pack + budget** | Selection/reduction; Evidence Pack IR; EXPLAIN; `BUDGET_EXCEEDED` | ✅ exited 2026-07-26 |
-| **C — `compile_context`** | Primary MCP tool; Phase 2 scorecard (precision, tokens, hops, refuse-dump) | 🟡 open |
+| **C — `compile_context`** | Primary MCP tool; Phase 2 scorecard (precision, tokens, hops, refuse-dump) | ✅ exited 2026-07-26 |
 
 ### Stage A — Intent classification & query planner ✅
 
@@ -373,17 +373,42 @@ Plans are stable JSON. Stage B owns Evidence Pack IR, must-include enforcement u
 
 `prism compile` produces packs. Stage C promotes MCP `compile_context`, agent guidance (“call compile first”), Phase 2 scorecard (precision ≥60%, refuse-dump, latency tracking).
 
+### Stage C — `compile_context` primary + Phase 2 gate ✅
+
+#### Deliverables
+
+- [x] MCP `compile_context` + `query_plan` — `prism-mcp` allowlist; server instructions
+- [x] Primary-path guide — [AGENT-USAGE.md](../architecture/AGENT-USAGE.md)
+- [x] EXPLAIN format — [EXPLAIN.md](../architecture/EXPLAIN.md)
+- [x] IDE peek stub — [IDE-EVIDENCE-PEEK.md](../architecture/IDE-EVIDENCE-PEEK.md)
+- [x] Phase 2 scorecard — [p2-phase-gate.md](../../eval/scorecards/p2-phase-gate.md) + `prism-eval p2-scorecard`
+- [x] Refuse-dump fixture — `fixtures/packs/refuse-dump/`
+- [x] Precision sample labels — `eval/labeling/packs/` (proxy-v0)
+- [x] `BUDGET_EXCEEDED` in MCP error model
+
+#### Exit / acceptance (Phase 2 gate)
+
+- [x] Context precision ≥60% on labeled sample (**proxy** labels; dual review pending)
+- [x] Unresolved scope → refuse unbounded dump (fixtures + MCP test)
+- [x] `compile_context` documented as preferred tool over ten reads
+- [x] Pack compile latency budget tracked toward &lt;300ms P95 (`mcp:compile_context` / `compile` events)
+- [x] Provenance present on every fragment (enforced in MCP tool)
+
+#### Handoff to Phase 3
+
+Evidence Packs are the primary agent path. Next: precise tier (SCIP/LSP) so high-stakes impact/refactor can upgrade heuristic `CALLS`. Treat precision gate as open until dual-reviewed labels land.
+
 ---
 
-## Phase 3 — Precise Tier (outline)
+## Phase 3 — Precise Tier
 
-**State:** ⚪ Not started (entry: P2 gate)  
+**State:** 🟡 Stage A open (entry: P2 gate passed with precision proxy caveat)  
 **Duration:** 4–6 weeks  
 **Gate:** Call-resolution precision improves on fixtures; safe-rename dry-run demo; tools require T2 when available for accuracy claims.
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
-| **A — Precise ingest** | SCIP and/or LSP index import path; tier-tagged edges | ⬜ |
+| **A — Precise ingest** | SCIP and/or LSP index import path; tier-tagged edges | 🟡 open |
 | **B — Hybrid resolve** | Prefer T2 over heuristic CALLS; on-demand upgrade | ⬜ |
 | **C — Product behaviors** | Precision-gated impact/rename; Phase 3 scorecard | ⬜ |
 
@@ -434,17 +459,17 @@ Plans are stable JSON. Stage B owns Evidence Pack IR, must-include enforcement u
 
 Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 
-| ID | Workstream | P2 Stage B status |
+| ID | Workstream | P2 exit status |
 |---|---|---|
 | **W-STORE** | Storage & identity | ✅ (unchanged from P1) |
 | **W-PLUGIN** | Plugin ABI | ✅ + IntentRecipe card draft |
 | **W-KG** | Knowledge graph | ✅ feeds pack selection |
-| **W-PLAN** | Query planning | ✅ recipes + plan IR + CLI |
+| **W-PLAN** | Query planning | ✅ recipes + plan IR + MCP `query_plan` |
 | **W-CC** | Context compiler | ✅ Evidence Pack + budget + EXPLAIN |
-| **W-MCP** | Agent surface | 🟡 Stage C: promote `compile_context` |
-| **W-IDE** | IDE/LSP | ⬜ |
-| **W-EVAL** | Evaluation | ✅ pack goldens + labeling process |
-| **W-OBS** | Observability | ✅ `query_finished` op=`compile` |
+| **W-MCP** | Agent surface | ✅ `compile_context` primary |
+| **W-IDE** | IDE/LSP | 🟡 evidence-peek stub doc |
+| **W-EVAL** | Evaluation | ✅ P2 scorecard + precision proxy labels |
+| **W-OBS** | Observability | ✅ `mcp:compile_context` latency |
 | **W-SEC** | Security & privacy | 🟡 allowlisted read-only MCP tools |
 
 ---
@@ -468,3 +493,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-25 | **P1 Stages C+D exited / gate passed (proxies):** `prism-mcp` tools, communities/`repo_map`, scorecard ≥5× hop+token proxies; quality LLM baseline still pending. **P2 Stage A opened** |
 | 2026-07-26 | **P2 Stage A exited:** `prism-plan` intent recipes + plan IR, `SCOPE_UNRESOLVED` fixtures, `prism query plan`, QUERY-PLANNER / INTENT-RECIPES docs. **Stage B opened** (Evidence Pack + budget) |
 | 2026-07-26 | **P2 Stage B exited:** `prism-compile` Evidence Pack IR, must-include budget invariant, EXPLAIN, `BUDGET_EXCEEDED`, `prism compile`, labeling process. **Stage C opened** (`compile_context` MCP + scorecard) |
+| 2026-07-26 | **P2 Stage C exited / gate passed (proxies):** MCP `compile_context` + `query_plan`, AGENT-USAGE primary path, precision ≥60% proxy labels, refuse-dump fixture, p2-scorecard. **P3 Stage A opened** |

@@ -1,0 +1,255 @@
+{
+  "summary": {
+    "phase": "P2",
+    "labeled_packs": 5,
+    "mean_context_precision": 0.6,
+    "gate_precision_ge_60": true,
+    "mean_hop_reduction_compile_context": 17.58,
+    "mean_token_reduction_proxy": 35.16,
+    "refuse_unbounded_dump_fixture": true,
+    "compile_context_primary_documented": true,
+    "pack_latency_p95_target_ms": 300,
+    "pack_latency_tracked": true,
+    "provenance_on_every_fragment": true,
+    "notes": "Precision from eval/labeling/packs proxy-v0; replace with dual human review."
+  },
+  "precision_rows": [
+    {
+      "task_id": "T001",
+      "intent": "repo_qa",
+      "fragment_count": 5,
+      "necessary": 3,
+      "unnecessary": 2,
+      "precision": 0.6,
+      "reviewer": "proxy-v0"
+    },
+    {
+      "task_id": "T002",
+      "intent": "impact",
+      "fragment_count": 5,
+      "necessary": 3,
+      "unnecessary": 2,
+      "precision": 0.6,
+      "reviewer": "proxy-v0"
+    },
+    {
+      "task_id": "T003",
+      "intent": "architecture",
+      "fragment_count": 5,
+      "necessary": 3,
+      "unnecessary": 2,
+      "precision": 0.6,
+      "reviewer": "proxy-v0"
+    },
+    {
+      "task_id": "T004",
+      "intent": "repo_qa",
+      "fragment_count": 5,
+      "necessary": 3,
+      "unnecessary": 2,
+      "precision": 0.6,
+      "reviewer": "proxy-v0"
+    },
+    {
+      "task_id": "T005",
+      "intent": "impact",
+      "fragment_count": 5,
+      "necessary": 3,
+      "unnecessary": 2,
+      "precision": 0.6,
+      "reviewer": "proxy-v0"
+    }
+  ],
+  "hop_rows": [
+    {
+      "task_id": "T001",
+      "type": "symbol_explain",
+      "explore_tool_hops_proxy": 16,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 16.0,
+      "explore_tokens_proxy": 12800,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 32.0
+    },
+    {
+      "task_id": "T002",
+      "type": "symbol_explain",
+      "explore_tool_hops_proxy": 16,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 16.0,
+      "explore_tokens_proxy": 12800,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 32.0
+    },
+    {
+      "task_id": "T003",
+      "type": "symbol_explain",
+      "explore_tool_hops_proxy": 16,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 16.0,
+      "explore_tokens_proxy": 12800,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 32.0
+    },
+    {
+      "task_id": "T004",
+      "type": "impact",
+      "explore_tool_hops_proxy": 18,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 18.0,
+      "explore_tokens_proxy": 14400,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 36.0
+    },
+    {
+      "task_id": "T005",
+      "type": "impact",
+      "explore_tool_hops_proxy": 18,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 18.0,
+      "explore_tokens_proxy": 14400,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 36.0
+    },
+    {
+      "task_id": "T006",
+      "type": "architecture",
+      "explore_tool_hops_proxy": 20,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 20.0,
+      "explore_tokens_proxy": 16000,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 40.0
+    },
+    {
+      "task_id": "T007",
+      "type": "architecture",
+      "explore_tool_hops_proxy": 20,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 20.0,
+      "explore_tokens_proxy": 16000,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 40.0
+    },
+    {
+      "task_id": "T008",
+      "type": "symbol_explain",
+      "explore_tool_hops_proxy": 16,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 16.0,
+      "explore_tokens_proxy": 12800,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 32.0
+    },
+    {
+      "task_id": "T009",
+      "type": "symbol_explain",
+      "explore_tool_hops_proxy": 16,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 16.0,
+      "explore_tokens_proxy": 12800,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 32.0
+    },
+    {
+      "task_id": "T010",
+      "type": "impact",
+      "explore_tool_hops_proxy": 18,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 18.0,
+      "explore_tokens_proxy": 14400,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 36.0
+    },
+    {
+      "task_id": "T011",
+      "type": "architecture",
+      "explore_tool_hops_proxy": 20,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 20.0,
+      "explore_tokens_proxy": 16000,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 40.0
+    },
+    {
+      "task_id": "T012",
+      "type": "symbol_explain",
+      "explore_tool_hops_proxy": 16,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 16.0,
+      "explore_tokens_proxy": 12800,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 32.0
+    },
+    {
+      "task_id": "T015",
+      "type": "symbol_explain",
+      "explore_tool_hops_proxy": 16,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 16.0,
+      "explore_tokens_proxy": 12800,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 32.0
+    },
+    {
+      "task_id": "T016",
+      "type": "impact",
+      "explore_tool_hops_proxy": 18,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 18.0,
+      "explore_tokens_proxy": 14400,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 36.0
+    },
+    {
+      "task_id": "T017",
+      "type": "architecture",
+      "explore_tool_hops_proxy": 20,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 20.0,
+      "explore_tokens_proxy": 16000,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 40.0
+    },
+    {
+      "task_id": "T018",
+      "type": "symbol_explain",
+      "explore_tool_hops_proxy": 16,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 16.0,
+      "explore_tokens_proxy": 12800,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 32.0
+    },
+    {
+      "task_id": "T019",
+      "type": "impact",
+      "explore_tool_hops_proxy": 18,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 18.0,
+      "explore_tokens_proxy": 14400,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 36.0
+    },
+    {
+      "task_id": "T020",
+      "type": "architecture",
+      "explore_tool_hops_proxy": 20,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 20.0,
+      "explore_tokens_proxy": 16000,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 40.0
+    },
+    {
+      "task_id": "T021",
+      "type": "symbol_explain",
+      "explore_tool_hops_proxy": 16,
+      "prism_tool_hops_expected": 1,
+      "hop_reduction_ratio": 16.0,
+      "explore_tokens_proxy": 12800,
+      "prism_tokens_proxy": 400,
+      "token_reduction_ratio": 32.0
+    }
+  ]
+}

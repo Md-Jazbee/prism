@@ -1,10 +1,13 @@
-# MCP tool catalog v1 (P1 Stage C)
+# MCP tool catalog (P2 Stage C)
 
 **Server:** `prism mcp <workspace>` (stdio JSON-RPC 2.0, protocol `2024-11-05`)  
-**Allowlist only** — no write / rename tools until P3.
+**Allowlist only** — no write / rename tools until P3.  
+**Primary tool:** `compile_context`
 
 | Tool | Inputs | Returns | Confidence |
 |---|---|---|---|
+| **`compile_context`** | `question`, optional budget/intent/anchors/stack/error/changed_paths | Evidence Pack + EXPLAIN | per-fragment provenance |
+| `query_plan` | same hints as compile | Plan IR (operator DAG) | recipe notes / gaps |
 | `index_status` | — | freshness, node/edge counts, sqlite bytes | N/A (metadata) |
 | `resolve_symbol` | `name`, optional `file`, `limit` | symbol ids + paths | per-node |
 | `neighbors` | `id`, optional `kind`, `dir`, `limit` | edge+node pairs | per-edge (`CALLS` = heuristic) |
@@ -16,21 +19,21 @@ Every successful tool response includes `confidence_note` and `latency_ms`. Fail
 ## Safety
 
 - Tools are read-only against `.prism/`.
-- Citations: node `id` + `file_path` (+ spans inside stored attrs).
-- Agents must prefer these over grep/read loops for structural questions ([AGENT-USAGE.md](./AGENT-USAGE.md)).
+- Every Evidence Pack fragment carries provenance (`node_ids`, analyzer, tier).
+- Agents must prefer `compile_context` over grep/read loops ([AGENT-USAGE.md](./AGENT-USAGE.md)).
 
 ## ADD §25 mapping
 
-| ADD tool | P1 status |
+| ADD tool | Status |
 |---|---|
+| `compile_context` | ✅ primary (P2 Stage C) |
+| `query_plan` | ✅ MCP + CLI |
 | `index_status` | ✅ |
 | `resolve_symbol` | ✅ |
 | `neighbors` | ✅ |
 | `impact` | ✅ heuristic |
-| `repo_map` | ✅ path-prefix stub → Stage D hubs |
-| `slice` / `compile_context` | P2 Stage C — MCP promote next |
-| `query_plan` (CLI) | P2 Stage A — `prism query plan` |
-| Evidence Pack compile (CLI) | P2 Stage B — `prism compile` |
+| `repo_map` | ✅ path-prefix + hubs |
+| `slice` | placeholder until P4 |
 | `detect_changes` / `find_tests` | later |
 
 ## Client config example

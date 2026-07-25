@@ -1,0 +1,13 @@
+{
+  "task_id": "T003",
+  "pack_schema": "0.0.1",
+  "intent": "architecture",
+  "reviewer": "proxy-v0",
+  "fragments": [
+    { "fragment_id": "frag:must:0:community_map", "label": "necessary", "note": "" },
+    { "fragment_id": "frag:must:1:hub_nodes", "label": "necessary", "note": "" },
+    { "fragment_id": "frag:opt:0:embedding_fallback_seeds", "label": "unnecessary", "note": "" },
+    { "fragment_id": "frag:opt:1:deep_module_bodies", "label": "unnecessary", "note": "" },
+    { "fragment_id": "frag:kg:repo_map", "label": "necessary", "note": "orientation needed" }
+  ]
+}
