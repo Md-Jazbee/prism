@@ -8,3 +8,6 @@ pub const FACT_SCHEMA_VERSION: &str = "0.0.1";
 
 /// `schemas/events/v0` mirror.
 pub const EVENTS_SCHEMA_VERSION: &str = "0.0.1";
+
+/// `schemas/plan/v0` mirror (query plan IR).
+pub const PLAN_SCHEMA_VERSION: &str = "0.0.1";

@@ -1,0 +1,75 @@
+{
+  "status": "ok",
+  "data": {
+    "schema_version": "0.0.1",
+    "plan_id": "plan:generate:237a4a3cd213d548",
+    "intent": "generate",
+    "question": "Generate a helper method near `Client.send` using existing types",
+    "budget_tokens": 4000,
+    "steps": [
+      {
+        "id": "s1",
+        "op": "resolve_symbol",
+        "inputs": {
+          "anchors": [
+            "Client.send",
+            "Generate"
+          ],
+          "limit": 20
+        },
+        "depends_on": [],
+        "est_cost_ms": 5,
+        "executable": true,
+        "why": "resolve insertion locus / nearby types"
+      },
+      {
+        "id": "s2",
+        "op": "expand",
+        "inputs": {
+          "depth": 1,
+          "edge_kinds": [
+            "IMPORTS",
+            "DEFINES",
+            "CONTAINS"
+          ],
+          "mode": "types_and_one_exemplar"
+        },
+        "depends_on": [
+          "s1"
+        ],
+        "est_cost_ms": 15,
+        "executable": true,
+        "why": "type deps + single exemplar"
+      },
+      {
+        "id": "s3",
+        "op": "budget_pack",
+        "inputs": {
+          "recipe": "generate"
+        },
+        "depends_on": [
+          "s2"
+        ],
+        "est_cost_ms": 10,
+        "executable": true,
+        "why": "assemble generate Evidence Pack (Stage B)"
+      }
+    ],
+    "must_include": [
+      "insertion_neighborhood",
+      "type_signatures"
+    ],
+    "drop_order": [
+      "architecture_prose",
+      "embedding_fallback_seeds",
+      "extra_exemplars",
+      "neighbor_bodies"
+    ],
+    "gaps": [],
+    "notes": [
+      "At most one exemplar in v1",
+      "expand: types + one exemplar neighborhood",
+      "seeds: target file locus"
+    ]
+  }
+}

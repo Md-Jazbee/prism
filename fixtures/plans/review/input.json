@@ -1,0 +1,6 @@
+{
+  "question": "Review this pull request change",
+  "intent": "review",
+  "changed_paths": ["httpx/_client.py"],
+  "budget_tokens": 4000
+}

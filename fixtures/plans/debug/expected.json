@@ -1,0 +1,125 @@
+{
+  "status": "ok",
+  "data": {
+    "schema_version": "0.0.1",
+    "plan_id": "plan:debug:6bee2c0d16ec4574",
+    "intent": "debug",
+    "question": "Why does this crash with a null pointer?",
+    "budget_tokens": 4000,
+    "steps": [
+      {
+        "id": "s1",
+        "op": "resolve_symbol",
+        "inputs": {
+          "anchors": [
+            "Why",
+            "httpx/_client.py:412 in send",
+            "AttributeError: 'NoneType' object has no attribute 'write'"
+          ],
+          "limit": 20
+        },
+        "depends_on": [],
+        "est_cost_ms": 5,
+        "executable": true,
+        "why": "resolve stack frames / error loci"
+      },
+      {
+        "id": "s2",
+        "op": "upgrade_precision",
+        "inputs": {
+          "critical_path_only": true,
+          "nodes_from": "s1",
+          "tier": "T2"
+        },
+        "depends_on": [
+          "s1"
+        ],
+        "est_cost_ms": 200,
+        "executable": false,
+        "why": "placeholder until P3 — refine ambiguous CALLS on frame0"
+      },
+      {
+        "id": "s3",
+        "op": "slice",
+        "inputs": {
+          "criterion_from": "s1",
+          "depth": "interproc_limited",
+          "direction": "backward"
+        },
+        "depends_on": [
+          "s2"
+        ],
+        "est_cost_ms": 80,
+        "executable": false,
+        "why": "placeholder until P4 — best-effort local neighborhood instead"
+      },
+      {
+        "id": "s4",
+        "op": "diff_intersect",
+        "inputs": {
+          "since": "main",
+          "worktree": true
+        },
+        "depends_on": [
+          "s3"
+        ],
+        "est_cost_ms": 30,
+        "executable": true,
+        "why": "intersect recent dirty/diff with slice candidates"
+      },
+      {
+        "id": "s5",
+        "op": "expand",
+        "inputs": {
+          "depth": 1,
+          "edge_kinds": [
+            "CALLS"
+          ],
+          "mode": "signatures"
+        },
+        "depends_on": [
+          "s4"
+        ],
+        "est_cost_ms": 15,
+        "executable": true,
+        "why": "callee signatures only"
+      },
+      {
+        "id": "s6",
+        "op": "budget_pack",
+        "inputs": {
+          "recipe": "debug"
+        },
+        "depends_on": [
+          "s5"
+        ],
+        "est_cost_ms": 10,
+        "executable": true,
+        "why": "assemble debug Evidence Pack (Stage B)"
+      }
+    ],
+    "must_include": [
+      "error_or_stack_verbatim",
+      "primary_frame_body"
+    ],
+    "drop_order": [
+      "architecture_prose",
+      "depth_3_plus_impact",
+      "embedding_fallback_seeds",
+      "neighbor_bodies",
+      "secondary_exemplars"
+    ],
+    "gaps": [
+      "operator `slice` not executable in v1 (placeholder until P4 — best-effort local neighborhood instead)",
+      "operator `upgrade_precision` not executable in v1 (placeholder until P3 — refine ambiguous CALLS on frame0)",
+      "semantic Slice requires P4; debug pack is best-effort"
+    ],
+    "notes": [
+      "UpgradePrecision is a placeholder until P3",
+      "best-effort until P4 slicer",
+      "expand: backward slice (placeholder) + recent diff + callee signatures",
+      "never drop error/stack under budget pressure",
+      "seeds: stack frames + error text"
+    ]
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "status": "ok",
+  "data": {
+    "schema_version": "0.0.1",
+    "plan_id": "plan:architecture:cd15d2c738978d96",
+    "intent": "architecture",
+    "question": "Give me a high-level architecture overview of this repo",
+    "budget_tokens": 4000,
+    "steps": [
+      {
+        "id": "s1",
+        "op": "community_of",
+        "inputs": {
+          "hub_limit": 15
+        },
+        "depends_on": [],
+        "est_cost_ms": 20,
+        "executable": true,
+        "why": "path-prefix communities + hubs (repo_map)"
+      },
+      {
+        "id": "s2",
+        "op": "resolve_symbol",
+        "inputs": {
+          "anchors": [
+            "Give"
+          ],
+          "limit": 10
+        },
+        "depends_on": [
+          "s1"
+        ],
+        "est_cost_ms": 5,
+        "executable": true,
+        "why": "optional: place named symbols into communities"
+      },
+      {
+        "id": "s3",
+        "op": "budget_pack",
+        "inputs": {
+          "recipe": "architecture"
+        },
+        "depends_on": [
+          "s2"
+        ],
+        "est_cost_ms": 10,
+        "executable": true,
+        "why": "assemble architecture Evidence Pack (Stage B)"
+      }
+    ],
+    "must_include": [
+      "community_map",
+      "hub_nodes"
+    ],
+    "drop_order": [
+      "deep_module_bodies",
+      "embedding_fallback_seeds",
+      "secondary_exemplars"
+    ],
+    "gaps": [],
+    "notes": [
+      "Uses CommunityOf / repo_map; anchors optional",
+      "expand: hub nodes + boundaries",
+      "seeds: communities (no symbol required)"
+    ]
+  }
+}

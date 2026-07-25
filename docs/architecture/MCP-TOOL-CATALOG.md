@@ -29,6 +29,7 @@ Every successful tool response includes `confidence_note` and `latency_ms`. Fail
 | `impact` | ✅ heuristic |
 | `repo_map` | ✅ path-prefix stub → Stage D hubs |
 | `slice` / `compile_context` | P2+ |
+| `query_plan` (CLI today) | P2 Stage A — `prism query plan`; MCP promote with Stage C |
 | `detect_changes` / `find_tests` | later |
 
 ## Client config example

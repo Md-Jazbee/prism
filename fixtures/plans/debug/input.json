@@ -1,0 +1,7 @@
+{
+  "question": "Why does this crash with a null pointer?",
+  "intent": "debug",
+  "stack_frames": ["httpx/_client.py:412 in send"],
+  "error_text": "AttributeError: 'NoneType' object has no attribute 'write'",
+  "budget_tokens": 4000
+}

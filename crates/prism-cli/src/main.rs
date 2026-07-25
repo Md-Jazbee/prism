@@ -1,11 +1,13 @@
-//! `prism` CLI — Phase 1 Stage B (`index` + structural `query`).
+//! `prism` CLI — Phase 2 Stage A (`index` + structural `query` + `query plan`).
 
 use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 use prism_core::{IncrementalIndexer, IndexOptions, WorkspaceManager};
 use prism_obs::{emit_index_event, IndexEvent};
+use prism_plan::{plan_query, Intent, PlanHints, PlanOutcome};
 use prism_store::{parse_edge_kinds, EdgeDirection, SqliteKgStore, SqliteMetaStore};
 use std::path::PathBuf;
+use std::str::FromStr;
 use std::time::Instant;
 use tracing_subscriber::EnvFilter;
 
@@ -14,7 +16,7 @@ use tracing_subscriber::EnvFilter;
     name = "prism",
     version,
     about = "Prism — Repository Intelligence Platform",
-    long_about = "Pre-LLM repository understanding: index → knowledge graph → context compilation.\nPhase 1: T1 extractors, KG query, MCP structural tools, repo_map."
+    long_about = "Pre-LLM repository understanding: index → knowledge graph → context compilation.\nPhase 2 Stage A: deterministic query plans (`prism query plan`)."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -107,6 +109,31 @@ enum QueryCmd {
         #[arg(long, default_value_t = 15)]
         hub_limit: usize,
     },
+    /// Deterministic query plan only (P2 Stage A) — no Evidence Pack yet.
+    Plan {
+        /// Natural-language or agent question.
+        question: String,
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        /// Force intent: repo_qa|debug|impact|refactor|generate|review|architecture
+        #[arg(long)]
+        intent: Option<String>,
+        /// Token budget hint for later BudgetPack (default 4000).
+        #[arg(long, default_value_t = 4000)]
+        budget: u32,
+        /// Explicit anchors (repeatable).
+        #[arg(long = "anchor")]
+        anchors: Vec<String>,
+        /// Stack frame strings (debug).
+        #[arg(long = "stack")]
+        stack_frames: Vec<String>,
+        /// Error / exception text (debug).
+        #[arg(long)]
+        error: Option<String>,
+        /// Changed paths for review/impact (repeatable).
+        #[arg(long = "changed")]
+        changed_paths: Vec<String>,
+    },
 }
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
@@ -180,10 +207,11 @@ fn main() -> Result<()> {
             println!("dirty: {}", id.snapshot.dirty);
             println!("tree_fingerprint: {}", id.snapshot.tree_fingerprint);
             println!(
-                "schema: meta={} fact={} events={}",
+                "schema: meta={} fact={} events={} plan={}",
                 prism_ir::META_SCHEMA_VERSION,
                 prism_ir::FACT_SCHEMA_VERSION,
-                prism_ir::EVENTS_SCHEMA_VERSION
+                prism_ir::EVENTS_SCHEMA_VERSION,
+                prism_ir::PLAN_SCHEMA_VERSION
             );
         }
         Commands::IndexStatus { path } => {
@@ -309,6 +337,57 @@ fn main() -> Result<()> {
                     map.communities.len(),
                     map.hubs.len()
                 );
+            }
+            QueryCmd::Plan {
+                question,
+                path: _path,
+                intent,
+                budget,
+                anchors,
+                stack_frames,
+                error,
+                changed_paths,
+            } => {
+                let mut hints = PlanHints {
+                    anchors,
+                    stack_frames,
+                    error_text: error,
+                    changed_paths,
+                    budget_tokens: Some(budget),
+                    ..Default::default()
+                };
+                if let Some(raw) = intent {
+                    hints.intent_override = Some(
+                        Intent::from_str(&raw)
+                            .map_err(|e| anyhow::anyhow!(e))
+                            .with_context(|| format!("invalid --intent {raw}"))?,
+                    );
+                }
+                let started = Instant::now();
+                let outcome = plan_query(&question, &hints)?;
+                let ms = started.elapsed().as_millis() as u64;
+                let hit_count = match &outcome {
+                    PlanOutcome::Ok(p) => p.steps.len() as u64,
+                    PlanOutcome::ScopeUnresolved(_) => 0,
+                };
+                emit_index_event(&IndexEvent::QueryFinished {
+                    op: "plan".into(),
+                    latency_ms: ms,
+                    hit_count,
+                });
+                println!("{}", serde_json::to_string_pretty(&outcome)?);
+                match &outcome {
+                    PlanOutcome::Ok(p) => eprintln!(
+                        "# plan status=ok intent={} steps={} budget={} latency_ms={ms}",
+                        p.intent,
+                        p.steps.len(),
+                        p.budget_tokens
+                    ),
+                    PlanOutcome::ScopeUnresolved(e) => eprintln!(
+                        "# plan status=scope_unresolved code={} latency_ms={ms}",
+                        e.code
+                    ),
+                }
             }
         },
         Commands::Mcp { path } => {

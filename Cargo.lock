@@ -391,6 +391,7 @@ dependencies = [
  "prism-ir",
  "prism-mcp",
  "prism-obs",
+ "prism-plan",
  "prism-store",
  "serde_json",
  "tracing",
@@ -484,6 +485,18 @@ dependencies = [
  "serde",
  "serde_json",
  "tracing",
+]
+
+[[package]]
+name = "prism-plan"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "prism-ir",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror",
 ]
 
 [[package]]

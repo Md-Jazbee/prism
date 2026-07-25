@@ -14,4 +14,6 @@ pub use facts::{
     FactNode, NodeKind, Span, Tier,
 };
 pub use identity::{FileId, RepositoryId, SnapshotId};
-pub use versions::{EVENTS_SCHEMA_VERSION, FACT_SCHEMA_VERSION, META_SCHEMA_VERSION};
+pub use versions::{
+    EVENTS_SCHEMA_VERSION, FACT_SCHEMA_VERSION, META_SCHEMA_VERSION, PLAN_SCHEMA_VERSION,
+};

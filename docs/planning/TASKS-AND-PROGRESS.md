@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
-**Status date:** 2026-07-25  
-**Current phase:** **P1 gate passed** (structural proxies) · **P2 open** · LLM quality baselines still pending  
+**Status date:** 2026-07-26  
+**Current phase:** **P2 Stage A exited** · Stage B open · LLM quality baselines still pending  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)
 
@@ -15,18 +15,18 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 |---:|---|---:|---|
 | **P0** | Foundations (identity, hash, schemas, eval) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-25 |
 | **P1** | Syntactic KG + MCP | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-25 (proxies) |
-| **P2** | Context Compiler | ░░░░░░░░░░ **0%** | 🟡 Stage A open |
+| **P2** | Context Compiler | ▓▓▓░░░░░░░ **33%** | 🟡 Stage B open (A exited) |
 | **P3** | Precise Tier (T2) | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P4** | Semantic Slicing | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P5** | Repo Intelligence + Hardening | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P6** | Team / Distributed (optional) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
 
-**How to read progress:** P1 % ≈ stages done ÷ 4 (A/B/C/D). Later phases stay at 0% until their entry gate passes.
+**How to read progress:** P2 % ≈ stages done ÷ 3 (A/B/C). Later phases stay at 0% until their entry gate passes.
 
 ```mermaid
 flowchart LR
     P0[P0 Foundations<br/>✅ done] --> P1[P1 Syntactic KG + MCP<br/>✅ done]
-    P1 --> P2[P2 Context Compiler<br/>🟡 Stage A]
+    P1 --> P2[P2 Context Compiler<br/>🟡 Stage B]
     P2 --> P3[P3 Precise Tier]
     P3 --> P4[P4 Semantic Slicing]
     P4 --> P5[P5 Intelligence + Eval]
@@ -60,7 +60,7 @@ flowchart LR
 | Content-hash incremental store | ● | ● | ● | ● | ● | ● | ● | ✅ live; measured on pilots |
 | Syntactic facts (T1) | ○ | ● | ● | ● | ● | ● | ● | ✅ Python + Rust extractors + goldens |
 | MCP graph tools | ○ | ● | ● | ● | ● | ● | ● | ✅ prism-mcp stdio tools |
-| Query plan + Evidence Pack | ○ | ○ | ● | ● | ● | ● | ● | ⬜ |
+| Query plan + Evidence Pack | ○ | ○ | ● | ● | ● | ● | ● | ◐ plan IR + recipes (Stage A); pack pending Stage B |
 | Precise symbol (T2) | ○ | ○ | ○ | ● | ● | ● | ● | ⬜ |
 | Semantic slice (T3/T4) | ○ | ○ | ○ | ○ | ● | ● | ● | ⬜ |
 | Architecture intelligence | ○ | ◐ | ◐ | ◐ | ◐ | ● | ● | ◐ path-prefix communities + hubs |
@@ -318,17 +318,38 @@ MCP structural tools are live. Next: intent recipes + `compile_context` Evidence
 
 ---
 
-## Phase 2 — Context Compiler (outline)
+## Phase 2 — Context Compiler
 
-**State:** 🟡 Stage A open (entry: P1 gate passed with noted quality caveat)  
+**State:** 🟡 **Stage A exited 2026-07-26** · Stage B open  
 **Duration:** 3–5 weeks  
 **Gate:** Context precision ≥60% on labeled sample; refuse unbounded dumps; pack compile P95 design target &lt;300ms (excl. LLM).
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
-| **A — Intent + planner** | Intent recipes; operator DAG; cost model v1 | 🟡 open |
-| **B — Pack + budget** | Selection/reduction; Evidence Pack IR; EXPLAIN; `BUDGET_EXCEEDED` | ⬜ |
+| **A — Intent + planner** | Intent recipes; operator DAG; cost model v1; plan-only API | ✅ exited 2026-07-26 |
+| **B — Pack + budget** | Selection/reduction; Evidence Pack IR; EXPLAIN; `BUDGET_EXCEEDED` | 🟡 open |
 | **C — `compile_context`** | Primary MCP tool; Phase 2 scorecard (precision, tokens, hops, refuse-dump) | ⬜ |
+
+### Stage A — Intent classification & query planner ✅
+
+#### Deliverables
+
+- [x] Intent recipe catalog v1 — [INTENT-RECIPES.md](../architecture/INTENT-RECIPES.md) + `schemas/plugins/IntentRecipe.md`
+- [x] Planner design — [QUERY-PLANNER.md](../architecture/QUERY-PLANNER.md); operator catalog + cost sketch
+- [x] Plan IR schema — `schemas/plan/v0/plan.schema.json` + `PLAN_SCHEMA_VERSION`
+- [x] Crate `prism-plan` — classify → recipe → `Plan` / `SCOPE_UNRESOLVED` (no LLM)
+- [x] Example plans — fixtures `fixtures/plans/{debug,impact,repo_qa,…}/`
+- [x] Plan-only API — CLI `prism query plan` (HTTP `POST /v1/query/plan` contracted)
+
+#### Exit / acceptance
+
+- [x] For each intent, a recipe produces a plan without executing LLM
+- [x] Fixtures cover ambiguous queries → `SCOPE_UNRESOLVED`
+- [x] Plan-only API (`/query/plan`) contract documented
+
+#### Handoff to Stage B
+
+Plans are stable JSON. Stage B owns Evidence Pack IR, must-include enforcement under budget, reduction techniques, and EXPLAIN reason codes. Do not promote `compile_context` MCP until Stage C.
 
 ---
 
@@ -391,17 +412,17 @@ MCP structural tools are live. Next: intent recipes + `compile_context` Evidence
 
 Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 
-| ID | Workstream | P1 exit status |
+| ID | Workstream | P2 Stage A status |
 |---|---|---|
-| **W-STORE** | Storage & identity | ✅ fact insert + query + dirty lists |
-| **W-PLUGIN** | Plugin ABI | ✅ frozen; Python + Rust extractors |
-| **W-KG** | Knowledge graph | ✅ query + path-prefix communities |
-| **W-PLAN** | Query planning | ⬜ P2 |
-| **W-CC** | Context compiler | ⬜ P2 |
-| **W-MCP** | Agent surface | ✅ structural MCP tools |
+| **W-STORE** | Storage & identity | ✅ (unchanged from P1) |
+| **W-PLUGIN** | Plugin ABI | ✅ + IntentRecipe card draft |
+| **W-KG** | Knowledge graph | ✅ (unchanged from P1) |
+| **W-PLAN** | Query planning | ✅ recipes + plan IR + CLI |
+| **W-CC** | Context compiler | 🟡 Stage B next |
+| **W-MCP** | Agent surface | 🟡 plan via CLI; `compile_context` in Stage C |
 | **W-IDE** | IDE/LSP | ⬜ |
-| **W-EVAL** | Evaluation | ✅ tool-hops + P1 scorecard proxies |
-| **W-OBS** | Observability | ✅ extract + query_finished |
+| **W-EVAL** | Evaluation | ✅ plan golden fixtures |
+| **W-OBS** | Observability | ✅ `query_finished` op=`plan` |
 | **W-SEC** | Security & privacy | 🟡 allowlisted read-only MCP tools |
 
 ---
@@ -423,3 +444,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-25 | **P1 Stage A exited:** Fact IR, tree-sitter Python/Rust extractors, golden fixtures, design docs, indexer extract path + `insert_facts`. Stage B opened |
 | 2026-07-25 | **P1 Stage B exited:** KG query API (resolve/neighbors/impact/dirty), `index-status`, reverse-dep lists, size/failure docs, `query_finished` metrics. Stage C opened |
 | 2026-07-25 | **P1 Stages C+D exited / gate passed (proxies):** `prism-mcp` tools, communities/`repo_map`, scorecard ≥5× hop+token proxies; quality LLM baseline still pending. **P2 Stage A opened** |
+| 2026-07-26 | **P2 Stage A exited:** `prism-plan` intent recipes + plan IR, `SCOPE_UNRESOLVED` fixtures, `prism query plan`, QUERY-PLANNER / INTENT-RECIPES docs. **Stage B opened** (Evidence Pack + budget) |

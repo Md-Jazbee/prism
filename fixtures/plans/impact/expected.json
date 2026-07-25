@@ -1,0 +1,70 @@
+{
+  "status": "ok",
+  "data": {
+    "schema_version": "0.0.1",
+    "plan_id": "plan:impact:ec16f5b85a1b400b",
+    "intent": "impact",
+    "question": "What is the impact of changing `WalkBuilder`?",
+    "budget_tokens": 4000,
+    "steps": [
+      {
+        "id": "s1",
+        "op": "resolve_symbol",
+        "inputs": {
+          "anchors": [
+            "WalkBuilder"
+          ],
+          "limit": 20
+        },
+        "depends_on": [],
+        "est_cost_ms": 5,
+        "executable": true,
+        "why": "resolve changed / named symbols"
+      },
+      {
+        "id": "s2",
+        "op": "impact",
+        "inputs": {
+          "depth": 2,
+          "limit": 100
+        },
+        "depends_on": [
+          "s1"
+        ],
+        "est_cost_ms": 25,
+        "executable": true,
+        "why": "forward heuristic impact cone"
+      },
+      {
+        "id": "s3",
+        "op": "budget_pack",
+        "inputs": {
+          "recipe": "impact"
+        },
+        "depends_on": [
+          "s2"
+        ],
+        "est_cost_ms": 10,
+        "executable": true,
+        "why": "assemble impact Evidence Pack (Stage B)"
+      }
+    ],
+    "must_include": [
+      "impact_cone_depth_1",
+      "seed_symbols"
+    ],
+    "drop_order": [
+      "architecture_prose",
+      "depth_3_plus_impact",
+      "embedding_fallback_seeds",
+      "neighbor_bodies",
+      "secondary_exemplars"
+    ],
+    "gaps": [],
+    "notes": [
+      "Impact edges are heuristic at T1 — not precise refactor safety",
+      "expand: forward IMPACTS depth 1–3 (heuristic T1)",
+      "seeds: changed symbols or named target"
+    ]
+  }
+}

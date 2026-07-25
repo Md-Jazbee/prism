@@ -1,0 +1,84 @@
+{
+  "status": "ok",
+  "data": {
+    "schema_version": "0.0.1",
+    "plan_id": "plan:review:778771f863e6d689",
+    "intent": "review",
+    "question": "Review this pull request change",
+    "budget_tokens": 4000,
+    "steps": [
+      {
+        "id": "s1",
+        "op": "diff_intersect",
+        "inputs": {
+          "anchors": [
+            "Review",
+            "httpx/_client.py"
+          ],
+          "worktree": true
+        },
+        "depends_on": [],
+        "est_cost_ms": 30,
+        "executable": true,
+        "why": "seed from PR/worktree diff paths"
+      },
+      {
+        "id": "s2",
+        "op": "impact",
+        "inputs": {
+          "depth": 2,
+          "limit": 100
+        },
+        "depends_on": [
+          "s1"
+        ],
+        "est_cost_ms": 25,
+        "executable": true,
+        "why": "impact cone of changed symbols"
+      },
+      {
+        "id": "s3",
+        "op": "find_tests",
+        "inputs": {
+          "symbols_from": "s2"
+        },
+        "depends_on": [
+          "s2"
+        ],
+        "est_cost_ms": 20,
+        "executable": true,
+        "why": "related tests (heuristic path/name match in v1)"
+      },
+      {
+        "id": "s4",
+        "op": "budget_pack",
+        "inputs": {
+          "recipe": "review"
+        },
+        "depends_on": [
+          "s3"
+        ],
+        "est_cost_ms": 10,
+        "executable": true,
+        "why": "assemble review Evidence Pack (Stage B)"
+      }
+    ],
+    "must_include": [
+      "diff_hunks",
+      "impact_cone_depth_1"
+    ],
+    "drop_order": [
+      "architecture_prose",
+      "depth_3_plus_impact",
+      "embedding_fallback_seeds",
+      "neighbor_bodies",
+      "secondary_exemplars"
+    ],
+    "gaps": [],
+    "notes": [
+      "DiffIntersect seeds from changed_paths / dirty worktree",
+      "expand: impact cone + related tests",
+      "seeds: PR / worktree diff"
+    ]
+  }
+}

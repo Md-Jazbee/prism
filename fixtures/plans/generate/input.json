@@ -1,0 +1,4 @@
+{
+  "question": "Generate a helper method near `Client.send` using existing types",
+  "budget_tokens": 4000
+}

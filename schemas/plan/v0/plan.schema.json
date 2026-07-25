@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/plan/v0/plan.schema.json",
+  "title": "Prism query plan IR v0",
+  "description": "Deterministic operator DAG from intent recipes (P2 Stage A). No LLM in the planning path.",
+  "version": "0.0.1",
+  "breaking_change_policy": "Major version bump in schemas/plan/ and prism-ir::PLAN_SCHEMA_VERSION.",
+  "intents": [
+    "repo_qa",
+    "debug",
+    "impact",
+    "refactor",
+    "generate",
+    "review",
+    "architecture"
+  ],
+  "operators": [
+    "resolve_symbol",
+    "expand",
+    "slice",
+    "impact",
+    "diff_intersect",
+    "find_tests",
+    "community_of",
+    "upgrade_precision",
+    "keyword_embed_fallback",
+    "budget_pack"
+  ],
+  "placeholder_until": {
+    "slice": "P4",
+    "upgrade_precision": "P3",
+    "keyword_embed_fallback": "optional low-confidence only"
+  },
+  "plan_outcome": {
+    "ok": { "status": "ok", "data": "Plan" },
+    "scope_unresolved": {
+      "status": "scope_unresolved",
+      "data": {
+        "code": "SCOPE_UNRESOLVED",
+        "reason": "string",
+        "ask_for": "string[]"
+      }
+    }
+  },
+  "plan_fields": [
+    "schema_version",
+    "plan_id",
+    "intent",
+    "question",
+    "budget_tokens",
+    "steps",
+    "must_include",
+    "drop_order",
+    "gaps",
+    "notes"
+  ],
+  "step_fields": [
+    "id",
+    "op",
+    "inputs",
+    "depends_on",
+    "est_cost_ms",
+    "executable",
+    "why"
+  ],
+  "api": {
+    "http": "POST /v1/query/plan",
+    "cli": "prism query plan \"<question>\" [--intent …] [--budget N]"
+  }
+}

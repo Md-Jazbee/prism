@@ -23,3 +23,5 @@ Do **not** open dozens of files via grep/read when these tools answer the questi
 ## Hop budget
 
 Structural gold tasks should complete in **1–4** Prism tool calls. If you exceed ~8 hops, stop and re-scope — Phase 2 `compile_context` will replace multi-hop thrash.
+
+**P2 Stage A:** Prefer `prism query plan "<question>"` (or future MCP plan tool) to inspect the operator DAG before multi-hop explore. Ambiguous questions without anchors return `SCOPE_UNRESOLVED` instead of dumping the repo.

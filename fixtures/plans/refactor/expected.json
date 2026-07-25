@@ -1,0 +1,93 @@
+{
+  "status": "ok",
+  "data": {
+    "schema_version": "0.0.1",
+    "plan_id": "plan:refactor:68a377d0a6056c39",
+    "intent": "refactor",
+    "question": "Refactor: rename `Client.send` and find all references",
+    "budget_tokens": 4000,
+    "steps": [
+      {
+        "id": "s1",
+        "op": "resolve_symbol",
+        "inputs": {
+          "anchors": [
+            "Client.send",
+            "Refactor"
+          ],
+          "limit": 5
+        },
+        "depends_on": [],
+        "est_cost_ms": 5,
+        "executable": true,
+        "why": "resolve refactor target"
+      },
+      {
+        "id": "s2",
+        "op": "upgrade_precision",
+        "inputs": {
+          "nodes_from": "s1",
+          "tier": "T2"
+        },
+        "depends_on": [
+          "s1"
+        ],
+        "est_cost_ms": 200,
+        "executable": false,
+        "why": "placeholder until P3 — required for safe rename claims"
+      },
+      {
+        "id": "s3",
+        "op": "expand",
+        "inputs": {
+          "depth": 2,
+          "edge_kinds": [
+            "REFERENCES",
+            "CALLS"
+          ],
+          "mode": "all_refs"
+        },
+        "depends_on": [
+          "s2"
+        ],
+        "est_cost_ms": 15,
+        "executable": true,
+        "why": "heuristic references / callers (T1 stand-in for T2 refs)"
+      },
+      {
+        "id": "s4",
+        "op": "budget_pack",
+        "inputs": {
+          "recipe": "refactor"
+        },
+        "depends_on": [
+          "s3"
+        ],
+        "est_cost_ms": 10,
+        "executable": true,
+        "why": "assemble refactor Evidence Pack (Stage B)"
+      }
+    ],
+    "must_include": [
+      "reference_list",
+      "target_symbol_definition"
+    ],
+    "drop_order": [
+      "architecture_prose",
+      "depth_3_plus_neighbors",
+      "embedding_fallback_seeds",
+      "neighbor_bodies",
+      "secondary_exemplars"
+    ],
+    "gaps": [
+      "operator `upgrade_precision` not executable in v1 (placeholder until P3 — required for safe rename claims)",
+      "precise REFERENCES require T2 (P3); heuristic only"
+    ],
+    "notes": [
+      "PRECISION_REQUIRED when claiming safe rename — T2 arrives in P3",
+      "expand: all REFERENCES (T2+ preferred)",
+      "seeds: target symbol",
+      "v1 expands heuristic REFERENCES / callers only"
+    ]
+  }
+}
