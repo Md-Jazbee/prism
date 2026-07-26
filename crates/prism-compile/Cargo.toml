@@ -15,6 +15,7 @@ prism-ir = { workspace = true }
 prism-plan = { workspace = true }
 prism-store = { workspace = true }
 prism-precise = { workspace = true }
+prism-semantic = { workspace = true }
 prism-obs = { workspace = true }
 
 [dev-dependencies]

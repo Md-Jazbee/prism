@@ -39,7 +39,7 @@ pub fn recipe_for(intent: Intent) -> IntentRecipe {
         Intent::Debug => IntentRecipe {
             intent,
             seed_description: "stack frames + error text",
-            expand_description: "backward slice (placeholder) + recent diff + callee signatures",
+            expand_description: "backward interproc slice + recent diff + callee signatures",
             must_include: &["error_or_stack_verbatim", "primary_frame_body"],
             drop_order: &[
                 "embedding_fallback_seeds",
@@ -49,7 +49,7 @@ pub fn recipe_for(intent: Intent) -> IntentRecipe {
                 "architecture_prose",
             ],
             notes: &[
-                "best-effort until P4 slicer",
+                "Slice: backward, max_depth=2, memoized",
                 "UpgradePrecision: mandatory, critical_path_only, ≤200ms",
                 "never drop error/stack under budget pressure",
             ],
@@ -167,10 +167,6 @@ impl IntentRecipe {
                     .into(),
             );
         }
-        if matches!(self.intent, Intent::Debug) {
-            plan.gaps
-                .push("semantic Slice requires P4; debug pack is best-effort".into());
-        }
 
         plan
     }
@@ -247,9 +243,16 @@ fn debug_steps(anchors: &[String]) -> Vec<PlanStep> {
         step(
             "s3",
             Operator::Slice,
-            json!({ "direction": "backward", "depth": "interproc_limited", "criterion_from": "s1" }),
+            json!({
+                "direction": "backward",
+                "max_depth": 2,
+                "max_functions": 16,
+                "max_spans": 40,
+                "residual_expand": true,
+                "criterion_from": "s1"
+            }),
             &["s2"],
-            "placeholder until P4 — best-effort local neighborhood instead",
+            "inter-procedural backward slice (depth-capped; memoized)",
         ),
         step(
             "s4",

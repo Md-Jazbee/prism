@@ -59,6 +59,16 @@ pub enum IndexEvent {
         latency_ms: u64,
         overlay_used: bool,
     },
+    /// Inter-procedural slice (P4 Stage B).
+    SliceFinished {
+        depth_reached: u64,
+        functions_visited: u64,
+        spans: u64,
+        truncated: bool,
+        memo_hit: bool,
+        latency_ms: u64,
+        shard_build_ms: u64,
+    },
 }
 
 /// Emit an index event via `tracing` (JSON-friendly fields).
@@ -149,6 +159,27 @@ pub fn emit_index_event(event: &IndexEvent) {
                 latency_ms = latency_ms,
                 overlay_used = overlay_used,
                 "precision upgrade"
+            );
+        }
+        IndexEvent::SliceFinished {
+            depth_reached,
+            functions_visited,
+            spans,
+            truncated,
+            memo_hit,
+            latency_ms,
+            shard_build_ms,
+        } => {
+            info!(
+                event = "slice_finished",
+                depth_reached = depth_reached,
+                functions_visited = functions_visited,
+                spans = spans,
+                truncated = truncated,
+                memo_hit = memo_hit,
+                latency_ms = latency_ms,
+                shard_build_ms = shard_build_ms,
+                "slice finished"
             );
         }
     }

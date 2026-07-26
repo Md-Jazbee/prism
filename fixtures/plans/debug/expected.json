@@ -46,15 +46,18 @@
         "op": "slice",
         "inputs": {
           "criterion_from": "s1",
-          "depth": "interproc_limited",
-          "direction": "backward"
+          "direction": "backward",
+          "max_depth": 2,
+          "max_functions": 16,
+          "max_spans": 40,
+          "residual_expand": true
         },
         "depends_on": [
           "s2"
         ],
         "est_cost_ms": 80,
-        "executable": false,
-        "why": "placeholder until P4 — best-effort local neighborhood instead"
+        "executable": true,
+        "why": "inter-procedural backward slice (depth-capped; memoized)"
       },
       {
         "id": "s4",
@@ -112,14 +115,11 @@
       "neighbor_bodies",
       "secondary_exemplars"
     ],
-    "gaps": [
-      "operator `slice` not executable in v1 (placeholder until P4 — best-effort local neighborhood instead)",
-      "semantic Slice requires P4; debug pack is best-effort"
-    ],
+    "gaps": [],
     "notes": [
+      "Slice: backward, max_depth=2, memoized",
       "UpgradePrecision: mandatory, critical_path_only, ≤200ms",
-      "best-effort until P4 slicer",
-      "expand: backward slice (placeholder) + recent diff + callee signatures",
+      "expand: backward interproc slice + recent diff + callee signatures",
       "never drop error/stack under budget pressure",
       "seeds: stack frames + error text"
     ]

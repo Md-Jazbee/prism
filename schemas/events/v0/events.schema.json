@@ -35,6 +35,18 @@
       "fields": ["op", "latency_ms", "hit_count"],
       "notes": "Track toward local structural query P95 <50ms (design NFR)"
     },
+    "slice_finished": {
+      "fields": [
+        "depth_reached",
+        "functions_visited",
+        "spans",
+        "truncated",
+        "memo_hit",
+        "latency_ms",
+        "shard_build_ms"
+      ],
+      "notes": "P4 Stage B inter-procedural Slice operator"
+    },
     "placeholders_later": {
       "tokens_per_task": "eval harness",
       "tool_calls_per_task": "eval harness"

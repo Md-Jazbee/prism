@@ -12,6 +12,12 @@
   manifest.json                 # algo version, languages, counts
   by-file/
     <path-hash>__<safe_name>.json   # FunctionCfgDfg bundle for one source file
+  shards/
+    <shard_id>.json                 # T4 call-graph neighborhood + overlay edges
+  memo/
+    <memo_key>.json                 # memoized Slice results
+  providers/                        # optional sink/source caches
+    <id>.json
 ```
 
 `path-hash` = first 16 hex of XXH3-128 of repo-relative path (stable key).  

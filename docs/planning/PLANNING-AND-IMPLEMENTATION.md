@@ -994,9 +994,9 @@ Lazy, entrypoint- or service-scoped semantic shards; program slicing as a first-
 
 #### Exit / acceptance
 
-- [ ] Shard rebuild is on-demand / dirty subsets only  
-- [ ] Slice returns minimal spans with provenance  
-- [ ] Memoization keys include `(snapshot_id, algorithm_version, params_hash)` |
+- [x] Shard rebuild is on-demand / dirty subsets only  
+- [x] Slice returns minimal spans with provenance  
+- [x] Memoization keys include `(snapshot_id, algorithm_version, params_hash)`  
 
 ---
 

@@ -410,6 +410,7 @@ dependencies = [
  "prism-obs",
  "prism-plan",
  "prism-precise",
+ "prism-semantic",
  "prism-store",
  "serde",
  "serde_json",

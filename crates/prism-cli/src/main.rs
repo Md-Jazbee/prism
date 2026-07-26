@@ -11,8 +11,9 @@ use prism_precise::{
     rename_dry_run, score_call_resolution, CallEdge, PrecisionGate,
 };
 use prism_semantic::{
-    analyze_python_file, build_file_artifact, build_workspace_python, load_file_artifact,
-    local_slice, read_manifest as read_semantic_manifest, SliceCriterion,
+    build_file_artifact, build_workspace_python, ensure_shard, interproc_slice,
+    local_slice, read_manifest as read_semantic_manifest, SliceCriterion, SliceDirection,
+    SliceParams,
 };
 use prism_store::{parse_edge_kinds, EdgeDirection, SqliteKgStore, SqliteMetaStore};
 use std::path::PathBuf;
@@ -158,7 +159,7 @@ enum SemanticCmd {
         #[arg(long)]
         file: Option<String>,
     },
-    /// Local backward slice for a line or symbol criterion.
+    /// Local or inter-procedural slice for a line or symbol criterion.
     Slice {
         #[arg(default_value = ".")]
         path: PathBuf,
@@ -171,6 +172,26 @@ enum SemanticCmd {
         /// Function name criterion.
         #[arg(long)]
         symbol: Option<String>,
+        /// Inter-procedural CALLS depth (0 = local only via interproc with depth 0).
+        #[arg(long, default_value_t = 2)]
+        depth: u32,
+        /// Slice direction.
+        #[arg(long, default_value = "backward")]
+        direction: String,
+        /// Force local-only (Stage A) slice.
+        #[arg(long)]
+        local: bool,
+    },
+    /// Build a call-graph shard around a seed function.
+    ShardBuild {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long)]
+        file: String,
+        #[arg(long)]
+        symbol: String,
+        #[arg(long, default_value_t = 2)]
+        depth: u32,
     },
     /// Show semantic manifest (or note if missing).
     Status {
@@ -734,44 +755,88 @@ fn main() -> Result<()> {
                 file,
                 line,
                 symbol,
+                depth,
+                direction,
+                local,
             } => {
                 let wm = WorkspaceManager::open(&path)?;
-                let art = match load_file_artifact(wm.root(), &file)? {
-                    Some(a) => a,
-                    None => {
-                        // analyze on the fly
-                        let abs = wm.root().join(&file);
-                        let source = std::fs::read_to_string(&abs)
-                            .with_context(|| format!("read {}", abs.display()))?;
-                        analyze_python_file(&file, &source, None)
+                if local {
+                    let art = build_file_artifact(wm.root(), &file)?;
+                    let criterion = match (line, symbol) {
+                        (Some(l), None) => SliceCriterion::Line {
+                            path: file.clone(),
+                            line: l,
+                        },
+                        (None, Some(s)) => SliceCriterion::Symbol {
+                            path: file.clone(),
+                            symbol: s,
+                        },
+                        _ => bail!("provide exactly one of --line or --symbol"),
+                    };
+                    match local_slice(&art, &criterion) {
+                        Ok(report) => {
+                            println!("{}", serde_json::to_string_pretty(&report)?);
+                            eprintln!(
+                                "# semantic slice(local) function={} spans={}",
+                                report.function,
+                                report.spans.len()
+                            );
+                        }
+                        Err(e) => {
+                            println!("{}", serde_json::to_string_pretty(&e)?);
+                            eprintln!("# semantic slice status=SEMANTIC_PARTIAL");
+                        }
                     }
-                };
-                let criterion = match (line, symbol) {
-                    (Some(l), None) => SliceCriterion::Line {
-                        path: file.clone(),
-                        line: l,
-                    },
-                    (None, Some(s)) => SliceCriterion::Symbol {
-                        path: file.clone(),
-                        symbol: s,
-                    },
-                    _ => bail!("provide exactly one of --line or --symbol"),
-                };
-                match local_slice(&art, &criterion) {
-                    Ok(report) => {
-                        println!("{}", serde_json::to_string_pretty(&report)?);
-                        eprintln!(
-                            "# semantic slice function={} spans={} criterion_line={}",
-                            report.function,
-                            report.spans.len(),
-                            report.criterion_line
-                        );
-                    }
-                    Err(e) => {
-                        println!("{}", serde_json::to_string_pretty(&e)?);
-                        eprintln!("# semantic slice status=SEMANTIC_PARTIAL");
+                } else {
+                    let dir = match direction.as_str() {
+                        "forward" => SliceDirection::Forward,
+                        _ => SliceDirection::Backward,
+                    };
+                    let params = SliceParams {
+                        direction: dir,
+                        max_depth: depth,
+                        max_functions: 16,
+                        max_spans: 40,
+                        residual_expand: true,
+                        path: file,
+                        line,
+                        symbol,
+                        snapshot_id: "adhoc".into(),
+                    };
+                    match interproc_slice(wm.root(), &params) {
+                        Ok(report) => {
+                            println!("{}", serde_json::to_string_pretty(&report)?);
+                            eprintln!(
+                                "# semantic slice depth={} spans={} memo={} truncated={}",
+                                report.depth_reached,
+                                report.spans.len(),
+                                report.provenance.memo_hit,
+                                report.truncated
+                            );
+                        }
+                        Err(e) => {
+                            println!("{}", serde_json::to_string_pretty(&e)?);
+                            eprintln!("# semantic slice status=SEMANTIC_PARTIAL");
+                        }
                     }
                 }
+            }
+            SemanticCmd::ShardBuild {
+                path,
+                file,
+                symbol,
+                depth,
+            } => {
+                let wm = WorkspaceManager::open(&path)?;
+                let _ = build_file_artifact(wm.root(), &file)?;
+                let (shard, truncated) = ensure_shard(wm.root(), &file, &symbol, depth, 16)?;
+                println!("{}", serde_json::to_string_pretty(&shard)?);
+                eprintln!(
+                    "# semantic shard-build id={} funcs={} truncated={}",
+                    shard.shard_id,
+                    shard.functions.len(),
+                    truncated
+                );
             }
             SemanticCmd::Status { path } => {
                 let wm = WorkspaceManager::open(&path)?;

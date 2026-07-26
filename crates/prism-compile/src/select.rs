@@ -273,6 +273,123 @@ pub fn select_from_kg(
                     );
                 }
             }
+            Operator::Slice => {
+                if let Some(root) = opts.workspace.as_ref() {
+                    let max_depth = step
+                        .inputs
+                        .get("max_depth")
+                        .and_then(|v| v.as_u64())
+                        .unwrap_or(2) as u32;
+                    let max_functions = step
+                        .inputs
+                        .get("max_functions")
+                        .and_then(|v| v.as_u64())
+                        .unwrap_or(16) as usize;
+                    let max_spans = step
+                        .inputs
+                        .get("max_spans")
+                        .and_then(|v| v.as_u64())
+                        .unwrap_or(40) as usize;
+                    let residual_expand = step
+                        .inputs
+                        .get("residual_expand")
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(true);
+                    let direction = match step
+                        .inputs
+                        .get("direction")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("backward")
+                    {
+                        "forward" => prism_semantic::SliceDirection::Forward,
+                        _ => prism_semantic::SliceDirection::Backward,
+                    };
+
+                    // Prefer explicit path:line anchors; else resolve first symbol hit.
+                    let mut ran = false;
+                    for a in &anchors {
+                        if let Some((path, line)) = parse_path_line(a) {
+                            let params = prism_semantic::SliceParams {
+                                direction,
+                                max_depth,
+                                max_functions,
+                                max_spans,
+                                residual_expand,
+                                path,
+                                line: Some(line),
+                                symbol: None,
+                                snapshot_id: "adhoc".into(),
+                            };
+                            match prism_semantic::interproc_slice(root, &params) {
+                                Ok(report) => {
+                                    emit_slice_event(&report);
+                                    out.extend(fragments_from_slice(&report));
+                                    if report.truncated {
+                                        gaps_extra.push(format!(
+                                            "Slice truncated depth={} residual={}",
+                                            report.depth_reached,
+                                            report.residual.len()
+                                        ));
+                                    }
+                                    ran = true;
+                                    break;
+                                }
+                                Err(e) => {
+                                    gaps_extra.push(format!("Slice partial: {}", e.message));
+                                }
+                            }
+                        }
+                    }
+                    if !ran {
+                        for a in &anchors {
+                            let name = strip_qual(a);
+                            let hits = kg.resolve_symbol(name, None, 1)?;
+                            if let Some(hit) = hits.first() {
+                                if let Some(path) = hit.file_path.clone() {
+                                    let params = prism_semantic::SliceParams {
+                                        direction,
+                                        max_depth,
+                                        max_functions,
+                                        max_spans,
+                                        residual_expand,
+                                        path,
+                                        line: None,
+                                        symbol: hit.name.clone(),
+                                        snapshot_id: "adhoc".into(),
+                                    };
+                                    match prism_semantic::interproc_slice(root, &params) {
+                                        Ok(report) => {
+                                            emit_slice_event(&report);
+                                            out.extend(fragments_from_slice(&report));
+                                            if report.truncated {
+                                                gaps_extra.push(format!(
+                                                    "Slice truncated depth={} residual={}",
+                                                    report.depth_reached,
+                                                    report.residual.len()
+                                                ));
+                                            }
+                                            ran = true;
+                                            break;
+                                        }
+                                        Err(e) => {
+                                            gaps_extra
+                                                .push(format!("Slice partial: {}", e.message));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if !ran {
+                        gaps_extra.push(
+                            "Slice skipped: no path:line or resolvable symbol criterion"
+                                .into(),
+                        );
+                    }
+                } else {
+                    gaps_extra.push("Slice skipped: no workspace in CompileOptions".into());
+                }
+            }
             Operator::Impact => {
                 for a in &anchors {
                     let name = strip_qual(a);
@@ -449,6 +566,78 @@ fn emit_upgrade_event(report: &HybridResolveReport) {
         latency_ms: report.latency_ms,
         overlay_used: report.overlay_used,
     });
+}
+
+fn emit_slice_event(report: &prism_semantic::InterprocSliceReport) {
+    emit_index_event(&IndexEvent::SliceFinished {
+        depth_reached: report.depth_reached as u64,
+        functions_visited: report.functions_visited.len() as u64,
+        spans: report.spans.len() as u64,
+        truncated: report.truncated,
+        memo_hit: report.provenance.memo_hit,
+        latency_ms: report.latency_ms,
+        shard_build_ms: 0,
+    });
+}
+
+fn fragments_from_slice(report: &prism_semantic::InterprocSliceReport) -> Vec<CandidateFragment> {
+    let mut out = Vec::new();
+    for (i, s) in report.spans.iter().enumerate() {
+        let text = format!(
+            "// slice {}::{} L{}-{} (depth≤{})\n",
+            s.path, s.function, s.start_line, s.end_line, report.depth_reached
+        );
+        out.push(CandidateFragment {
+            id: format!(
+                "frag:slice:{}:{}:{}:{i}",
+                s.path, s.start_line, s.end_line
+            ),
+            kind: FragmentKind::Slice,
+            layer: PackLayer::Core,
+            text: text.clone(),
+            token_estimate: estimate_tokens(&text),
+            provenance: Provenance {
+                node_ids: vec![format!("{}::{}", s.path, s.function)],
+                edge_ids: vec![report.provenance.shard_id.clone()],
+                analyzer: "prism-semantic".into(),
+                tier: "T3".into(),
+            },
+            confidence: "extracted".into(),
+            why_included: "primary_frame_body".into(),
+            drop_priority: 0,
+            roles: vec!["primary_frame_body".into(), "seed_symbols".into()],
+            must_include: i == 0,
+        });
+    }
+    if !report.cfg_summary.is_empty() {
+        let t = report.cfg_summary.clone();
+        out.push(CandidateFragment {
+            id: "frag:slice:cfg_summary".into(),
+            kind: FragmentKind::Signature,
+            layer: PackLayer::Mod,
+            text: t.clone(),
+            token_estimate: estimate_tokens(&t),
+            provenance: Provenance::synthetic("slice_cfg"),
+            confidence: "extracted".into(),
+            why_included: "cfg_summary".into(),
+            drop_priority: 15,
+            roles: vec!["cfg_summary".into()],
+            must_include: false,
+        });
+    }
+    out
+}
+
+/// Parse `path:line` or `path:line in symbol` style anchors.
+fn parse_path_line(anchor: &str) -> Option<(String, u32)> {
+    // e.g. httpx/_client.py:412 in send
+    let primary = anchor.split_whitespace().next().unwrap_or(anchor);
+    let (path, line_s) = primary.rsplit_once(':')?;
+    if !path.contains('.') && !path.contains('/') {
+        return None;
+    }
+    let line: u32 = line_s.parse().ok()?;
+    Some((path.to_string(), line))
 }
 
 fn fragments_from_upgrade(report: &HybridResolveReport) -> Vec<CandidateFragment> {

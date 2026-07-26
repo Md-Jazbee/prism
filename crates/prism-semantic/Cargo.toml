@@ -1,6 +1,6 @@
 [package]
 name = "prism-semantic"
-description = "T3 intra-procedural CFG/DFG + local slice (P4 Stage A)"
+description = "T3/T4 CFG/DFG, local + inter-procedural slice (P4)"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

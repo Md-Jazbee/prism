@@ -58,6 +58,17 @@
             "uses": { "type": "array" },
             "deps": { "type": "array" }
           }
+        },
+        "calls": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["callee", "line"],
+            "properties": {
+              "callee": { "type": "string" },
+              "line": { "type": "integer", "minimum": 0 }
+            }
+          }
         }
       }
     }

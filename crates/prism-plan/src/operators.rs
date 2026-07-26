@@ -9,7 +9,7 @@ use std::fmt;
 pub enum Operator {
     ResolveSymbol,
     Expand,
-    /// Placeholder until P4 semantic slicing.
+    /// Semantic slicing (P4 Stage B — executable, depth-capped).
     Slice,
     Impact,
     DiffIntersect,
@@ -51,6 +51,7 @@ impl Operator {
                 | Operator::FindTests
                 | Operator::BudgetPack
                 | Operator::UpgradePrecision
+                | Operator::Slice
         )
     }
 

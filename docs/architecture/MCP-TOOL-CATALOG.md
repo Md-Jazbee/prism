@@ -35,7 +35,7 @@ Every successful tool response includes `confidence_note` and `latency_ms`. Fail
 | `neighbors` | ✅ |
 | `impact` | ✅ + `require_precise` gate |
 | `repo_map` | ✅ |
-| `slice` | placeholder until P4 |
+| `slice` | executable (P4 Stage B; depth-capped interproc) |
 | rename apply | ❌ dry-run only (CLI) |
 
 ## Client config example

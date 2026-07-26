@@ -1,8 +1,8 @@
 //! Python T3 CFG/DFG via tree-sitter (best-effort).
 
 use crate::artifact::{
-    CfgBlock, CfgEdge, DfgDef, DfgDep, DfgGraph, DfgUse, FunctionFlow, SemanticFileArtifact,
-    ALGO_VERSION, SEMANTIC_SCHEMA_VERSION,
+    CallSite, CfgBlock, CfgEdge, DfgDef, DfgDep, DfgGraph, DfgUse, FunctionFlow,
+    SemanticFileArtifact, ALGO_VERSION, SEMANTIC_SCHEMA_VERSION,
 };
 use tree_sitter::{Node, Parser};
 
@@ -89,6 +89,7 @@ fn extract_function(node: Node, src: &[u8]) -> Option<FunctionFlow> {
 
     let (blocks, cfg_edges) = build_cfg(&name, body_start, end_line, &lines);
     let dfg = build_dfg(body, src, body_start);
+    let calls = collect_calls(body, src);
 
     Some(FunctionFlow {
         name,
@@ -97,7 +98,40 @@ fn extract_function(node: Node, src: &[u8]) -> Option<FunctionFlow> {
         blocks,
         cfg_edges,
         dfg,
+        calls,
     })
+}
+
+fn collect_calls(body: Node, src: &[u8]) -> Vec<CallSite> {
+    let mut out = Vec::new();
+    walk_calls(body, src, &mut out);
+    out
+}
+
+fn walk_calls(node: Node, src: &[u8], out: &mut Vec<CallSite>) {
+    if node.kind() == "call" {
+        if let Some(func) = node.child_by_field_name("function") {
+            let callee = match func.kind() {
+                "identifier" => func.utf8_text(src).ok().map(|s| s.to_string()),
+                "attribute" => func
+                    .child_by_field_name("attribute")
+                    .and_then(|a| a.utf8_text(src).ok().map(|s| s.to_string())),
+                _ => None,
+            };
+            if let Some(callee) = callee {
+                if !is_keyword(&callee) {
+                    out.push(CallSite {
+                        callee,
+                        line: node.start_position().row as u32,
+                    });
+                }
+            }
+        }
+    }
+    let mut c = node.walk();
+    for child in node.children(&mut c) {
+        walk_calls(child, src, out);
+    }
 }
 
 fn build_cfg(
