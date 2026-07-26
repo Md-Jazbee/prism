@@ -621,6 +621,10 @@ pub fn select_from_kg(
 
 
 /// Pull extractive Doc/Section spans for prose roles (P12 Stage A+B).
+///
+/// Caps volume aggressively: at most one `product_thesis` must-include (README
+/// preferred) plus a few optional architecture_prose sections. Never attach
+/// code roles like `primary_symbol_definition` to doc fragments.
 fn select_doc_prose(
     kg: &SqliteKgStore,
     opts: &CompileOptions,
@@ -636,24 +640,43 @@ fn select_doc_prose(
         return Ok(Vec::new());
     }
 
-    let docs = kg.list_nodes_by_kinds(&["Doc", "Section"], 40)?;
+    // Prefer Docs; Sections are optional fillers (ORDER BY kind would starve
+    // later Docs if we mixed kinds under a small LIMIT).
+    let mut docs = kg.list_nodes_by_kinds(&["Doc"], 200)?;
+    docs.extend(kg.list_nodes_by_kinds(&["Section"], 40)?);
     let mut out = Vec::new();
     let root = opts.workspace.as_ref();
 
-    for (i, node) in docs.iter().enumerate() {
-        if !path_allowed(node.file_path.as_deref(), anchors) {
-            continue;
-        }
-        let anchored = node
-            .file_path
-            .as_ref()
-            .map(|p| crate::path_class::anchor_covers_path(anchors, p))
-            .unwrap_or(false);
-        if !anchored && !anchors.is_empty() && node.kind != "Doc" {
-            continue;
-        }
-        if !anchored && anchors.is_empty() && i > 12 {
+    // Prefer product-facing docs for thesis; score lower = better.
+    // Lexical anchors boost prose ranking but must not steal product_thesis.
+    let mut ranked: Vec<(i32, &prism_store::GraphNodeView)> = docs
+        .iter()
+        .filter(|n| path_allowed(n.file_path.as_deref(), anchors))
+        .map(|n| (doc_priority(n, anchors), n))
+        .collect();
+    ranked.sort_by(|a, b| a.0.cmp(&b.0).then_with(|| a.1.id.cmp(&b.1.id)));
+
+    let mut thesis_taken = false;
+    let mut prose_count = 0usize;
+    const MAX_PROSE: usize = 6;
+
+    for (prio, node) in ranked {
+        if prose_count >= MAX_PROSE {
             break;
+        }
+        // Skip low-priority noise unless explicitly anchored.
+        if prio > 50 && !anchors.is_empty() {
+            let anchored = node
+                .file_path
+                .as_ref()
+                .map(|p| crate::path_class::anchor_covers_path(anchors, p))
+                .unwrap_or(false);
+            if !anchored {
+                continue;
+            }
+        }
+        if prio > 80 {
+            continue;
         }
 
         let text = match (root, node.file_path.as_deref()) {
@@ -665,20 +688,28 @@ fn select_doc_prose(
                 node.file_path.as_deref().unwrap_or("")
             ),
         };
-        let role = if node.kind == "Doc" {
+
+        // Thesis is reserved for product-facing Docs (README / ADD / setup),
+        // never a random lexically-grounded architecture note.
+        let is_thesis_candidate =
+            !thesis_taken && node.kind == "Doc" && is_product_thesis_path(node.file_path.as_deref());
+        let role = if is_thesis_candidate {
             "product_thesis"
         } else {
             "architecture_prose"
         };
-        let must = matches!(plan.intent, Intent::Architecture)
-            || plan
-                .must_include
-                .iter()
-                .any(|r| r == role || r == "architecture_prose");
+        let must = is_thesis_candidate
+            && plan.must_include.iter().any(|r| r == "product_thesis");
+
+        if is_thesis_candidate {
+            thesis_taken = true;
+        }
+        prose_count += 1;
+
         out.push(CandidateFragment {
-            id: format!("frag:doc:{}:{i}", node.id),
+            id: format!("frag:doc:{}:{}", node.id, prose_count),
             kind: FragmentKind::Slice,
-            layer: if node.kind == "Doc" {
+            layer: if role == "product_thesis" {
                 PackLayer::Arch
             } else {
                 PackLayer::Core
@@ -688,16 +719,68 @@ fn select_doc_prose(
             provenance: Provenance::from_node(&node.id, "prism-extract-markdown"),
             confidence: "asserted".into(),
             why_included: role.into(),
-            drop_priority: if must { 0 } else { 25 },
-            roles: vec![
-                role.into(),
-                "architecture_prose".into(),
-                "primary_symbol_definition".into(),
-            ],
+            drop_priority: if must { 0 } else { 20 + prose_count as u32 },
+            roles: vec![role.into()],
             must_include: must,
         });
     }
     Ok(out)
+}
+
+/// Paths eligible for the single `product_thesis` slot (ACC-1).
+fn is_product_thesis_path(path: Option<&str>) -> bool {
+    let Some(path) = path else {
+        return false;
+    };
+    let lower = path.replace('\\', "/").to_ascii_lowercase();
+    lower == "readme.md"
+        || lower == "agents.md"
+        || lower.contains("architecture-design-document")
+        || lower.contains("product-setup")
+}
+
+fn doc_priority(node: &prism_store::GraphNodeView, anchors: &[String]) -> i32 {
+    let path = node.file_path.as_deref().unwrap_or("").replace('\\', "/");
+    let lower = path.to_ascii_lowercase();
+    let is_doc = node.kind == "Doc";
+    // Product thesis candidates outrank lexical anchors so README wins ACC-1.
+    if is_doc && lower == "readme.md" {
+        return 1;
+    }
+    if is_doc && lower == "agents.md" {
+        return 2;
+    }
+    if is_doc
+        && (lower.contains("architecture-design-document") || lower.contains("product-setup"))
+    {
+        return 3;
+    }
+    if anchors
+        .iter()
+        .any(|a| crate::path_class::anchor_covers_path(std::slice::from_ref(a), &path))
+    {
+        return 8;
+    }
+    if is_doc && lower.ends_with("/readme.md") {
+        return 12;
+    }
+    // Prefer whole-doc spans over many tiny sections of the same file.
+    if lower == "readme.md" || lower == "agents.md" {
+        return 18;
+    }
+    if lower.starts_with("docs/") && node.kind == "Section" {
+        return 25;
+    }
+    if lower.starts_with("docs/") && is_doc {
+        return 20;
+    }
+    if node.kind == "Section" {
+        return 40;
+    }
+    if is_doc {
+        return 30;
+    }
+    90
 }
 
 fn read_doc_excerpt(

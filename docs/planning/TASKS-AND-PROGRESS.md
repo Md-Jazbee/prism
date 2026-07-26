@@ -1060,8 +1060,8 @@ flowchart LR
 | # | Item | Blocks |
 |---|---|---|
 | 1 | Live five-arm adjudication vs Graphify (pinned graph) | ACC-1, ACC-5, ACC-7 |
-| 2 | Dual-review community label acceptance ≥70% | ACC-4 labels |
-| 3 | Point MCP/`prism` on PATH at release binary built after Louvain | operational |
+| 2 | Dual-review community label acceptance ≥70% (worksheet ready) | ACC-4 labels |
+| 3 | Restart Cursor MCP after `cargo build -p prism-cli --release` | operational |
 
 ---
 
@@ -1151,3 +1151,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P12 Stages B–D landed (code + scaffold):** honest `gaps[]` + ACC-2 invariant, path-class ACC-6, analyzer `p12-doc-v1` re-extract, hub ranking v2 denylist, DQ001–025, `five_arm.py`, adjudication protocol, p12-phase-gate. Commit `0e8893b`. **Live ACC-1…ACC-7 gate still open**; Leiden + ACC-3 lexical seeds deferred. |
 | 2026-07-26 | **P12 follow-up:** ACC-3 lexical seed grounding (`score_anchor` / `lexical_seed_search` / `ground_plan_seeds`) + ranked `SCOPE_UNRESOLVED.candidates`; planted-secret docs fixture; board/plan checkboxes updated. Leiden + live five-arm remain open. |
 | 2026-07-26 | **P12 closeout (code):** deterministic Louvain communities + bridges; G4 doc-edit incremental test; ACC-3 AG001–020 sample PASS (1.0); five-arm ablations + [P12-FIVE-ARM-REPORT.md](../eval/P12-FIVE-ARM-REPORT.md); reindex yields Doc/Section nodes. **Live ACC-1/5/7 gate remains OPEN.** |
+| 2026-07-26 | **P12 live-pack polish:** doc prose cap + README `product_thesis` (no lexical steal); co-directory edges → live `louvain_v1+resolved_degree_hubs`; ACC-1 pack-answerability proxy 96%; community-label dual-review worksheet (n=20). Gate still OPEN for live ACC-1/5/7. |

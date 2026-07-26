@@ -1,0 +1,364 @@
+{
+  "suite": "p12-acc1-pack-answerability-proxy",
+  "status": "PROXY",
+  "note": "Does not close live-judged ACC-1 gate",
+  "generated_at": "2026-07-26T18:33:52Z",
+  "prism": "/Users/jasbeermohammad/AllFiles/AI-lenarning/AI-P2/target/release/prism",
+  "budget_tokens": 4000,
+  "n": 25,
+  "answerable": 24,
+  "answerable_rate": 0.96,
+  "all_spans": 17,
+  "all_spans_rate": 0.68,
+  "elapsed_s": 0.67,
+  "results": [
+    {
+      "id": "DQ001",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "README.md",
+        "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2194,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ002",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "docs/architecture/MCP-TOOL-CATALOG.md",
+        "README.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2200,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ003",
+      "ok": true,
+      "all_spans": false,
+      "refusal": null,
+      "span_hits": [
+        "AGENTS.md"
+      ],
+      "span_misses": [
+        "schemas/agent-workflow/v1/catalog.json"
+      ],
+      "forbidden_hits": [],
+      "tokens_used": 2034,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ004",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "README.md",
+        "docs/architecture/PRODUCT-SETUP.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2734,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ005",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2034,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ006",
+      "ok": true,
+      "all_spans": false,
+      "refusal": null,
+      "span_hits": [
+        "AGENTS.md"
+      ],
+      "span_misses": [
+        "docs/architecture/MCP-TOOL-CATALOG.md"
+      ],
+      "forbidden_hits": [],
+      "tokens_used": 2042,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ007",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "README.md",
+        "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2038,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ008",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2034,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ009",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "README.md",
+        "docs/PRODUCT-SETUP.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2034,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ010",
+      "ok": false,
+      "refusal": "scope_unresolved",
+      "span_hits": [],
+      "span_misses": [
+        "README.md"
+      ],
+      "forbidden_hits": [],
+      "tokens_used": null
+    },
+    {
+      "id": "DQ011",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "AGENTS.md",
+        "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2034,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ012",
+      "ok": true,
+      "all_spans": false,
+      "refusal": null,
+      "span_hits": [
+        "AGENTS.md"
+      ],
+      "span_misses": [
+        ".cursor/rules/prism-compile-first.mdc"
+      ],
+      "forbidden_hits": [],
+      "tokens_used": 2741,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ013",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2034,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ014",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "README.md",
+        "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2034,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ015",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md",
+        "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2034,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ016",
+      "ok": true,
+      "all_spans": false,
+      "refusal": null,
+      "span_hits": [
+        "AGENTS.md"
+      ],
+      "span_misses": [
+        "docs/architecture/MCP-TOOL-CATALOG.md"
+      ],
+      "forbidden_hits": [],
+      "tokens_used": 3173,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ017",
+      "ok": true,
+      "all_spans": false,
+      "refusal": null,
+      "span_hits": [
+        "README.md"
+      ],
+      "span_misses": [
+        "docs/contributing/plugin-guide.md"
+      ],
+      "forbidden_hits": [],
+      "tokens_used": 2038,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ018",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "README.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2221,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ019",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "README.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2034,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ020",
+      "ok": true,
+      "all_spans": false,
+      "refusal": null,
+      "span_hits": [
+        "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+      ],
+      "span_misses": [
+        "docs/REPO-FEATURE-SUMMARY-AND-TOKEN-COMPARISON.md"
+      ],
+      "forbidden_hits": [],
+      "tokens_used": 2034,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ021",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "AGENTS.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2034,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ022",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "AGENTS.md",
+        "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2034,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ023",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "docs/planning/PLANNING-AND-IMPLEMENTATION.md",
+        "README.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2034,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ024",
+      "ok": true,
+      "all_spans": true,
+      "refusal": null,
+      "span_hits": [
+        "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+      ],
+      "span_misses": [],
+      "forbidden_hits": [],
+      "tokens_used": 2034,
+      "thesis_role": "product_thesis"
+    },
+    {
+      "id": "DQ025",
+      "ok": true,
+      "all_spans": false,
+      "refusal": null,
+      "span_hits": [
+        "README.md"
+      ],
+      "span_misses": [
+        "docs/REPO-FEATURE-SUMMARY-AND-TOKEN-COMPARISON.md",
+        "docs/eval/PUBLIC-BENCHMARK-REPORT.md"
+      ],
+      "forbidden_hits": [],
+      "tokens_used": 2034,
+      "thesis_role": "product_thesis"
+    }
+  ]
+}

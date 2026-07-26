@@ -1,8 +1,9 @@
 //! Semantic communities + hub detection (P1 Stage D + P12 Stage C).
 //!
 //! Algorithm `louvain_v1+resolved_degree_hubs`: deterministic Louvain over a
-//! file-level graph (IMPORTS / CALLS / DESCRIBES), with path-prefix fallback
-//! when the structural graph is too sparse. Hubs exclude unresolved/builtins.
+//! file-level graph (IMPORTS / CALLS / DESCRIBES / MENTIONS / CONTAINS plus
+//! soft co-directory edges), with path-prefix fallback when the structural
+//! graph is too sparse. Hubs exclude unresolved/builtins.
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -136,7 +137,7 @@ impl SqliteKgStore {
         let hubs = self.degree_hubs_filtered(hub_limit)?;
         let mut notes = vec![
             if used_louvain {
-                "Communities from deterministic Louvain on file-level IMPORTS/CALLS/DESCRIBES (seeded by sorted file id)."
+                "Communities from deterministic Louvain on file-level edges (IMPORTS/CALLS/DESCRIBES/MENTIONS/CONTAINS + co-directory; seeded by sorted file id)."
                     .into()
             } else {
                 "Communities fell back to directory prefixes (structural graph too sparse for Louvain)."
@@ -197,7 +198,7 @@ impl SqliteKgStore {
             }
         }
 
-        let mut adj: HashMap<String, HashMap<String, f64>> = HashMap::new();
+        let mut adj: FileAdj = HashMap::new();
         for f in &files {
             adj.insert(f.clone(), HashMap::new());
         }
@@ -207,7 +208,7 @@ impl SqliteKgStore {
              FROM edges e
              JOIN nodes ns ON ns.id = e.src
              JOIN nodes nd ON nd.id = e.dst
-             WHERE e.kind IN ('IMPORTS', 'CALLS', 'DESCRIBES', 'MENTIONS')
+             WHERE e.kind IN ('IMPORTS', 'CALLS', 'DESCRIBES', 'MENTIONS', 'CONTAINS')
                AND ns.file_path IS NOT NULL AND nd.file_path IS NOT NULL",
         )?;
         let rows = stmt.query_map([], |r| {
@@ -229,10 +230,34 @@ impl SqliteKgStore {
                 "IMPORTS" | "CALLS" => 1.0,
                 "DESCRIBES" => 0.5,
                 "MENTIONS" => 0.25,
+                "CONTAINS" => 0.35,
                 _ => 0.1,
             };
             *adj.entry(src.clone()).or_default().entry(dst.clone()).or_insert(0.0) += w;
             *adj.entry(dst).or_default().entry(src).or_insert(0.0) += w;
+        }
+
+        // Soft co-directory edges so Louvain has a connected graph when most
+        // CALLS target unresolved: builtins (common at T1).
+        let mut by_prefix: HashMap<String, Vec<String>> = HashMap::new();
+        for f in &files {
+            by_prefix
+                .entry(path_prefix(f))
+                .or_default()
+                .push(f.clone());
+        }
+        for members in by_prefix.values() {
+            if members.len() < 2 {
+                continue;
+            }
+            // Connect consecutive sorted members (path) — O(n) spanning tree per prefix.
+            let mut sorted = members.clone();
+            sorted.sort();
+            for w in sorted.windows(2) {
+                let (a, b) = (&w[0], &w[1]);
+                *adj.entry(a.clone()).or_default().entry(b.clone()).or_insert(0.0) += 0.2;
+                *adj.entry(b.clone()).or_default().entry(a.clone()).or_insert(0.0) += 0.2;
+            }
         }
 
         let mut file_list: Vec<String> = files.into_iter().collect();
