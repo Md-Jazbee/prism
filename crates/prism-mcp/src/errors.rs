@@ -1,4 +1,4 @@
-//! MCP / product error model (P1–P2).
+//! MCP / product error model (P1–P3).
 
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -13,6 +13,8 @@ pub enum ToolErrorCode {
     BudgetExceeded,
     /// Index missing or stale relative to expected snapshot.
     IndexUnavailable,
+    /// Precise (T2) overlay required for this claim / operation (P3).
+    PrecisionRequired,
     /// Tool arguments invalid.
     InvalidArgs,
     /// Internal failure.
@@ -64,6 +66,17 @@ impl ToolError {
             code: ToolErrorCode::InvalidArgs,
             message: message.into(),
             hint: None,
+        }
+    }
+
+    pub fn precision_required(message: impl Into<String>) -> Self {
+        Self {
+            code: ToolErrorCode::PrecisionRequired,
+            message: message.into(),
+            hint: Some(
+                "Run a language indexer → PreciseIndex, then `prism precise import`. Heuristic T1 results remain available but must stay labeled."
+                    .into(),
+            ),
         }
     }
 }

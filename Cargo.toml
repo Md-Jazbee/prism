@@ -12,6 +12,7 @@ members = [
     "crates/prism-mcp",
     "crates/prism-plan",
     "crates/prism-compile",
+    "crates/prism-precise",
 ]
 default-members = ["crates/prism-cli"]
 
@@ -49,3 +50,4 @@ prism-extract-rust = { path = "crates/prism-extract-rust" }
 prism-mcp = { path = "crates/prism-mcp" }
 prism-plan = { path = "crates/prism-plan" }
 prism-compile = { path = "crates/prism-compile" }
+prism-precise = { path = "crates/prism-precise" }

@@ -1,0 +1,5 @@
+{
+  "t1": { "precision": 0.5, "recall": 0.5, "note": "missing_fn TP; greet unresolved FP vs oracle" },
+  "t2": { "precision": 1.0, "recall": 1.0, "note": "greet resolved + missing_fn still unresolved correctly" },
+  "gate": "T2 precision and recall must both exceed T1 on this fixture"
+}

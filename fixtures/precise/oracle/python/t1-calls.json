@@ -1,0 +1,14 @@
+[
+  {
+    "src": "sym:app.py:function:main:80",
+    "dst": "unresolved:greet",
+    "file_path": "app.py",
+    "start_byte": 100
+  },
+  {
+    "src": "sym:app.py:function:main:80",
+    "dst": "unresolved:missing_fn",
+    "file_path": "app.py",
+    "start_byte": 120
+  }
+]

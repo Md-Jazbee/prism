@@ -16,5 +16,5 @@ pub use facts::{
 pub use identity::{FileId, RepositoryId, SnapshotId};
 pub use versions::{
     EVENTS_SCHEMA_VERSION, FACT_SCHEMA_VERSION, META_SCHEMA_VERSION, PACK_SCHEMA_VERSION,
-    PLAN_SCHEMA_VERSION,
+    PLAN_SCHEMA_VERSION, PRECISE_INDEX_SCHEMA_VERSION,
 };

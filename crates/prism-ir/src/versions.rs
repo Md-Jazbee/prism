@@ -14,3 +14,6 @@ pub const PLAN_SCHEMA_VERSION: &str = "0.0.1";
 
 /// `schemas/evidence-pack/v0` mirror.
 pub const PACK_SCHEMA_VERSION: &str = "0.0.1";
+
+/// `schemas/precise-index/v0` mirror.
+pub const PRECISE_INDEX_SCHEMA_VERSION: &str = "0.0.1";

@@ -1,4 +1,4 @@
-//! `prism` CLI — Phase 2 (`index` + query + `query plan` + `compile`).
+//! `prism` CLI — Phase 3 (`index` + query + plan + compile + precise import).
 
 use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
@@ -6,6 +6,10 @@ use prism_compile::CompileOutcome;
 use prism_core::{IncrementalIndexer, IndexOptions, WorkspaceManager};
 use prism_obs::{emit_index_event, IndexEvent};
 use prism_plan::{plan_query, Intent, PlanHints, PlanOutcome};
+use prism_precise::{
+    import_precise_index, load_precise_index, precision_required, read_manifest,
+    score_call_resolution, CallEdge, PrecisionGate,
+};
 use prism_store::{parse_edge_kinds, EdgeDirection, SqliteKgStore, SqliteMetaStore};
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -17,7 +21,7 @@ use tracing_subscriber::EnvFilter;
     name = "prism",
     version,
     about = "Prism — Repository Intelligence Platform",
-    long_about = "Pre-LLM repository understanding: index → knowledge graph → context compilation.\nPhase 2: query plans + Evidence Pack compile (`prism compile`)."
+    long_about = "Pre-LLM repository understanding: index → knowledge graph → context compilation.\nPhase 3: precise tier overlay (`prism precise import`)."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -84,6 +88,36 @@ enum Commands {
         /// Workspace root that already has `.prism/` index.
         #[arg(default_value = ".")]
         path: PathBuf,
+    },
+    /// Precise tier (T2) — import SCIP/PreciseIndex overlays (P3 Stage A).
+    Precise {
+        #[command(subcommand)]
+        cmd: PreciseCmd,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+enum PreciseCmd {
+    /// Import a PreciseIndex JSON and refine heuristic CALLS/REFERENCES.
+    Import {
+        /// Path to PreciseIndex JSON (`schemas/precise-index/v0`).
+        index: PathBuf,
+        #[arg(long, default_value = ".")]
+        workspace: PathBuf,
+    },
+    /// Show attached precise overlay manifest (or PRECISION_REQUIRED).
+    Status {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
+    /// Score T1 vs T2 call resolution against an oracle fixture.
+    Score {
+        #[arg(long)]
+        t1: PathBuf,
+        #[arg(long)]
+        oracle: PathBuf,
+        #[arg(long)]
+        t2: PathBuf,
     },
 }
 
@@ -236,12 +270,13 @@ fn main() -> Result<()> {
             println!("dirty: {}", id.snapshot.dirty);
             println!("tree_fingerprint: {}", id.snapshot.tree_fingerprint);
             println!(
-                "schema: meta={} fact={} events={} plan={} pack={}",
+                "schema: meta={} fact={} events={} plan={} pack={} precise={}",
                 prism_ir::META_SCHEMA_VERSION,
                 prism_ir::FACT_SCHEMA_VERSION,
                 prism_ir::EVENTS_SCHEMA_VERSION,
                 prism_ir::PLAN_SCHEMA_VERSION,
-                prism_ir::PACK_SCHEMA_VERSION
+                prism_ir::PACK_SCHEMA_VERSION,
+                prism_ir::PRECISE_INDEX_SCHEMA_VERSION
             );
         }
         Commands::IndexStatus { path } => {
@@ -491,6 +526,82 @@ fn main() -> Result<()> {
                 .with_context(|| format!("open workspace {}", path.display()))?;
             prism_mcp::serve_stdio(wm.root().to_path_buf())?;
         }
+        Commands::Precise { cmd } => match cmd {
+            PreciseCmd::Import { index, workspace } => {
+                let wm = WorkspaceManager::open(&workspace)
+                    .with_context(|| format!("open workspace {}", workspace.display()))?;
+                let id = wm.identity()?;
+                let (manifest, stats) = import_precise_index(
+                    wm.root(),
+                    &index,
+                    id.snapshot.git_commit.clone(),
+                    Some(id.snapshot.tree_fingerprint.clone()),
+                )?;
+                println!("{}", serde_json::to_string_pretty(&manifest)?);
+                eprintln!(
+                    "# precise import language={} symbols={} edges={} refined={} inserted={}",
+                    manifest.language,
+                    manifest.symbols,
+                    manifest.edges,
+                    stats.refined,
+                    stats.inserted
+                );
+            }
+            PreciseCmd::Status { path } => {
+                let wm = WorkspaceManager::open(&path)?;
+                if let Some(m) = read_manifest(wm.root())? {
+                    println!("{}", serde_json::to_string_pretty(&m)?);
+                    eprintln!("# precise status=ok analyzer={}", m.analyzer);
+                } else {
+                    let err = precision_required(
+                        PrecisionGate::OverlayPresent,
+                        false,
+                        false,
+                        "no precise (T2) overlay attached",
+                    )
+                    .unwrap_err();
+                    println!("{}", serde_json::to_string_pretty(&err)?);
+                    eprintln!("# precise status=PRECISION_REQUIRED");
+                }
+            }
+            PreciseCmd::Score { t1, oracle, t2 } => {
+                let t1_edges: Vec<CallEdge> = serde_json::from_str(
+                    &std::fs::read_to_string(&t1)
+                        .with_context(|| format!("read {}", t1.display()))?,
+                )?;
+                let oracle_edges: Vec<CallEdge> = serde_json::from_str(
+                    &std::fs::read_to_string(&oracle)
+                        .with_context(|| format!("read {}", oracle.display()))?,
+                )?;
+                let index = load_precise_index(&t2)?;
+                let t2_edges: Vec<CallEdge> = index
+                    .edges
+                    .iter()
+                    .filter(|e| e.kind == "CALLS")
+                    .map(|e| CallEdge {
+                        src: e.src.clone(),
+                        dst: e.dst.clone(),
+                        file_path: e.file_path.clone(),
+                        start_byte: e.span.as_ref().map(|s| s.start_byte),
+                    })
+                    .collect();
+                let t1_score = score_call_resolution(&t1_edges, &oracle_edges);
+                let t2_score = score_call_resolution(&t2_edges, &oracle_edges);
+                let report = serde_json::json!({
+                    "t1": t1_score,
+                    "t2": t2_score,
+                    "precision_delta": t2_score.precision - t1_score.precision,
+                    "recall_delta": t2_score.recall - t1_score.recall,
+                });
+                println!("{}", serde_json::to_string_pretty(&report)?);
+                eprintln!(
+                    "# precise score t1_p={:.2} t2_p={:.2} delta={:.2}",
+                    t1_score.precision,
+                    t2_score.precision,
+                    t2_score.precision - t1_score.precision
+                );
+            }
+        },
     }
     Ok(())
 }

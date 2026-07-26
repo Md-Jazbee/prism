@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/precise-index/v0/precise-index.schema.json",
+  "title": "Prism PreciseIndex v0",
+  "description": "SCIP/LSP-neutral interchange for T2 defs/refs. SCIP protobuf maps into this shape (see docs/architecture/ID-MAPPING.md).",
+  "type": "object",
+  "required": ["schema_version", "language", "analyzer", "symbols", "edges"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string", "const": "0.0.1" },
+    "language": { "type": "string", "minLength": 1 },
+    "analyzer": { "type": "string", "minLength": 1 },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "git_commit": { "type": ["string", "null"] },
+        "tree_fingerprint": { "type": ["string", "null"] }
+      }
+    },
+    "symbols": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/symbol" }
+    },
+    "edges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/edge" }
+    }
+  },
+  "$defs": {
+    "span": {
+      "type": "object",
+      "required": ["start_byte", "end_byte", "start_line", "start_col", "end_line", "end_col"],
+      "additionalProperties": false,
+      "properties": {
+        "start_byte": { "type": "integer", "minimum": 0 },
+        "end_byte": { "type": "integer", "minimum": 0 },
+        "start_line": { "type": "integer", "minimum": 0 },
+        "start_col": { "type": "integer", "minimum": 0 },
+        "end_line": { "type": "integer", "minimum": 0 },
+        "end_col": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "symbol": {
+      "type": "object",
+      "required": ["id", "name", "kind", "file_path"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "kind": { "type": "string", "minLength": 1 },
+        "file_path": { "type": "string", "minLength": 1 },
+        "span": { "$ref": "#/$defs/span" },
+        "scip_symbol": { "type": "string" }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": ["kind", "src", "dst", "file_path"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["CALLS", "REFERENCES", "DEFINES", "IMPORTS", "EXTENDS", "IMPLEMENTS"]
+        },
+        "src": { "type": "string", "minLength": 1 },
+        "dst": { "type": "string", "minLength": 1 },
+        "file_path": { "type": "string", "minLength": 1 },
+        "span": { "$ref": "#/$defs/span" },
+        "scip_symbol": { "type": "string" }
+      }
+    }
+  }
+}

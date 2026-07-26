@@ -820,9 +820,9 @@ Bring external precise indexes into Prism’s identity system without requiring 
 
 #### Exit / acceptance
 
-- [ ] Import path can attach precise defs/refs for at least one language end-to-end in design  
-- [ ] Fixtures define precision/recall measurement vs oracle  
-- [ ] Failure mode when SCIP missing is clear (`PRECISION_REQUIRED`) |
+- [x] Import path can attach precise defs/refs for at least one language end-to-end in design  
+- [x] Fixtures define precision/recall measurement vs oracle  
+- [x] Failure mode when SCIP missing is clear (`PRECISION_REQUIRED`) |
 
 ---
 

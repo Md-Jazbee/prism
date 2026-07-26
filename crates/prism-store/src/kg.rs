@@ -96,6 +96,106 @@ impl SqliteKgStore {
         )?;
         Ok(n)
     }
+
+    /// Lightweight edge rows for a file (P3 overlay join).
+    pub fn edges_for_file(&self, file_path: &str) -> Result<Vec<crate::query::GraphEdgeView>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, kind, src, dst, file_path, confidence FROM edges
+             WHERE file_path = ?1 ORDER BY id",
+        )?;
+        let rows = stmt.query_map(params![file_path], |r| {
+            Ok(crate::query::GraphEdgeView {
+                id: r.get(0)?,
+                kind: r.get(1)?,
+                src: r.get(2)?,
+                dst: r.get(3)?,
+                file_path: r.get(4)?,
+                confidence: r.get(5)?,
+            })
+        })?;
+        let mut out = Vec::new();
+        for row in rows {
+            out.push(row?);
+        }
+        Ok(out)
+    }
+
+    /// Load a full [`FactEdge`] from `attrs_json` when present.
+    pub fn load_fact_edge(&self, edge_id: &str) -> Result<Option<prism_ir::FactEdge>> {
+        let mut stmt = self
+            .conn
+            .prepare("SELECT attrs_json FROM edges WHERE id = ?1")?;
+        match stmt.query_row(params![edge_id], |r| r.get::<_, String>(0)) {
+            Ok(attrs) => {
+                let edge: prism_ir::FactEdge = serde_json::from_str(&attrs).with_context(|| {
+                    format!("deserialize FactEdge attrs for {edge_id}")
+                })?;
+                Ok(Some(edge))
+            }
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e.into()),
+        }
+    }
+
+    /// Upsert overlay nodes without wiping the file subgraph (P3 T2 attach).
+    pub fn upsert_overlay_nodes(&mut self, nodes: &[prism_ir::FactNode]) -> Result<()> {
+        for node in nodes {
+            let attrs = serde_json::to_string(node).unwrap_or_else(|_| "{}".into());
+            self.conn.execute(
+                "INSERT INTO nodes(id, kind, name, file_path, attrs_json) VALUES (?1, ?2, ?3, ?4, ?5)
+                 ON CONFLICT(id) DO UPDATE SET
+                   kind = excluded.kind,
+                   name = excluded.name,
+                   file_path = COALESCE(excluded.file_path, nodes.file_path),
+                   attrs_json = excluded.attrs_json",
+                params![
+                    node.id,
+                    node.kind.as_str(),
+                    node.name,
+                    node.file_path,
+                    attrs
+                ],
+            )?;
+        }
+        Ok(())
+    }
+
+    /// Upsert a single overlay / refined edge (P3).
+    pub fn upsert_overlay_edge(&mut self, edge: &prism_ir::FactEdge) -> Result<()> {
+        let attrs = serde_json::to_string(edge).unwrap_or_else(|_| "{}".into());
+        self.conn.execute(
+            "INSERT INTO edges(id, kind, src, dst, file_path, confidence, attrs_json)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+             ON CONFLICT(id) DO UPDATE SET
+               kind = excluded.kind,
+               src = excluded.src,
+               dst = excluded.dst,
+               file_path = excluded.file_path,
+               confidence = excluded.confidence,
+               attrs_json = excluded.attrs_json",
+            params![
+                edge.id,
+                edge.kind.as_str(),
+                edge.src,
+                edge.dst,
+                edge.file_path,
+                edge.confidence.as_str(),
+                attrs,
+            ],
+        )?;
+        Ok(())
+    }
+
+    /// True if any edge touching `node_id` has confidence=precise.
+    pub fn symbol_has_precise_edges(&self, node_id: &str) -> Result<bool> {
+        let n: u64 = self.conn.query_row(
+            "SELECT COUNT(*) FROM edges
+             WHERE confidence = 'precise' AND (src = ?1 OR dst = ?1)",
+            params![node_id],
+            |r| r.get(0),
+        )?;
+        Ok(n > 0)
+    }
 }
 
 impl KgStore for SqliteKgStore {

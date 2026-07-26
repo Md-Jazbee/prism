@@ -1,0 +1,86 @@
+{
+  "schema_version": "0.0.1",
+  "language": "python",
+  "analyzer": "precise-fixture@0.0.1",
+  "snapshot": {
+    "git_commit": null,
+    "tree_fingerprint": null
+  },
+  "symbols": [
+    {
+      "id": "sym:lib.py:function:greet:0",
+      "name": "greet",
+      "kind": "function",
+      "file_path": "lib.py",
+      "span": {
+        "start_byte": 0,
+        "end_byte": 40,
+        "start_line": 3,
+        "start_col": 0,
+        "end_line": 4,
+        "end_col": 16
+      },
+      "scip_symbol": "scip-python python . . lib/greet()."
+    },
+    {
+      "id": "sym:app.py:function:main:80",
+      "name": "main",
+      "kind": "function",
+      "file_path": "app.py",
+      "span": {
+        "start_byte": 80,
+        "end_byte": 140,
+        "start_line": 4,
+        "start_col": 0,
+        "end_line": 6,
+        "end_col": 16
+      },
+      "scip_symbol": "scip-python python . . app/main()."
+    }
+  ],
+  "edges": [
+    {
+      "kind": "CALLS",
+      "src": "sym:app.py:function:main:80",
+      "dst": "sym:lib.py:function:greet:0",
+      "file_path": "app.py",
+      "span": {
+        "start_byte": 100,
+        "end_byte": 105,
+        "start_line": 5,
+        "start_col": 4,
+        "end_line": 5,
+        "end_col": 9
+      },
+      "scip_symbol": "scip-python python . . lib/greet()."
+    },
+    {
+      "kind": "CALLS",
+      "src": "sym:app.py:function:main:80",
+      "dst": "unresolved:missing_fn",
+      "file_path": "app.py",
+      "span": {
+        "start_byte": 120,
+        "end_byte": 130,
+        "start_line": 6,
+        "start_col": 4,
+        "end_line": 6,
+        "end_col": 14
+      }
+    },
+    {
+      "kind": "REFERENCES",
+      "src": "sym:app.py:function:main:80",
+      "dst": "sym:lib.py:function:greet:0",
+      "file_path": "app.py",
+      "span": {
+        "start_byte": 100,
+        "end_byte": 105,
+        "start_line": 5,
+        "start_col": 4,
+        "end_line": 5,
+        "end_col": 9
+      }
+    }
+  ]
+}
