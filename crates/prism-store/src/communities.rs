@@ -439,10 +439,7 @@ impl SqliteKgStore {
 }
 
 /// Deterministic Louvain (single-level + aggregation) with nodes processed in sorted order.
-fn louvain_cluster(
-    nodes: &[String],
-    adj: &HashMap<String, HashMap<String, f64>>,
-) -> HashMap<String, usize> {
+fn louvain_cluster(nodes: &[String], adj: &FileAdj) -> HashMap<String, usize> {
     let mut membership: HashMap<String, usize> = nodes
         .iter()
         .enumerate()
@@ -518,7 +515,7 @@ fn louvain_cluster(
 fn community_strength(
     comm: usize,
     membership: &HashMap<String, usize>,
-    adj: &HashMap<String, HashMap<String, f64>>,
+    adj: &FileAdj,
 ) -> f64 {
     let mut s = 0.0;
     for (n, &c) in membership {
