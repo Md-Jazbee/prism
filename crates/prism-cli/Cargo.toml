@@ -24,3 +24,4 @@ prism-mcp = { workspace = true }
 prism-plan = { workspace = true }
 prism-compile = { workspace = true }
 prism-precise = { workspace = true }
+prism-semantic = { workspace = true }

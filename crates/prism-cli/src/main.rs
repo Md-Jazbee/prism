@@ -1,4 +1,4 @@
-//! `prism` CLI — Phase 3 (`index` + query + plan + compile + precise import).
+//! `prism` CLI — Phase 4 (`index` + query + plan + compile + precise + semantic).
 
 use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
@@ -9,6 +9,10 @@ use prism_plan::{plan_query, Intent, PlanHints, PlanOutcome};
 use prism_precise::{
     ambiguity_index, import_precise_index, load_precise_index, precision_required, read_manifest,
     rename_dry_run, score_call_resolution, CallEdge, PrecisionGate,
+};
+use prism_semantic::{
+    analyze_python_file, build_file_artifact, build_workspace_python, load_file_artifact,
+    local_slice, read_manifest as read_semantic_manifest, SliceCriterion,
 };
 use prism_store::{parse_edge_kinds, EdgeDirection, SqliteKgStore, SqliteMetaStore};
 use std::path::PathBuf;
@@ -94,6 +98,11 @@ enum Commands {
         #[command(subcommand)]
         cmd: PreciseCmd,
     },
+    /// Semantic tier (T3) — intra-proc CFG/DFG + local slice (P4 Stage A).
+    Semantic {
+        #[command(subcommand)]
+        cmd: SemanticCmd,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -136,6 +145,37 @@ enum PreciseCmd {
         /// Bypass PRECISION_REQUIRED; results stay labeled heuristic.
         #[arg(long)]
         allow_heuristic: bool,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+enum SemanticCmd {
+    /// Build T3 CFG/DFG artifacts for Python files under the workspace.
+    Build {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        /// Optional single repo-relative file.
+        #[arg(long)]
+        file: Option<String>,
+    },
+    /// Local backward slice for a line or symbol criterion.
+    Slice {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        /// Repo-relative source path.
+        #[arg(long)]
+        file: String,
+        /// 0-based line criterion (mutually exclusive with --symbol).
+        #[arg(long)]
+        line: Option<u32>,
+        /// Function name criterion.
+        #[arg(long)]
+        symbol: Option<String>,
+    },
+    /// Show semantic manifest (or note if missing).
+    Status {
+        #[arg(default_value = ".")]
+        path: PathBuf,
     },
 }
 
@@ -665,6 +705,88 @@ fn main() -> Result<()> {
                         println!("{}", serde_json::to_string_pretty(&e)?);
                         eprintln!("# rename-dry-run status=PRECISION_REQUIRED");
                     }
+                }
+            }
+        },
+        Commands::Semantic { cmd } => match cmd {
+            SemanticCmd::Build { path, file } => {
+                let wm = WorkspaceManager::open(&path)?;
+                if let Some(rel) = file {
+                    let art = build_file_artifact(wm.root(), &rel)?;
+                    println!("{}", serde_json::to_string_pretty(&art)?);
+                    eprintln!(
+                        "# semantic build file={} functions={} notes={}",
+                        art.path,
+                        art.functions.len(),
+                        art.notes.len()
+                    );
+                } else {
+                    let manifest = build_workspace_python(wm.root())?;
+                    println!("{}", serde_json::to_string_pretty(&manifest)?);
+                    eprintln!(
+                        "# semantic build files={} functions={}",
+                        manifest.files, manifest.functions
+                    );
+                }
+            }
+            SemanticCmd::Slice {
+                path,
+                file,
+                line,
+                symbol,
+            } => {
+                let wm = WorkspaceManager::open(&path)?;
+                let art = match load_file_artifact(wm.root(), &file)? {
+                    Some(a) => a,
+                    None => {
+                        // analyze on the fly
+                        let abs = wm.root().join(&file);
+                        let source = std::fs::read_to_string(&abs)
+                            .with_context(|| format!("read {}", abs.display()))?;
+                        analyze_python_file(&file, &source, None)
+                    }
+                };
+                let criterion = match (line, symbol) {
+                    (Some(l), None) => SliceCriterion::Line {
+                        path: file.clone(),
+                        line: l,
+                    },
+                    (None, Some(s)) => SliceCriterion::Symbol {
+                        path: file.clone(),
+                        symbol: s,
+                    },
+                    _ => bail!("provide exactly one of --line or --symbol"),
+                };
+                match local_slice(&art, &criterion) {
+                    Ok(report) => {
+                        println!("{}", serde_json::to_string_pretty(&report)?);
+                        eprintln!(
+                            "# semantic slice function={} spans={} criterion_line={}",
+                            report.function,
+                            report.spans.len(),
+                            report.criterion_line
+                        );
+                    }
+                    Err(e) => {
+                        println!("{}", serde_json::to_string_pretty(&e)?);
+                        eprintln!("# semantic slice status=SEMANTIC_PARTIAL");
+                    }
+                }
+            }
+            SemanticCmd::Status { path } => {
+                let wm = WorkspaceManager::open(&path)?;
+                if let Some(m) = read_semantic_manifest(wm.root())? {
+                    println!("{}", serde_json::to_string_pretty(&m)?);
+                    eprintln!("# semantic status=ok algo={}", m.algo_version);
+                } else {
+                    println!(
+                        "{}",
+                        serde_json::json!({
+                            "code": "SEMANTIC_PARTIAL",
+                            "message": "no semantic artifacts — run `prism semantic build`",
+                        })
+                    );
+                    eprintln!("# semantic status=missing");
                 }
             }
         },

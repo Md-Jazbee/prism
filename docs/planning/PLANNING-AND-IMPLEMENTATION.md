@@ -948,8 +948,8 @@ Provide local path sensitivity without paying for whole-repo CPG.
 
 #### Exit / acceptance
 
-- [ ] Local slice operator specified for “symbol/line” criteria  
-- [ ] Property-based acceptance tests defined  
+- [x] Local slice operator specified for “symbol/line” criteria  
+- [x] Property-based acceptance tests defined  
 
 ---
 

@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P3 gate passed** · P4 open · LLM quality / dual-review labels still pending  
+**Current phase:** **P4 Stage B open** · Stage A (T3 intra-proc) exited · LLM quality / dual-review labels still pending  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)
 
@@ -17,18 +17,18 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P1** | Syntactic KG + MCP | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-25 (proxies) |
 | **P2** | Context Compiler | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 (proxies) |
 | **P3** | Precise Tier (T2) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
-| **P4** | Semantic Slicing | ░░░░░░░░░░ **0%** | 🟡 Stage A open |
+| **P4** | Semantic Slicing | ▓▓▓░░░░░░░ **33%** | 🟡 Stage B open |
 | **P5** | Repo Intelligence + Hardening | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P6** | Team / Distributed (optional) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
 
-**How to read progress:** P3 % ≈ stages done ÷ 3 (A/B/C). Later phases stay at 0% until their entry gate passes.
+**How to read progress:** P4 % ≈ stages done ÷ 3 (A/B/C). Later phases stay at 0% until their entry gate passes.
 
 ```mermaid
 flowchart LR
     P0[P0 Foundations<br/>✅ done] --> P1[P1 Syntactic KG + MCP<br/>✅ done]
     P1 --> P2[P2 Context Compiler<br/>✅ done]
     P2 --> P3[P3 Precise Tier<br/>✅ done]
-    P3 --> P4[P4 Semantic Slicing<br/>🟡 Stage A]
+    P3 --> P4[P4 Semantic Slicing<br/>🟡 Stage B]
     P4 --> P5[P5 Intelligence + Eval]
     P5 --> P6[P6 Distributed / Team<br/>optional]
 
@@ -62,7 +62,7 @@ flowchart LR
 | MCP graph tools | ○ | ● | ● | ● | ● | ● | ● | ✅ prism-mcp stdio tools |
 | Query plan + Evidence Pack | ○ | ○ | ● | ● | ● | ● | ● | ✅ plan + pack + EXPLAIN + MCP `compile_context` |
 | Precise symbol (T2) | ○ | ○ | ○ | ● | ● | ● | ● | ✅ gated product path |
-| Semantic slice (T3/T4) | ○ | ○ | ○ | ○ | ● | ● | ● | ⬜ |
+| Semantic slice (T3/T4) | ○ | ○ | ○ | ○ | ● | ● | ● | 🟡 T3 local slice (Python); inter-proc pending |
 | Architecture intelligence | ○ | ◐ | ◐ | ◐ | ◐ | ● | ● | ◐ path-prefix communities + hubs |
 | Team/shared index | ○ | ○ | ○ | ○ | ○ | ○ | ● | ⬜ |
 
@@ -479,17 +479,39 @@ Precise IDs and gated claims are live. Next: semantic slicing (T3 CFG/DFG) for d
 
 ---
 
-## Phase 4 — Semantic Slicing (outline)
+## Phase 4 — Semantic Slicing
 
-**State:** 🟡 Stage A open (entry: P3 gate passed)  
+**State:** 🟡 **Stage B open** (Stage A exited 2026-07-26)  
 **Duration:** 5–8 weeks  
 **Gate:** Debug tasks token↓ ≥5× with quality within ~5 pts of frontier-explore.
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
-| **A — Intra-procedural (T3)** | CFG/DFG shards; criteria for local slices | ⬜ |
-| **B — Inter-procedural (T4)** | CPG shards; slice operator; shard budgets | ⬜ |
+| **A — Intra-procedural (T3)** | CFG/DFG shards; criteria for local slices | ✅ exited 2026-07-26 |
+| **B — Inter-procedural (T4)** | CPG shards; slice operator; shard budgets | 🟡 open |
 | **C — Debug recipes + gate** | Wire debug intents; optional runtime enrichment; Phase 4 scorecard | ⬜ |
+
+### Stage A — Intra-procedural control/data flow (T3) ✅
+
+#### Deliverables
+
+- [x] T3 analysis design — [T3-ANALYSIS.md](../architecture/T3-ANALYSIS.md)
+- [x] Semantic artifact layout — [SEMANTIC-ARTIFACTS.md](../architecture/SEMANTIC-ARTIFACTS.md) (`.prism/semantic/`)
+- [x] Crash policy — [SEMANTIC-CRASH-POLICY.md](../architecture/SEMANTIC-CRASH-POLICY.md)
+- [x] Schema v0 — `schemas/semantic-artifact/v0`
+- [x] Crate `prism-semantic` — Python CFG/DFG + `local_slice` + store
+- [x] CLI `prism semantic build|slice|status`
+- [x] Fixture — `fixtures/slices/python/sample.py`
+- [x] Property tests — criterion-in-slice + idempotent re-slice; no panic on broken source
+
+#### Exit / acceptance
+
+- [x] Local slice operator specified for symbol/line criteria (`local_slice` / CLI `--file` + `--line`)
+- [x] Property-based acceptance tests defined (and green in `prism-semantic`)
+
+#### Handoff to Stage B
+
+Intra-proc Python slices land under `.prism/semantic/` (not hot `graph.sqlite`). Next: inter-procedural shards, first-class `Slice` planner operator, depth caps + residual expand.
 
 ---
 
@@ -562,3 +584,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P3 Stage A exited:** PreciseIndex ingest (`prism-precise`), ID mapping + SCIP runbook, oracle P/R fixtures (Python), `PRECISION_REQUIRED`, CLI `prism precise`. **Stage B opened** (hybrid resolve) |
 | 2026-07-26 | **P3 Stage B exited:** hybrid resolve + ambiguity index, executable `UpgradePrecision` (mandatory refactor/debug; optional impact), prefer-precise packs, `precision_upgrade` obs. **Stage C opened** |
 | 2026-07-26 | **P3 Stage C exited / gate passed:** gating matrix, safe-rename dry-run, `require_precise`, p3-scorecard (+50pp call precision). **P4 Stage A opened** |
+| 2026-07-26 | **P4 Stage A exited:** T3 Python CFG/DFG (`prism-semantic`), `.prism/semantic/` artifacts, crash policy, local slice CLI + property tests. **Stage B opened** (inter-proc / Slice operator) |

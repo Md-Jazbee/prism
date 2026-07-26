@@ -394,6 +394,7 @@ dependencies = [
  "prism-obs",
  "prism-plan",
  "prism-precise",
+ "prism-semantic",
  "prism-store",
  "serde_json",
  "tracing",
@@ -531,6 +532,23 @@ dependencies = [
  "serde_json",
  "tempfile",
  "thiserror",
+]
+
+[[package]]
+name = "prism-semantic"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "hex",
+ "prism-core",
+ "prism-ir",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror",
+ "tree-sitter",
+ "tree-sitter-python",
+ "xxhash-rust",
 ]
 
 [[package]]

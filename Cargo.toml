@@ -13,6 +13,7 @@ members = [
     "crates/prism-plan",
     "crates/prism-compile",
     "crates/prism-precise",
+    "crates/prism-semantic",
 ]
 default-members = ["crates/prism-cli"]
 
@@ -51,3 +52,4 @@ prism-mcp = { path = "crates/prism-mcp" }
 prism-plan = { path = "crates/prism-plan" }
 prism-compile = { path = "crates/prism-compile" }
 prism-precise = { path = "crates/prism-precise" }
+prism-semantic = { path = "crates/prism-semantic" }

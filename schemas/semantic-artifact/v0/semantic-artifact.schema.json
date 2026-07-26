@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/semantic-artifact/v0/semantic-artifact.schema.json",
+  "title": "Prism Semantic Artifact v0 (T3 CFG/DFG)",
+  "type": "object",
+  "required": ["schema_version", "algo_version", "language", "path", "functions"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string", "const": "0.0.1" },
+    "algo_version": { "type": "string" },
+    "language": { "type": "string" },
+    "path": { "type": "string" },
+    "content_hash": { "type": ["string", "null"] },
+    "notes": { "type": "array", "items": { "type": "string" } },
+    "functions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/function" }
+    }
+  },
+  "$defs": {
+    "function": {
+      "type": "object",
+      "required": ["name", "start_line", "end_line", "blocks", "cfg_edges", "dfg"],
+      "properties": {
+        "name": { "type": "string" },
+        "start_line": { "type": "integer", "minimum": 0 },
+        "end_line": { "type": "integer", "minimum": 0 },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "start_line", "end_line", "kind"],
+            "properties": {
+              "id": { "type": "string" },
+              "start_line": { "type": "integer" },
+              "end_line": { "type": "integer" },
+              "kind": { "type": "string" }
+            }
+          }
+        },
+        "cfg_edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["src", "dst", "kind"],
+            "properties": {
+              "src": { "type": "string" },
+              "dst": { "type": "string" },
+              "kind": { "type": "string" }
+            }
+          }
+        },
+        "dfg": {
+          "type": "object",
+          "required": ["defs", "uses", "deps"],
+          "properties": {
+            "defs": { "type": "array" },
+            "uses": { "type": "array" },
+            "deps": { "type": "array" }
+          }
+        }
+      }
+    }
+  }
+}

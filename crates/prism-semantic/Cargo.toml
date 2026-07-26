@@ -1,0 +1,22 @@
+[package]
+name = "prism-semantic"
+description = "T3 intra-procedural CFG/DFG + local slice (P4 Stage A)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+hex = { workspace = true }
+xxhash-rust = { workspace = true }
+tree-sitter = { workspace = true }
+tree-sitter-python = { workspace = true }
+prism-ir = { workspace = true }
+prism-core = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
