@@ -1,0 +1,10 @@
+{
+  "id": "AG007",
+  "version": "0.0.1",
+  "type": "seed_grounding",
+  "question": "What is FactBundle?",
+  "anchor": "FactBundle",
+  "must_ground": true,
+  "min_score": 70,
+  "notes": "ACC-3 gold; score via eval/baselines/seed_grounding_score.py against live index"
+}

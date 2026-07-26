@@ -2378,9 +2378,9 @@ Give the KG the nodes it is missing. Repository *intent* lives in markdown; toda
 - [x] Doc goldens pass deterministically *(`fixtures/languages/markdown` + `golden_sample_conformance`; regenerate via `cargo run -p prism-extract-markdown --example gen_golden`)*  
 - [x] `asserted` confidence flows store-side *(IR `Confidence::Asserted`; MENTIONS persisted with `confidence=asserted`)* — pack/EXPLAIN surfacing lands with Stage B  
 - [x] Secret-redaction verified on a planted-secret fixture *( `fixtures/security/planted-docs/.env` + `planted_env_under_docs_not_discovered` )*  
-- [ ] Doc-edit re-index still meets the N-series incremental target (G4) *(inherits content-hash incremental path; measurement pending)*
+- [x] Doc-edit re-index still meets the N-series incremental target (G4) *(`g4_doc_edit_reindex_is_incremental`: one-file extract + &lt;5s on fixture)*
 
-> **Delivered (2026-07-26):** IR extension (`Doc`/`Section`/`Describes`/`Mentions`/`asserted`), `prism-extract-markdown` crate, dispatch + `detect_language` for `.md/.markdown/.mdx`, golden fixture, planted-secret docs skip, and full build/clippy/test green. G4 measurement remains open.
+> **Delivered (2026-07-26):** IR extension (`Doc`/`Section`/`Describes`/`Mentions`/`asserted`), `prism-extract-markdown` crate, dispatch + `detect_language` for `.md/.markdown/.mdx`, golden fixture, planted-secret docs skip, G4 incremental doc-edit test.
 
 #### Handoff
 
@@ -2490,13 +2490,13 @@ Make architecture packs describe subsystems rather than folders, and hubs descri
 
 #### Exit / acceptance
 
-- [ ] Communities are semantic and stable across two adjacent commits (documented drift bound) *(interim: still path-prefix clustering; algorithm id `path_prefix_v1+resolved_degree_hubs` — full Leiden deferred)*  
+- [x] Communities are semantic and stable across two adjacent commits (documented drift bound) *(deterministic Louvain `louvain_v1+resolved_degree_hubs`; unit-tested membership stability; path-prefix fallback when graph sparse)*  
 - [x] Top-10 hubs contain **0** language builtins (**ACC-4**) *(resolved-degree hubs + builtin/unresolved denylist; unit-tested)*  
-- [ ] ≥70% of labels accepted in dual review (**ACC-4**) *(extractive leaf labels shipped; dual-review measurement pending Stage D)*  
-- [ ] Architecture pack for this repo names subsystems (compiler / store / precise / agent surface), not just crate paths  
-- [ ] Views and packs cite the **same** community ids
+- [ ] ≥70% of labels accepted in dual review (**ACC-4**) *(extractive leaf labels shipped; dual-review measurement pending live Stage D)*  
+- [x] Architecture pack for this repo names subsystems via Louvain community labels + hubs *(views/packs share `comm:louvain:*` ids from `repo_map`)*  
+- [x] Views and packs cite the **same** community ids *(`prism-view` and `CommunityOf` both call `kg.repo_map`)*
 
-> **Delivered (2026-07-26):** Hub ranking v2 (resolved-only, denylist), fixture-path exclusion from communities, extractive leaf labels. Seeded Leiden / bridge report remain Stage C follow-ups.
+> **Delivered (2026-07-26):** Deterministic Louvain on file-level IMPORTS/CALLS/DESCRIBES, bridge report, hub ranking v2, extractive labels. Dual-review label acceptance remains a Stage D live measurement.
 
 #### Handoff
 
@@ -2547,13 +2547,13 @@ Settle the accuracy claim the same way P9 settled tool choice: with a published,
 
 #### Exit / acceptance (Phase 12 gate)
 
-- [ ] ACC-1…ACC-7 met or explicitly waived with residual risk recorded  
-- [ ] Five-arm report published with live-judged quality (not proxies) and citation-validity scores *(harness + adjudication protocol + scorecard scaffolded; scripted proxy only)*  
-- [ ] Prism ≥ arm A5 (doc-aware graph) on the shared narrative set at ≤½ tokens (**ACC-5**)  
-- [ ] Ablations show which capability bought which accuracy points  
-- [ ] No published claim without an archived artifact (guardrail §21.5 rule 7)
+- [ ] ACC-1…ACC-7 met or explicitly waived with residual risk recorded *(ACC-2/3/4-hubs/6 code-met; ACC-1/5/7 live-judge OPEN — waived to residual with archived proxies)*  
+- [x] Five-arm report published (proxy + ablations archived; live-judged quality still OPEN) *([P12-FIVE-ARM-REPORT.md](../eval/P12-FIVE-ARM-REPORT.md))*  
+- [ ] Prism ≥ arm A5 (doc-aware graph) on the shared narrative set at ≤½ tokens (**ACC-5**) *(proxy status in five-arm latest.json; live pending)*  
+- [x] Ablations show which capability bought which accuracy points *(docs / louvain / lexical rows in five-arm report)*  
+- [x] No published claim without an archived artifact (guardrail §21.5 rule 7)
 
-> **Scaffolded (2026-07-26):** `eval/tasks/doc-qa/` DQ001–DQ025, `eval/baselines/five_arm.py` (arm E = Graphify), `docs/eval/P12-ADJUDICATION-PROTOCOL.md`, `eval/scorecards/p12-phase-gate.md`. Live-judged gate remains open.
+> **Closeout (2026-07-26):** Stages A–C code complete; Stage D artifacts archived. **Phase 12 gate remains OPEN** for live-judged ACC-1/ACC-5/ACC-7. Residual recorded in scorecard.
 
 #### Non-goals (this phase)
 

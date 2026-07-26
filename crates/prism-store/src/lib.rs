@@ -9,7 +9,7 @@ pub mod lexical;
 pub mod meta;
 pub mod query;
 
-pub use communities::{Community, Hub, RepoMap};
+pub use communities::{Bridge, Community, Hub, RepoMap};
 pub use intel::{DetectChangesReport, Entrypoint, Hotspot, RepoIntelReport, INTEL_ALGO_VERSION};
 pub use kg::{KgStore, SqliteKgStore};
 pub use lexical::{tokenize_seed_terms, SeedCandidate, MIN_CANDIDATE_SCORE, MIN_GROUND_SCORE};

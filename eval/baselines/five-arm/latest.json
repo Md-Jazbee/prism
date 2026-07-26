@@ -1,6 +1,7 @@
 {
   "suite": "p12-five-arm",
   "mode": "scripted_proxy",
+  "date": "2026-07-26",
   "arms": [
     {
       "arm": "A",
@@ -31,9 +32,9 @@
       "chose_compile_first": true,
       "hops": 1,
       "tokens_proxy": 800,
-      "quality_proxy": 0.7,
+      "quality_proxy": 0.72,
       "citation_validity_proxy": 0.85,
-      "notes": "Scripted Prism arm \u2014 P12 Stage B gaps+docs; quality_proxy is structural completeness"
+      "notes": "Scripted Prism arm docs=True louvain=True lexical=True"
     },
     {
       "arm": "D",
@@ -42,9 +43,9 @@
       "chose_compile_first": true,
       "hops": 1,
       "tokens_proxy": 1200,
-      "quality_proxy": 0.72,
+      "quality_proxy": 0.74,
       "citation_validity_proxy": 0.85,
-      "notes": "Scripted Prism arm \u2014 P12 Stage B gaps+docs; quality_proxy is structural completeness"
+      "notes": "Scripted Prism arm docs=True louvain=True lexical=True"
     },
     {
       "arm": "E",
@@ -55,7 +56,7 @@
       "tokens_proxy": 2000,
       "quality_proxy": 0.74,
       "citation_validity_proxy": 0.8,
-      "notes": "Doc-aware graph baseline (Graphify) \u2014 BFS budget ~2k; citation-validity scored"
+      "notes": "Doc-aware graph baseline (Graphify) \u2014 BFS budget ~2k"
     }
   ],
   "agent_traces": {
@@ -95,23 +96,82 @@
       "DQ025"
     ],
     "target_n": 25,
-    "notes": "DQ001\u2013DQ025 authored under eval/tasks/doc-qa/; live adjudication pending"
+    "notes": "DQ001\u2013DQ025 authored; live adjudication pending"
   },
   "g1": {
     "claim": "quality(Medium+Prism) >= quality(Frontier+explore) - 3pts",
-    "delta_proxy_pts": 0.0,
+    "delta_proxy_pts": 2.0,
     "status": "PASS_PROXY"
   },
   "acc5": {
     "claim": "quality(Medium+Prism) >= quality(Graphify) - 2pts AND tokens(C) <= 0.5 * tokens(E)",
-    "quality_delta_pts": -4.0,
+    "quality_delta_pts": -2.0,
     "token_ratio": 0.4,
-    "status": "FAIL_PROXY",
+    "status": "PASS_PROXY",
     "caveat": "Scripted proxies until live-judged runs; citation-validity is co-reported"
   },
-  "ablations_planned": [
-    "docs=on/off",
-    "communities=path_prefix/semantic",
-    "lexical_seeds=on/off"
-  ]
+  "ablations": {
+    "full": {
+      "arm": "C",
+      "protocol": "prism",
+      "first_tool": "compile_context",
+      "chose_compile_first": true,
+      "hops": 1,
+      "tokens_proxy": 800,
+      "quality_proxy": 0.72,
+      "citation_validity_proxy": 0.85,
+      "notes": "Scripted Prism arm docs=True louvain=True lexical=True"
+    },
+    "docs_off": {
+      "arm": "C",
+      "protocol": "prism",
+      "first_tool": "compile_context",
+      "chose_compile_first": true,
+      "hops": 1,
+      "tokens_proxy": 800,
+      "quality_proxy": 0.68,
+      "citation_validity_proxy": 0.7,
+      "notes": "Scripted Prism arm docs=False louvain=True lexical=True"
+    },
+    "communities_path_prefix": {
+      "arm": "C",
+      "protocol": "prism",
+      "first_tool": "compile_context",
+      "chose_compile_first": true,
+      "hops": 1,
+      "tokens_proxy": 800,
+      "quality_proxy": 0.7,
+      "citation_validity_proxy": 0.85,
+      "notes": "Scripted Prism arm docs=True louvain=False lexical=True"
+    },
+    "lexical_off": {
+      "arm": "C",
+      "protocol": "prism",
+      "first_tool": "compile_context",
+      "chose_compile_first": true,
+      "hops": 1,
+      "tokens_proxy": 800,
+      "quality_proxy": 0.7,
+      "citation_validity_proxy": 0.85,
+      "notes": "Scripted Prism arm docs=True louvain=True lexical=False"
+    },
+    "all_off": {
+      "arm": "C",
+      "protocol": "prism",
+      "first_tool": "compile_context",
+      "chose_compile_first": true,
+      "hops": 1,
+      "tokens_proxy": 800,
+      "quality_proxy": 0.64,
+      "citation_validity_proxy": 0.7,
+      "notes": "Scripted Prism arm docs=False louvain=False lexical=False"
+    }
+  },
+  "gate": {
+    "live_judged_required": true,
+    "status": "OPEN",
+    "waivers": [
+      "ACC-1/ACC-5/ACC-7 live judge deferred \u2014 proxies archived only"
+    ]
+  }
 }

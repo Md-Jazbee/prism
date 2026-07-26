@@ -1,0 +1,10 @@
+{
+  "id": "AG020",
+  "version": "0.0.1",
+  "type": "seed_grounding",
+  "question": "Wrong seed TotallyFakeSymbol123",
+  "anchor": "TotallyFakeSymbol123",
+  "must_ground": false,
+  "min_score": null,
+  "notes": "ACC-3 gold; score via eval/baselines/seed_grounding_score.py against live index"
+}

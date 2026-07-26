@@ -1,0 +1,175 @@
+{
+  "suite": "p12-acc3-seed-grounding",
+  "db": "/Users/jasbeermohammad/AllFiles/AI-lenarning/AI-P2/.prism/graph.sqlite",
+  "n_tasks": 20,
+  "n_judged": 16,
+  "tp": 15,
+  "fn": 0,
+  "fp": 0,
+  "tn": 5,
+  "precision": 1.0,
+  "target": 0.9,
+  "status": "PASS",
+  "rows": [
+    {
+      "id": "AG001",
+      "anchor": "PlanHints",
+      "score": 100,
+      "grounded": true,
+      "must_ground": true,
+      "ok": true
+    },
+    {
+      "id": "AG002",
+      "anchor": "EvidencePack",
+      "score": 100,
+      "grounded": true,
+      "must_ground": true,
+      "ok": true
+    },
+    {
+      "id": "AG003",
+      "anchor": "compile_context",
+      "score": 100,
+      "grounded": true,
+      "must_ground": true,
+      "ok": true
+    },
+    {
+      "id": "AG004",
+      "anchor": "SqliteKgStore",
+      "score": 100,
+      "grounded": true,
+      "must_ground": true,
+      "ok": true
+    },
+    {
+      "id": "AG005",
+      "anchor": "IncrementalIndexer",
+      "score": 100,
+      "grounded": true,
+      "must_ground": true,
+      "ok": true
+    },
+    {
+      "id": "AG006",
+      "anchor": "ground_plan_seeds",
+      "score": 100,
+      "grounded": true,
+      "must_ground": true,
+      "ok": true
+    },
+    {
+      "id": "AG007",
+      "anchor": "FactBundle",
+      "score": 100,
+      "grounded": true,
+      "must_ground": true,
+      "ok": true
+    },
+    {
+      "id": "AG008",
+      "anchor": "ScopeUnresolved",
+      "score": 100,
+      "grounded": true,
+      "must_ground": true,
+      "ok": true
+    },
+    {
+      "id": "AG009",
+      "anchor": "repo_map",
+      "score": 100,
+      "grounded": true,
+      "must_ground": true,
+      "ok": true
+    },
+    {
+      "id": "AG010",
+      "anchor": "select_from_kg",
+      "score": 100,
+      "grounded": true,
+      "must_ground": true,
+      "ok": true
+    },
+    {
+      "id": "AG011",
+      "anchor": "IgnorePolicy",
+      "score": 100,
+      "grounded": true,
+      "must_ground": true,
+      "ok": true
+    },
+    {
+      "id": "AG012",
+      "anchor": "IntentRecipe",
+      "score": 100,
+      "grounded": true,
+      "must_ground": false,
+      "ok": true
+    },
+    {
+      "id": "AG013",
+      "anchor": "classify_path",
+      "score": 100,
+      "grounded": true,
+      "must_ground": true,
+      "ok": true
+    },
+    {
+      "id": "AG014",
+      "anchor": "ANALYZER_PIPELINE_VERSION",
+      "score": 50,
+      "grounded": false,
+      "must_ground": false,
+      "ok": true
+    },
+    {
+      "id": "AG015",
+      "anchor": "pack_under_budget",
+      "score": 100,
+      "grounded": true,
+      "must_ground": true,
+      "ok": true
+    },
+    {
+      "id": "AG016",
+      "anchor": "tokenize_seed_terms",
+      "score": 100,
+      "grounded": true,
+      "must_ground": true,
+      "ok": true
+    },
+    {
+      "id": "AG017",
+      "anchor": "louvain_cluster",
+      "score": 100,
+      "grounded": true,
+      "must_ground": false,
+      "ok": true
+    },
+    {
+      "id": "AG018",
+      "anchor": "WorkspaceManager",
+      "score": 100,
+      "grounded": true,
+      "must_ground": true,
+      "ok": true
+    },
+    {
+      "id": "AG019",
+      "anchor": "scope_unresolved",
+      "score": 100,
+      "grounded": true,
+      "must_ground": false,
+      "ok": true
+    },
+    {
+      "id": "AG020",
+      "anchor": "TotallyFakeSymbol123",
+      "score": 0,
+      "grounded": false,
+      "must_ground": false,
+      "ok": true
+    }
+  ]
+}

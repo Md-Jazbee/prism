@@ -484,9 +484,11 @@ pub fn select_from_kg(
                 let map = kg.repo_map(10)?;
                 let eps = kg.detect_entrypoints(8).unwrap_or_default();
                 let summary = format!(
-                    "communities={} hubs={} entrypoints={}",
+                    "algorithm={} communities={} hubs={} bridges={} entrypoints={}",
+                    map.algorithm,
                     map.communities.len(),
                     map.hubs.len(),
+                    map.bridges.len(),
                     eps.len()
                 );
                 let mut lines = vec![summary];
@@ -498,6 +500,12 @@ pub fn select_from_kg(
                 }
                 for h in map.hubs.iter().take(5) {
                     lines.push(format!("  hub {} degree={}", h.node_id, h.degree));
+                }
+                for b in map.bridges.iter().take(5) {
+                    lines.push(format!(
+                        "  bridge {} → {} ({})",
+                        b.src_community, b.dst_community, b.edge_kind
+                    ));
                 }
                 for e in eps.iter().take(5) {
                     lines.push(format!(

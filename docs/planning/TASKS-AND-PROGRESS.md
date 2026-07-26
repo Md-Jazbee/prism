@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P12 Stages A–C code landed · Stage D scaffolded (live ACC gate open)** · P11 Stage C partial · P8 **cut** (CLI+MCP) · P0–P7+P9 complete · **P10 deferred/skipped**  
+**Current phase:** **P12 Stages A–C complete · Stage D artifacts archived (live ACC gate OPEN)** · P11 Stage C partial · P8 **cut** (CLI+MCP) · P0–P7+P9 complete · **P10 deferred/skipped**  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)  
 **Source of truth for stack/layout:** [TECH-STACK-AND-PROJECT-STRUCTURE.md](../architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md)
@@ -32,7 +32,7 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P9** | Agent Experience & Workflows | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P10** | Team / Distributed (optional, was P6) | ░░░░░░░░░░ **0%** | ⚪ Deferred / skipped for now |
 | **P11** | Install & Distribution (any system) | ▓▓▓▓▓▓▓▓▓░ **~90%** | 🟡 Stage A+B done; Stage C proven on simulated release — cold-VM pending public tag |
-| **P12** | Accuracy & Grounding (doc-aware evidence) | ▓▓▓▓▓▓▓▓░░ **~80%** | 🟡 Stages A–B complete; C interim hubs; D scaffold — live ACC gate + Leiden open |
+| **P12** | Accuracy & Grounding (doc-aware evidence) | ▓▓▓▓▓▓▓▓▓░ **~90%** | 🟡 A–C complete; D report+ablations archived — live ACC-1/5/7 OPEN |
 
 **How to read progress:** **P0–P7 and P9 are gated**. **P8 was cut** — agent/IDE needs are met by `prism setup` + MCP, not a VSIX. **P10** stays optional/skipped. **P11** remains the distribution track (cold-VM pending). **P12** is the active accuracy track (parallel to P11-C).
 
@@ -93,7 +93,7 @@ flowchart LR
 | Path-class / first-party scoping | P12-B | ✅ fixtures/vendored excluded unless anchored (ACC-6) |
 | Precise symbol (T2) | P3 | ✅ gated product path |
 | Semantic slice (T3/T4) | P4 | ✅ debug packs slice-minimal (gate proxies) |
-| Architecture intelligence | P5→P12-C | 🟡 path-prefix communities + **hub ranking v2** (resolved/denylist); Leiden deferred |
+| Architecture intelligence | P5→P12-C | ✅ Louvain file communities + hub denylist + bridges (label dual-review open) |
 | WASM plugin host | P5 → **P6** | ⚪ **deferred** — [ADR-0001](../architecture/adr/0001-wasm-plugin-host-deferred.md) (gap G-03 waived) |
 | Daemon + HTTP/SSE API | P6 | ✅ `prismd` + `prism-api` `/v1/*` + SSE (gaps G-01/G-10) |
 | LSP surface | P6 | ✅ `prism-lsp` |
@@ -995,10 +995,10 @@ flowchart LR
 
 | Stage | Focus | Progress | State |
 |---|---|---:|---|
-| **A** | Documentation & narrative layer | ~95% | ✅ Code exited 2026-07-26 (`f1dfcdc`); planted-secret fixture done; G4 measure open |
-| **B** | Grounded selection & honest gaps | ~95% | ✅ ACC-3 lexical seed grounding + ranked refusals landed |
-| **C** | Semantic communities & orientation | ~55% | 🟡 Hub denylist + path filter landed; Leiden / label dual-review open |
-| **D** | Accuracy gate (five-arm + adjudication) | ~40% | 🟡 Harness + DQ001–025 + protocol scaffolded; live judge open |
+| **A** | Documentation & narrative layer | 100% | ✅ Exited 2026-07-26 (incl. G4 + secret fixture) |
+| **B** | Grounded selection & honest gaps | 100% | ✅ Exited 2026-07-26 (ACC-2/3/6) |
+| **C** | Semantic communities & orientation | ~95% | ✅ Louvain+hubs+bridges; label dual-review live sample open |
+| **D** | Accuracy gate (five-arm + adjudication) | ~70% | 🟡 Artifacts archived; live judge OPEN |
 
 ### Stage A — Documentation & narrative layer
 
@@ -1009,9 +1009,9 @@ flowchart LR
 | Dispatch `.md/.markdown/.mdx` in `prism-extract` | ✅ | `detect_language` |
 | End-to-end Doc/Section index (temp workspace) | ✅ | |
 | Secret-redaction planted-secret doc fixture | ✅ | `fixtures/security/planted-docs/` + unit test |
-| Doc-edit incremental re-measure (G4) | ⬜ | inherits content-hash path |
+| Doc-edit incremental re-measure (G4) | ✅ | `g4_doc_edit_reindex_is_incremental` |
 
-**Stage A exit:** extractive docs in KG with `asserted` confidence. Commit: `f1dfcdc`.
+**Stage A exit:** extractive docs in KG with `asserted` confidence. Commit: `f1dfcdc` (+ residuals in closeout).
 
 ### Stage B — Grounded selection & honest gaps
 
@@ -1022,10 +1022,10 @@ flowchart LR
 | Path-class first-party vs fixture/vendored (ACC-6) | ✅ | `path_class.rs` |
 | Doc-backed recipe roles (`product_thesis`, …) | ✅ | `prism-plan` recipes + goldens |
 | Analyzer pipeline version force re-extract | ✅ | `ANALYZER_PIPELINE_VERSION=p12-doc-v1` |
-| Lexical/BM25 seed index + ACC-3 ≥90% | ✅ | `prism-store` lexical + `ground_plan_seeds` (score≥70); Stage D precision sample still open |
+| Lexical seed index + ACC-3 ≥90% | ✅ | AG001–020 sample **PASS** (precision=1.0) |
 | Wrong-seed → ranked candidates + second-call recover | ✅ | unit-tested; MCP passes `candidates` |
 
-**Stage B exit (code):** honest gaps + path filter + analyzer invalidation. ACC-3 measurement still open. Commit: `0e8893b`.
+**Stage B exit:** honest gaps + path filter + ACC-3 grounding.
 
 ### Stage C — Semantic communities & orientation
 
@@ -1033,37 +1033,35 @@ flowchart LR
 |---|---|---|
 | Hub ranking v2 (resolved-only + builtin/unresolved denylist) | ✅ | ACC-4 hub half; unit-tested |
 | Exclude `fixtures/repos/` from community rollup | ✅ | |
-| Extractive leaf labels + honesty notes | ✅ | algorithm id `path_prefix_v1+resolved_degree_hubs` |
-| Seeded Leiden / Louvain clustering | ⬜ | deferred; still path-prefix |
-| Dual-review label acceptance ≥70% (ACC-4) | ⬜ | Stage D measurement |
-| Bridge report (cross-community) | ⬜ | |
-| Views and packs share community ids | ⬜ | |
+| Extractive leaf labels + honesty notes | ✅ | |
+| Seeded Louvain clustering | ✅ | `louvain_v1+resolved_degree_hubs` (path-prefix fallback) |
+| Dual-review label acceptance ≥70% (ACC-4) | ⬜ | live Stage D measurement |
+| Bridge report (cross-community) | ✅ | capped bridges on `RepoMap` |
+| Views and packs share community ids | ✅ | both use `kg.repo_map` |
 
-**Stage C exit (interim):** hubs cleaned; clustering still path-prefix until Leiden lands.
+**Stage C exit:** Louvain communities + hubs + bridges; label dual-review open.
 
 ### Stage D — Accuracy gate
 
 | Task | Status | Notes |
 |---|---|---|
 | Doc-QA gold suite (≥25) | ✅ | `eval/tasks/doc-qa/DQ001`–`DQ025` |
-| Five-arm harness (arm E = Graphify) | ✅ | `eval/baselines/five_arm.py` (scripted proxy) |
+| Five-arm harness (arm E = Graphify) | ✅ | `eval/baselines/five_arm.py` |
 | Adjudication protocol | ✅ | [P12-ADJUDICATION-PROTOCOL.md](../eval/P12-ADJUDICATION-PROTOCOL.md) |
-| P12 scorecard scaffold | ✅ | [p12-phase-gate.md](../../eval/scorecards/p12-phase-gate.md) |
-| Live-judged ACC-1…ACC-7 | ⬜ | gate; proxies must not satisfy exit |
-| Ablations (docs / communities / lexical) | ⬜ | planned in five_arm output |
-| Published five-arm accuracy report | ⬜ | |
+| P12 scorecard | ✅ | [p12-phase-gate.md](../../eval/scorecards/p12-phase-gate.md) |
+| Ablations (docs / communities / lexical) | ✅ | in five-arm report |
+| Published five-arm accuracy report | ✅ | [P12-FIVE-ARM-REPORT.md](../eval/P12-FIVE-ARM-REPORT.md) (proxy) |
+| Live-judged ACC-1…ACC-7 | ⬜ | gate OPEN |
 
-**Stage D / P12 gate:** open until live-judged ACC targets pass or are waived.
+**Stage D / P12 gate:** OPEN for live-judged ACC-1/ACC-5/ACC-7; code + proxy artifacts complete.
 
 ### Open P12 follow-ups
 
 | # | Item | Blocks |
 |---|---|---|
-| 1 | Seeded Leiden communities + label dual-review | ACC-4 full |
-| 2 | Live five-arm adjudication vs Graphify | ACC-1, ACC-5, ACC-7 |
-| 3 | Doc-edit G4 incremental re-measure | Stage A residual |
-| 4 | Reindex workspaces after `p12-doc-v1` | Doc nodes in existing `.prism` indexes |
-| 5 | ACC-3 precision sample on gold anchor set (n≥20) | Stage D measurement |
+| 1 | Live five-arm adjudication vs Graphify (pinned graph) | ACC-1, ACC-5, ACC-7 |
+| 2 | Dual-review community label acceptance ≥70% | ACC-4 labels |
+| 3 | Point MCP/`prism` on PATH at release binary built after Louvain | operational |
 
 ---
 
@@ -1075,7 +1073,7 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 |---|---|---|
 | **W-STORE** | Storage & identity | ✅ + intel catalog |
 | **W-PLUGIN** | Plugin ABI | ✅ + contributor guide + conformance CI |
-| **W-KG** | Knowledge graph | ✅ overlays + **P12 hub v2 denylist**; Leiden still deferred |
+| **W-KG** | Knowledge graph | ✅ overlays + **Louvain communities** + hub v2 denylist |
 | **W-PLAN** | Query planning | ✅ executable `Slice` on debug |
 | **W-CC** | Context compiler | ✅ debug pack gates + **P12 honest `gaps[]`** (ACC-2) |
 | **W-MCP** | Agent surface | ✅ AGENT-USAGE + intel tools |
@@ -1099,8 +1097,8 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 
 | ID | Workstream | Opens in |
 |---|---|---|
-| **W-DOC** | Documentation intelligence — Doc/Section extract, links/mentions, `asserted`, doc goldens | ✅ P12 Stage A (residuals: secret fixture, G4) |
-| **W-ACC** | Accuracy program — Doc-QA gold, adjudication, citation validity, five-arm / ablations | 🟡 P12 Stage D scaffolded; live gate open |
+| **W-DOC** | Documentation intelligence — Doc/Section extract, links/mentions, `asserted`, doc goldens | ✅ P12 Stage A complete |
+| **W-ACC** | Accuracy program — Doc-QA gold, adjudication, citation validity, five-arm / ablations | 🟡 Artifacts archived; live ACC-1/5/7 OPEN |
 
 ---
 
@@ -1152,3 +1150,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P12 Stage A exited (code):** `Doc`/`Section`/`DESCRIBES`/`MENTIONS`/`asserted`, `prism-extract-markdown`, markdown dispatch + goldens. Commit `f1dfcdc`. Residuals: secret-doc fixture, G4 re-measure. |
 | 2026-07-26 | **P12 Stages B–D landed (code + scaffold):** honest `gaps[]` + ACC-2 invariant, path-class ACC-6, analyzer `p12-doc-v1` re-extract, hub ranking v2 denylist, DQ001–025, `five_arm.py`, adjudication protocol, p12-phase-gate. Commit `0e8893b`. **Live ACC-1…ACC-7 gate still open**; Leiden + ACC-3 lexical seeds deferred. |
 | 2026-07-26 | **P12 follow-up:** ACC-3 lexical seed grounding (`score_anchor` / `lexical_seed_search` / `ground_plan_seeds`) + ranked `SCOPE_UNRESOLVED.candidates`; planted-secret docs fixture; board/plan checkboxes updated. Leiden + live five-arm remain open. |
+| 2026-07-26 | **P12 closeout (code):** deterministic Louvain communities + bridges; G4 doc-edit incremental test; ACC-3 AG001–020 sample PASS (1.0); five-arm ablations + [P12-FIVE-ARM-REPORT.md](../eval/P12-FIVE-ARM-REPORT.md); reindex yields Doc/Section nodes. **Live ACC-1/5/7 gate remains OPEN.** |

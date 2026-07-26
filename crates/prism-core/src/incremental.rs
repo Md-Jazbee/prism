@@ -269,6 +269,47 @@ mod tests {
     }
 
     #[test]
+    fn g4_doc_edit_reindex_is_incremental() {
+        // P12 Stage A residual / G4: editing one markdown file must not rebuild all docs.
+        let dir = tempdir().unwrap();
+        let root = dir.path();
+        fs::create_dir_all(root.join("docs")).unwrap();
+        fs::create_dir_all(root.join("src")).unwrap();
+        fs::write(root.join("docs/a.md"), b"# A\n\nAlpha.\n").unwrap();
+        fs::write(root.join("docs/b.md"), b"# B\n\nBeta.\n").unwrap();
+        fs::write(root.join("src/lib.rs"), b"fn lib() {}\n").unwrap();
+
+        let prism = root.join(".prism");
+        let wm = WorkspaceManager::open(root).unwrap();
+        let mut indexer = IncrementalIndexer::open(wm, &prism).unwrap();
+        let first = indexer.run(&IndexOptions::default()).unwrap();
+        assert!(first.stats.files_extracted >= 2);
+        assert!(first.stats.wall_time_ms < 30_000, "cold index too slow: {}ms", first.stats.wall_time_ms);
+
+        // Edit only one doc.
+        fs::write(root.join("docs/a.md"), b"# A\n\nAlpha edited.\n").unwrap();
+        let started = std::time::Instant::now();
+        let wm2 = WorkspaceManager::open(root).unwrap();
+        let mut indexer2 = IncrementalIndexer::open(wm2, &prism).unwrap();
+        let second = indexer2.run(&IndexOptions::default()).unwrap();
+        let elapsed = started.elapsed().as_millis() as u64;
+        assert!(
+            second.stats.files_skipped_unchanged >= 1,
+            "expected unchanged skip, stats={:?}",
+            second.stats
+        );
+        assert_eq!(
+            second.stats.files_extracted, 1,
+            "doc edit should re-extract exactly one file, stats={:?}",
+            second.stats
+        );
+        assert!(
+            elapsed < 5_000,
+            "G4 incremental doc-edit budget: expected <5s on fixture, got {elapsed}ms"
+        );
+    }
+
+    #[test]
     fn dry_run_does_not_persist_hashes() {
         let dir = tempdir().unwrap();
         fs::write(dir.path().join("a.rs"), b"fn a() {}").unwrap();

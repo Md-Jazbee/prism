@@ -1,0 +1,10 @@
+{
+  "id": "AG010",
+  "version": "0.0.1",
+  "type": "seed_grounding",
+  "question": "What does select_from_kg return?",
+  "anchor": "select_from_kg",
+  "must_ground": true,
+  "min_score": 70,
+  "notes": "ACC-3 gold; score via eval/baselines/seed_grounding_score.py against live index"
+}

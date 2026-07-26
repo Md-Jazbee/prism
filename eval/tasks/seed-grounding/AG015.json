@@ -1,0 +1,10 @@
+{
+  "id": "AG015",
+  "version": "0.0.1",
+  "type": "seed_grounding",
+  "question": "Where is pack_under_budget?",
+  "anchor": "pack_under_budget",
+  "must_ground": true,
+  "min_score": 70,
+  "notes": "ACC-3 gold; score via eval/baselines/seed_grounding_score.py against live index"
+}
