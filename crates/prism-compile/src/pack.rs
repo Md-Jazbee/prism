@@ -3,6 +3,7 @@
 use crate::budget::BudgetExceeded;
 use crate::explain::{DropRecord, ExplainReport};
 use crate::fragment::{EvidenceFragment, PackLayer};
+use crate::gap::EvidenceGap;
 use prism_ir::PACK_SCHEMA_VERSION;
 use prism_plan::{Intent, ScopeUnresolved};
 use serde::{Deserialize, Serialize};
@@ -69,7 +70,8 @@ pub struct EvidencePack {
     pub hierarchy: PackHierarchy,
     pub fragments: Vec<EvidenceFragment>,
     pub citations: Vec<Citation>,
-    pub gaps: Vec<String>,
+    /// Honest absences (P12 Stage B). Never placeholder fragments.
+    pub gaps: Vec<EvidenceGap>,
     pub drops: Vec<DropRecord>,
     pub explain: ExplainReport,
 }
@@ -77,6 +79,19 @@ pub struct EvidencePack {
 impl EvidencePack {
     pub fn schema_version() -> &'static str {
         PACK_SCHEMA_VERSION
+    }
+
+    /// Invariant (ACC-2 / P12 Stage B): no kept fragment may be purely synthetic.
+    pub fn assert_no_placeholder_fragments(&self) -> Result<(), String> {
+        for f in &self.fragments {
+            if f.provenance.is_synthetic_only() {
+                return Err(format!(
+                    "placeholder fragment {} has only synthetic provenance",
+                    f.id
+                ));
+            }
+        }
+        Ok(())
     }
 }
 

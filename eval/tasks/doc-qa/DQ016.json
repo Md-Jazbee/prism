@@ -1,0 +1,24 @@
+{
+  "id": "DQ016",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "use cases",
+  "question": "When should an agent use impact vs neighbors vs repo_map?",
+  "accepted_answer_criteria": [
+    "impact for blast-radius / change analysis",
+    "neighbors for 1-hop graph hops",
+    "repo_map for orientation / communities"
+  ],
+  "necessary_spans": [
+    "docs/architecture/MCP-TOOL-CATALOG.md",
+    "AGENTS.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "doc sections or gaps",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

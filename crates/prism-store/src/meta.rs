@@ -4,6 +4,9 @@ use anyhow::{Context, Result};
 use rusqlite::{params, Connection};
 use std::path::Path;
 
+/// Bump when extractors change shape so content-identical files re-extract (P12).
+pub const ANALYZER_PIPELINE_VERSION: &str = "p12-doc-v1";
+
 /// Metadata store backed by SQLite WAL.
 pub struct SqliteMetaStore {
     conn: Connection,
@@ -46,32 +49,65 @@ impl SqliteMetaStore {
             );
             ",
         )?;
+        // P12: analyzer_version column so extractor upgrades force re-extract.
+        let has_analyzer: bool = conn
+            .prepare("PRAGMA table_info(files)")?
+            .query_map([], |r| r.get::<_, String>(1))?
+            .filter_map(|c| c.ok())
+            .any(|c| c == "analyzer_version");
+        if !has_analyzer {
+            conn.execute_batch(
+                "ALTER TABLE files ADD COLUMN analyzer_version TEXT NOT NULL DEFAULT '';",
+            )?;
+        }
         conn.execute(
             "INSERT OR REPLACE INTO schema_meta(key, value) VALUES ('meta_schema_version', ?1)",
             params![prism_ir::META_SCHEMA_VERSION],
         )?;
+        conn.execute(
+            "INSERT OR REPLACE INTO schema_meta(key, value) VALUES ('analyzer_pipeline_version', ?1)",
+            params![ANALYZER_PIPELINE_VERSION],
+        )?;
         Ok(Self { conn })
     }
 
-    pub fn get_file_hash(&self, path: &str) -> Result<Option<String>> {
+    /// Returns `(content_hash, analyzer_version)` when present.
+    pub fn get_file_record(&self, path: &str) -> Result<Option<(String, String)>> {
         let mut stmt = self
             .conn
-            .prepare("SELECT content_hash FROM files WHERE path = ?1")?;
+            .prepare("SELECT content_hash, analyzer_version FROM files WHERE path = ?1")?;
         let mut rows = stmt.query(params![path])?;
         if let Some(row) = rows.next()? {
-            Ok(Some(row.get(0)?))
+            Ok(Some((
+                row.get(0)?,
+                row.get::<_, String>(1).unwrap_or_default(),
+            )))
         } else {
             Ok(None)
         }
     }
 
+    pub fn get_file_hash(&self, path: &str) -> Result<Option<String>> {
+        Ok(self.get_file_record(path)?.map(|(h, _)| h))
+    }
+
     pub fn upsert_file_hash(&self, path: &str, content_hash: &str) -> Result<()> {
+        self.upsert_file_hash_versioned(path, content_hash, ANALYZER_PIPELINE_VERSION)
+    }
+
+    pub fn upsert_file_hash_versioned(
+        &self,
+        path: &str,
+        content_hash: &str,
+        analyzer_version: &str,
+    ) -> Result<()> {
         self.conn.execute(
-            "INSERT INTO files(path, content_hash) VALUES (?1, ?2)
+            "INSERT INTO files(path, content_hash, analyzer_version) VALUES (?1, ?2, ?3)
              ON CONFLICT(path) DO UPDATE SET
                content_hash = excluded.content_hash,
+               analyzer_version = excluded.analyzer_version,
                updated_at = datetime('now')",
-            params![path, content_hash],
+            params![path, content_hash, analyzer_version],
         )?;
         Ok(())
     }
@@ -118,7 +154,7 @@ mod tests {
         assert!(store.get_file_hash("a.rs").unwrap().is_none());
         store.upsert_file_hash("a.rs", "abc").unwrap();
         assert_eq!(store.get_file_hash("a.rs").unwrap().as_deref(), Some("abc"));
-        store.upsert_file_hash("a.rs", "def").unwrap();
-        assert_eq!(store.get_file_hash("a.rs").unwrap().as_deref(), Some("def"));
+        let rec = store.get_file_record("a.rs").unwrap().unwrap();
+        assert_eq!(rec.1, ANALYZER_PIPELINE_VERSION);
     }
 }

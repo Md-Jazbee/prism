@@ -1,0 +1,22 @@
+{
+  "id": "DQ018",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "product thesis",
+  "question": "Why is Prism local-first and what does that imply for API keys?",
+  "accepted_answer_criteria": [
+    "Indexing does not require an API key",
+    "Works offline / local SQLite index"
+  ],
+  "necessary_spans": [
+    "README.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "doc sections or gaps",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

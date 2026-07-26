@@ -1,0 +1,24 @@
+{
+  "id": "DQ020",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "architecture",
+  "question": "What is Phase 12 Accuracy & Grounding trying to fix?",
+  "accepted_answer_criteria": [
+    "Doc/narrative evidence missing or placeholder packs",
+    "Honest gaps instead of synthetic fragments",
+    "Five-arm / Graphify comparison"
+  ],
+  "necessary_spans": [
+    "docs/planning/PLANNING-AND-IMPLEMENTATION.md",
+    "docs/REPO-FEATURE-SUMMARY-AND-TOKEN-COMPARISON.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "doc sections or gaps",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

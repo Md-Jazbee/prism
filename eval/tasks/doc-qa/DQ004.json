@@ -1,0 +1,24 @@
+{
+  "id": "DQ004",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "install/bootstrap",
+  "question": "How does a cold machine get to a working compile_context without a Rust toolchain?",
+  "accepted_answer_criteria": [
+    "Mentions install script or release binary",
+    "Mentions prism setup and doctor --ready",
+    "Does not require API keys for indexing"
+  ],
+  "necessary_spans": [
+    "README.md",
+    "docs/architecture/PRODUCT-SETUP.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "product_thesis / usage_surface",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

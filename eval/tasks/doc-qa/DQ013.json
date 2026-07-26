@@ -1,0 +1,22 @@
+{
+  "id": "DQ013",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "non-goals",
+  "question": "What does Prism explicitly refuse to claim before certain gates?",
+  "accepted_answer_criteria": [
+    "Mentions at least one gated claim (precise rename, slice-debug, install-anywhere, etc.)",
+    "States a phase/gate dependency"
+  ],
+  "necessary_spans": [
+    "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "doc sections or gaps",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

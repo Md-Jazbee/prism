@@ -1,6 +1,8 @@
 //! Selection: plan (+ optional KG) → candidate fragments.
 
 use crate::fragment::{estimate_tokens, CandidateFragment, FragmentKind, PackLayer, Provenance};
+use crate::gap::{EvidenceGap, WhyAbsent};
+use crate::path_class::path_allowed;
 use anyhow::Result;
 use prism_obs::{emit_index_event, IndexEvent};
 use prism_plan::{Intent, Operator, Plan};
@@ -16,10 +18,20 @@ pub struct CompileOptions {
     pub workspace: Option<PathBuf>,
 }
 
+/// Live KG selection output (P12 Stage B): real fragments + honest gaps.
+#[derive(Debug, Clone, Default)]
+pub struct SelectionOutcome {
+    pub candidates: Vec<CandidateFragment>,
+    pub gaps: Vec<EvidenceGap>,
+}
+
 /// Offline / synthetic candidates from recipe roles (no KG).
 ///
 /// Produces one fragment per `must_include` role plus a few optional neighbors
 /// so budget/drop behavior is testable without an index.
+///
+/// **Live packs must not use this path** — see [`select_from_kg`]. Placeholders
+/// here exist only for offline EXPLAIN / budget invariant demos.
 pub fn select_candidates(plan: &Plan) -> Vec<CandidateFragment> {
     let anchor = first_anchor(plan).unwrap_or_else(|| "unknown".into());
     let mut out = Vec::new();
@@ -87,21 +99,25 @@ pub fn select_candidates(plan: &Plan) -> Vec<CandidateFragment> {
 }
 
 /// Select candidates by executing cheap T1 (+ bounded T2 upgrade) plan steps against the KG.
+///
+/// P12 Stage B: does **not** prepend `role_template` placeholders. Unfilled roles
+/// become [`EvidenceGap`]s. Synthetic-only fragments are stripped before return.
 pub fn select_from_kg(
     kg: &SqliteKgStore,
     plan: &Plan,
     opts: &CompileOptions,
-) -> Result<Vec<CandidateFragment>> {
+) -> Result<SelectionOutcome> {
     let mut out = Vec::new();
-    let mut gaps_extra: Vec<String> = Vec::new();
+    let mut gaps: Vec<EvidenceGap> = Vec::new();
     let anchors = anchors_from_plan(plan);
+    let mut gaps_extra: Vec<String> = Vec::new();
 
-    // Always materialize must-include role stubs first (may be enriched below)
-    out.extend(select_candidates(plan));
+    // P12: no select_candidates() prepend — live packs cite real nodes only.
+    out.extend(select_doc_prose(kg, opts, plan, &anchors)?);
 
     let mut seed_ids: Vec<String> = Vec::new();
 
-    // Enrich / replace with live KG hits where possible
+    // Enrich with live KG hits where possible
     for step in &plan.steps {
         if !step.executable && !matches!(step.op, Operator::BudgetPack) {
             continue;
@@ -111,6 +127,23 @@ pub fn select_from_kg(
                 for a in &anchors {
                     let name = strip_qual(a);
                     let hits = kg.resolve_symbol(name, None, 5)?;
+                    let hits: Vec<_> = hits
+                        .into_iter()
+                        .filter(|h| path_allowed(h.file_path.as_deref(), &anchors))
+                        .collect();
+                    if hits.is_empty() {
+                        gaps.push(
+                            EvidenceGap::new(
+                                "primary_symbol_definition",
+                                WhyAbsent::SeedUnresolved,
+                                format!(
+                                    "Could not resolve `{name}` — pick a symbol/path from resolve_symbol / repo_map"
+                                ),
+                            )
+                            .with_detail(a.clone()),
+                        );
+                        continue;
+                    }
                     for (i, hit) in hits.iter().enumerate() {
                         if !seed_ids.iter().any(|s| s == &hit.id) {
                             seed_ids.push(hit.id.clone());
@@ -176,6 +209,7 @@ pub fn select_from_kg(
                             EdgeDirection::Both,
                             15,
                         )?;
+                        nbrs.retain(|n| path_allowed(n.node.file_path.as_deref(), &anchors));
                         nbrs.sort_by(|a, b| {
                             confidence_rank(&b.edge.confidence)
                                 .cmp(&confidence_rank(&a.edge.confidence))
@@ -473,13 +507,28 @@ pub fn select_from_kg(
                     ));
                 }
                 let text = lines.join("\n");
+                let mut node_ids: Vec<String> = map
+                    .communities
+                    .iter()
+                    .take(8)
+                    .map(|c| c.id.clone())
+                    .collect();
+                node_ids.extend(map.hubs.iter().take(5).map(|h| h.node_id.clone()));
+                if node_ids.is_empty() {
+                    node_ids.push("repo_map:empty".into());
+                }
                 out.push(CandidateFragment {
                     id: "frag:kg:repo_map".into(),
                     kind: FragmentKind::Community,
                     layer: PackLayer::Arch,
                     text: text.clone(),
                     token_estimate: estimate_tokens(&text),
-                    provenance: Provenance::synthetic("repo_map"),
+                    provenance: Provenance {
+                        node_ids,
+                        edge_ids: vec![],
+                        analyzer: "prism-store".into(),
+                        tier: "T1".into(),
+                    },
                     confidence: "heuristic".into(),
                     why_included: "community_map".into(),
                     drop_priority: 0,
@@ -497,7 +546,7 @@ pub fn select_from_kg(
                             layer: PackLayer::Diff,
                             text: text.clone(),
                             token_estimate: estimate_tokens(&text),
-                            provenance: Provenance::synthetic(a),
+                            provenance: Provenance::from_node(format!("path:{a}"), "prism-compile"),
                             confidence: "extracted".into(),
                             why_included: "diff_hunks".into(),
                             drop_priority: 0,
@@ -522,7 +571,7 @@ pub fn select_from_kg(
                     layer: PackLayer::Core,
                     text: text.clone(),
                     token_estimate: estimate_tokens(&text),
-                    provenance: Provenance::synthetic("error"),
+                    provenance: Provenance::from_node("error:verbatim", "prism-compile"),
                     confidence: "extracted".into(),
                     why_included: "error_or_stack_verbatim".into(),
                     drop_priority: 0,
@@ -533,12 +582,20 @@ pub fn select_from_kg(
         }
     }
 
-    // Prefer precise over heuristic when same fragment id stem / neighbor target
+    // Convert free-form upgrade/slice notes into structured gaps (not fragments).
+    for g in gaps_extra {
+        gaps.push(EvidenceGap::from_plan_note(&g));
+    }
+
+    // Prefer precise over heuristic when same fragment id
     out.sort_by(|a, b| {
         a.id.cmp(&b.id)
             .then_with(|| confidence_rank(&b.confidence).cmp(&confidence_rank(&a.confidence)))
     });
     out.dedup_by(|a, b| a.id == b.id);
+
+    // Strip synthetic-only placeholders (ACC-2).
+    out.retain(|c| !c.provenance.is_synthetic_only());
 
     // Re-apply must_include from plan roles
     for c in &mut out {
@@ -548,25 +605,118 @@ pub fn select_from_kg(
         }
     }
 
-    // Stash upgrade uncertainty as synthetic gap fragments (visible in pack text roles)
-    for (i, g) in gaps_extra.iter().enumerate() {
-        out.push(CandidateFragment {
-            id: format!("frag:gap:upgrade:{i}"),
-            kind: FragmentKind::Signature,
-            layer: PackLayer::Nbr,
-            text: g.clone(),
-            token_estimate: estimate_tokens(g),
-            provenance: Provenance::synthetic("upgrade_gap"),
-            confidence: "heuristic".into(),
-            why_included: "precision_uncertainty".into(),
-            drop_priority: 5,
-            roles: vec!["precision_uncertainty".into()],
-            must_include: false,
+    Ok(SelectionOutcome {
+        candidates: out,
+        gaps,
+    })
+}
+
+
+/// Pull extractive Doc/Section spans for prose roles (P12 Stage A+B).
+fn select_doc_prose(
+    kg: &SqliteKgStore,
+    opts: &CompileOptions,
+    plan: &Plan,
+    anchors: &[String],
+) -> Result<Vec<CandidateFragment>> {
+    let want_prose = matches!(plan.intent, Intent::Architecture | Intent::RepoQa)
+        || anchors.iter().any(|a| {
+            let l = a.to_ascii_lowercase();
+            l.ends_with(".md") || l.contains("readme") || l.starts_with("docs/")
         });
+    if !want_prose {
+        return Ok(Vec::new());
     }
 
-    let _ = gaps_extra;
+    let docs = kg.list_nodes_by_kinds(&["Doc", "Section"], 40)?;
+    let mut out = Vec::new();
+    let root = opts.workspace.as_ref();
+
+    for (i, node) in docs.iter().enumerate() {
+        if !path_allowed(node.file_path.as_deref(), anchors) {
+            continue;
+        }
+        let anchored = node
+            .file_path
+            .as_ref()
+            .map(|p| crate::path_class::anchor_covers_path(anchors, p))
+            .unwrap_or(false);
+        if !anchored && !anchors.is_empty() && node.kind != "Doc" {
+            continue;
+        }
+        if !anchored && anchors.is_empty() && i > 12 {
+            break;
+        }
+
+        let text = match (root, node.file_path.as_deref()) {
+            (Some(ws), Some(path)) => read_doc_excerpt(ws, path, node),
+            _ => format!(
+                "{} {} {}",
+                node.kind,
+                node.name.as_deref().unwrap_or(""),
+                node.file_path.as_deref().unwrap_or("")
+            ),
+        };
+        let role = if node.kind == "Doc" {
+            "product_thesis"
+        } else {
+            "architecture_prose"
+        };
+        let must = matches!(plan.intent, Intent::Architecture)
+            || plan
+                .must_include
+                .iter()
+                .any(|r| r == role || r == "architecture_prose");
+        out.push(CandidateFragment {
+            id: format!("frag:doc:{}:{i}", node.id),
+            kind: FragmentKind::Slice,
+            layer: if node.kind == "Doc" {
+                PackLayer::Arch
+            } else {
+                PackLayer::Core
+            },
+            text: text.clone(),
+            token_estimate: estimate_tokens(&text),
+            provenance: Provenance::from_node(&node.id, "prism-extract-markdown"),
+            confidence: "asserted".into(),
+            why_included: role.into(),
+            drop_priority: if must { 0 } else { 25 },
+            roles: vec![
+                role.into(),
+                "architecture_prose".into(),
+                "primary_symbol_definition".into(),
+            ],
+            must_include: must,
+        });
+    }
     Ok(out)
+}
+
+fn read_doc_excerpt(
+    workspace: &std::path::Path,
+    rel: &str,
+    node: &prism_store::GraphNodeView,
+) -> String {
+    let path = workspace.join(rel);
+    let Ok(bytes) = std::fs::read(&path) else {
+        return format!("{} {}", node.kind, node.name.as_deref().unwrap_or(rel));
+    };
+    let title = node.name.as_deref().unwrap_or(rel);
+    let raw = String::from_utf8_lossy(&bytes);
+    let excerpt = if node.kind == "Section" {
+        if let Some(idx) = raw
+            .find(&format!("# {title}"))
+            .or_else(|| raw.find(title))
+        {
+            let end = (idx + 800).min(raw.len());
+            raw[idx..end].to_string()
+        } else {
+            raw.chars().take(800).collect()
+        }
+    } else {
+        raw.chars().take(1200).collect()
+    };
+    format!("# {title} ({rel})\n{excerpt}")
 }
 
 fn emit_upgrade_event(report: &HybridResolveReport) {

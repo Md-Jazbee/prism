@@ -1,0 +1,22 @@
+{
+  "id": "DQ024",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "architecture",
+  "question": "What path classes must not appear in Evidence Packs unless the question anchors there?",
+  "accepted_answer_criteria": [
+    "Mentions fixtures and/or vendored/generated",
+    "ACC-6 or first-party scoping policy"
+  ],
+  "necessary_spans": [
+    "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "doc sections or gaps",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

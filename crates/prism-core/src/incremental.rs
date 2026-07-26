@@ -83,12 +83,14 @@ impl IncrementalIndexer {
         };
 
         // Snapshot prior hashes for parallel skip decisions (SQLite stays single-threaded).
-        let prior_hashes: std::collections::HashMap<String, String> = self
+        // P12: skip only when content_hash AND analyzer_pipeline_version match.
+        let prior_records: std::collections::HashMap<String, (String, String)> = self
             .meta
             .list_file_paths()?
             .into_iter()
-            .filter_map(|p| self.meta.get_file_hash(&p).ok().flatten().map(|h| (p, h)))
+            .filter_map(|p| self.meta.get_file_record(&p).ok().flatten().map(|r| (p, r)))
             .collect();
+        let pipeline = prism_store::ANALYZER_PIPELINE_VERSION;
 
         let root_path: PathBuf = self.workspace.root().to_path_buf();
         let prepared: Vec<Prepared> = discovered
@@ -114,9 +116,9 @@ impl IncrementalIndexer {
                     }
                 };
                 let content_hash = file_content_hash(&bytes);
-                let unchanged = prior_hashes
+                let unchanged = prior_records
                     .get(&rel)
-                    .map(|h| h == &content_hash)
+                    .map(|(h, ver)| h == &content_hash && ver == pipeline)
                     .unwrap_or(false);
                 if unchanged {
                     return Prepared::Unchanged {

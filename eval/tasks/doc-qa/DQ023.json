@@ -1,0 +1,23 @@
+{
+  "id": "DQ023",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "non-goals",
+  "question": "Is team shared-index / certified answer cache part of the solo product today?",
+  "accepted_answer_criteria": [
+    "States P10/team features are deferred or optional",
+    "Solo mode does not require always-on shared graph DB"
+  ],
+  "necessary_spans": [
+    "docs/planning/PLANNING-AND-IMPLEMENTATION.md",
+    "README.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "doc sections or gaps",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

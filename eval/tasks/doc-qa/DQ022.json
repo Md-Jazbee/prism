@@ -1,0 +1,23 @@
+{
+  "id": "DQ022",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "use cases",
+  "question": "How does Prism help debug a crash with a stack trace?",
+  "accepted_answer_criteria": [
+    "Mentions debug workflow or compile_context with error/stack",
+    "Error/stack criterion never dropped under budget"
+  ],
+  "necessary_spans": [
+    "AGENTS.md",
+    "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "doc sections or gaps",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

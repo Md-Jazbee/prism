@@ -6,16 +6,20 @@
 mod budget;
 mod explain;
 mod fragment;
+mod gap;
 mod pack;
+mod path_class;
 mod select;
 
-pub use budget::{pack_under_budget, BudgetExceeded};
+pub use budget::{pack_under_budget, pack_under_budget_with_gaps, BudgetExceeded};
 pub use explain::{DropRecord, ExplainFragment, ExplainReport};
 pub use fragment::{
     estimate_tokens, CandidateFragment, EvidenceFragment, FragmentKind, PackLayer, Provenance,
 };
+pub use gap::{EvidenceGap, WhyAbsent};
 pub use pack::{Citation, CompileOutcome, EvidencePack, PackHierarchy, PackMeta};
-pub use select::{select_candidates, select_from_kg, CompileOptions};
+pub use path_class::{classify_path, is_noise_path, path_allowed, PathClass};
+pub use select::{select_candidates, select_from_kg, CompileOptions, SelectionOutcome};
 
 use anyhow::{Context, Result};
 use prism_plan::{plan_query, Plan, PlanHints, PlanOutcome, ScopeUnresolved};
@@ -54,14 +58,25 @@ pub fn compile_context(
             let opts = CompileOptions {
                 workspace: Some(workspace.to_path_buf()),
             };
-            let candidates = select_from_kg(&kg, &plan, &opts)?;
-            Ok(compile_from_candidates(&plan, candidates))
+            let selection = select_from_kg(&kg, &plan, &opts)?;
+            match pack_under_budget_with_gaps(&plan, selection.candidates, selection.gaps) {
+                Ok(pack) => {
+                    // ACC-2: live packs must never keep synthetic placeholders.
+                    pack.assert_no_placeholder_fragments()
+                        .map_err(anyhow::Error::msg)?;
+                    Ok(CompileOutcome::Ok(Box::new(pack)))
+                }
+                Err(e) => Ok(CompileOutcome::BudgetExceeded(e)),
+            }
         }
     }
 }
 
 /// Compile using only the plan (synthetic candidates from recipe roles) — no KG.
 /// Useful for offline EXPLAIN / budget invariant demos.
+///
+/// Note (P12): synthetic packs may contain placeholder provenance; live
+/// [`compile_context`] strips those and emits [`EvidenceGap`]s instead.
 pub fn compile_synthetic(plan: &Plan) -> CompileOutcome {
     let candidates = select_candidates(plan);
     compile_from_candidates(plan, candidates)
@@ -79,6 +94,56 @@ mod tests {
 
     fn fixture(name: &str) -> PathBuf {
         PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(format!("../../fixtures/packs/{name}"))
+    }
+
+    #[test]
+    fn placeholder_invariant_rejects_synthetic_only() {
+        use crate::explain::ExplainReport;
+        use crate::fragment::{EvidenceFragment, FragmentKind, PackLayer, Provenance};
+        use crate::pack::{Citation, EvidencePack, PackHierarchy, PackMeta};
+        let bad = EvidencePack {
+            meta: PackMeta {
+                schema_version: EvidencePack::schema_version().into(),
+                plan_id: "plan:test".into(),
+                intent: Intent::RepoQa,
+                question: "q".into(),
+                budget_tokens: 100,
+                tokens_used: 1,
+                repo: None,
+                snapshot: None,
+            },
+            hierarchy: PackHierarchy::default(),
+            fragments: vec![EvidenceFragment {
+                id: "frag:bad".into(),
+                kind: FragmentKind::Slice,
+                layer: PackLayer::Core,
+                text: "// must-include `x`".into(),
+                token_estimate: 1,
+                must_include: true,
+                drop_priority: 0,
+                roles: vec!["x".into()],
+                why_included: "x".into(),
+                confidence: "extracted".into(),
+                provenance: Provenance::synthetic("x"),
+            }],
+            citations: vec![Citation {
+                id: "C1".into(),
+                fragment_id: "frag:bad".into(),
+                node_ids: vec!["synthetic:x".into()],
+            }],
+            gaps: vec![],
+            drops: vec![],
+            explain: ExplainReport {
+                plan_id: "plan:test".into(),
+                budget_tokens: 100,
+                tokens_used: 1,
+                must_include_ok: true,
+                fragments: vec![],
+                drops: vec![],
+                notes: vec![],
+            },
+        };
+        assert!(bad.assert_no_placeholder_fragments().is_err());
     }
 
     #[test]

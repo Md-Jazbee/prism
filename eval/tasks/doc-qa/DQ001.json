@@ -1,0 +1,26 @@
+{
+  "id": "DQ001",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "product thesis",
+  "question": "What is Prism and what problem does it solve for AI coding agents?",
+  "accepted_answer_criteria": [
+    "States repository intelligence / Evidence Pack thesis",
+    "Mentions local-first indexing without API keys",
+    "Contrasts with grep/read explore loops"
+  ],
+  "necessary_spans": [
+    "README.md",
+    "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "product_thesis + architecture_prose or gaps",
+  "baseline_protocols": [
+    "frontier+explore",
+    "medium+explore",
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

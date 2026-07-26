@@ -24,17 +24,26 @@ pub fn recipe_for(intent: Intent) -> IntentRecipe {
     match intent {
         Intent::RepoQa => IntentRecipe {
             intent,
-            seed_description: "named symbols / paths in the question",
-            expand_description: "def + 1-hop callee/caller signatures",
-            must_include: &["primary_symbol_definition", "primary_symbol_signature"],
+            seed_description: "named symbols / paths / doc headings in the question",
+            expand_description: "def + 1-hop callee/caller signatures + doc prose when present",
+            must_include: &[
+                "primary_symbol_definition",
+                "primary_symbol_signature",
+            ],
             drop_order: &[
                 "embedding_fallback_seeds",
                 "depth_3_plus_neighbors",
                 "neighbor_bodies",
                 "secondary_exemplars",
                 "architecture_prose",
+                "product_thesis",
+                "usage_surface",
             ],
-            notes: &["Prefer T1 ResolveSymbol + Expand; no LLM in planner"],
+            notes: &[
+                "Prefer T1 ResolveSymbol + Expand; no LLM in planner",
+                "P12: unfilled roles become gaps[] — never role_template placeholders",
+                "Doc/Section nodes fill architecture_prose / product_thesis when indexed",
+            ],
         },
         Intent::Debug => IntentRecipe {
             intent,
@@ -121,15 +130,21 @@ pub fn recipe_for(intent: Intent) -> IntentRecipe {
         },
         Intent::Architecture => IntentRecipe {
             intent,
-            seed_description: "communities (no symbol required)",
-            expand_description: "hub nodes + boundaries",
-            must_include: &["community_map", "hub_nodes"],
+            seed_description: "communities (no symbol required); optional README/docs anchors",
+            expand_description: "hub nodes + boundaries + doc product thesis",
+            must_include: &["community_map", "hub_nodes", "product_thesis"],
             drop_order: &[
                 "embedding_fallback_seeds",
                 "deep_module_bodies",
                 "secondary_exemplars",
+                "architecture_prose",
+                "usage_surface",
             ],
-            notes: &["Uses CommunityOf / repo_map; anchors optional"],
+            notes: &[
+                "Uses CommunityOf / repo_map; anchors optional",
+                "P12: product_thesis filled from Doc nodes when present; else gaps[]",
+                "Hub ranking excludes unresolved/builtin noise (ACC-4)",
+            ],
         },
     }
 }

@@ -1,0 +1,24 @@
+{
+  "id": "DQ011",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "workflows",
+  "question": "Which Prism workflows exist for agents and when is each used?",
+  "accepted_answer_criteria": [
+    "Names onboarding / review / debug / refactor_prep (or equivalents)",
+    "Ties each to a trigger situation",
+    "Mentions compile_context as primary tool"
+  ],
+  "necessary_spans": [
+    "AGENTS.md",
+    "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "doc sections or gaps",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

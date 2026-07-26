@@ -1,0 +1,23 @@
+{
+  "id": "DQ019",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "install/bootstrap",
+  "question": "How do host adapters register Prism for Cursor vs VS Code vs Claude?",
+  "accepted_answer_criteria": [
+    "Mentions prism host install",
+    "Names at least two host targets",
+    "Mentions mcp.json or CLAUDE.md"
+  ],
+  "necessary_spans": [
+    "README.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "doc sections or gaps",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

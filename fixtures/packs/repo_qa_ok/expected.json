@@ -4,7 +4,7 @@
     "meta": {
       "intent": "repo_qa",
       "budget_tokens": 4000,
-      "tokens_used": 95,
+      "tokens_used": 121,
       "question": "What does `Helper` do?",
       "plan_id": "plan:repo_qa:2ebb291c4daaf487",
       "schema_version": "0.0.1"
@@ -21,7 +21,9 @@
         "frag:opt:1:depth_3_plus_neighbors",
         "frag:opt:2:embedding_fallback_seeds",
         "frag:opt:3:neighbor_bodies",
-        "frag:opt:4:secondary_exemplars"
+        "frag:opt:4:product_thesis",
+        "frag:opt:5:secondary_exemplars",
+        "frag:opt:6:usage_surface"
       ]
     },
     "fragments": [
@@ -152,7 +154,28 @@
         "must_include": false
       },
       {
-        "id": "frag:opt:4:secondary_exemplars",
+        "id": "frag:opt:4:product_thesis",
+        "kind": "signature",
+        "layer": "nbr",
+        "text": "[optional:product_thesis] related context for Helper",
+        "token_estimate": 13,
+        "provenance": {
+          "node_ids": [
+            "synthetic:product_thesis"
+          ],
+          "analyzer": "prism-compile@0.0.1",
+          "tier": "T1"
+        },
+        "confidence": "heuristic",
+        "why_included": "optional:product_thesis",
+        "drop_priority": 50,
+        "roles": [
+          "product_thesis"
+        ],
+        "must_include": false
+      },
+      {
+        "id": "frag:opt:5:secondary_exemplars",
         "kind": "signature",
         "layer": "nbr",
         "text": "[optional:secondary_exemplars] related context for Helper",
@@ -166,9 +189,30 @@
         },
         "confidence": "heuristic",
         "why_included": "optional:secondary_exemplars",
-        "drop_priority": 50,
+        "drop_priority": 60,
         "roles": [
           "secondary_exemplars"
+        ],
+        "must_include": false
+      },
+      {
+        "id": "frag:opt:6:usage_surface",
+        "kind": "signature",
+        "layer": "nbr",
+        "text": "[optional:usage_surface] related context for Helper",
+        "token_estimate": 13,
+        "provenance": {
+          "node_ids": [
+            "synthetic:usage_surface"
+          ],
+          "analyzer": "prism-compile@0.0.1",
+          "tier": "T1"
+        },
+        "confidence": "heuristic",
+        "why_included": "optional:usage_surface",
+        "drop_priority": 70,
+        "roles": [
+          "usage_surface"
         ],
         "must_include": false
       }
@@ -218,9 +262,23 @@
       },
       {
         "id": "C7",
-        "fragment_id": "frag:opt:4:secondary_exemplars",
+        "fragment_id": "frag:opt:4:product_thesis",
+        "node_ids": [
+          "synthetic:product_thesis"
+        ]
+      },
+      {
+        "id": "C8",
+        "fragment_id": "frag:opt:5:secondary_exemplars",
         "node_ids": [
           "synthetic:secondary_exemplars"
+        ]
+      },
+      {
+        "id": "C9",
+        "fragment_id": "frag:opt:6:usage_surface",
+        "node_ids": [
+          "synthetic:usage_surface"
         ]
       }
     ],
@@ -229,7 +287,7 @@
     "explain": {
       "plan_id": "plan:repo_qa:2ebb291c4daaf487",
       "budget_tokens": 4000,
-      "tokens_used": 95,
+      "tokens_used": 121,
       "must_include_ok": true,
       "fragments": [
         {
@@ -275,9 +333,23 @@
           "kept": true
         },
         {
-          "fragment_id": "frag:opt:4:secondary_exemplars",
+          "fragment_id": "frag:opt:4:product_thesis",
+          "why_included": "optional:product_thesis",
+          "token_estimate": 13,
+          "must_include": false,
+          "kept": true
+        },
+        {
+          "fragment_id": "frag:opt:5:secondary_exemplars",
           "why_included": "optional:secondary_exemplars",
           "token_estimate": 15,
+          "must_include": false,
+          "kept": true
+        },
+        {
+          "fragment_id": "frag:opt:6:usage_surface",
+          "why_included": "optional:usage_surface",
+          "token_estimate": 13,
           "must_include": false,
           "kept": true
         }
@@ -286,7 +358,8 @@
       "notes": [
         "must-include fragments cannot be budget-evicted",
         "error/stack + criterion slice never dropped under budget pressure",
-        "extractive default; no abstractive code summaries"
+        "extractive default; no abstractive code summaries",
+        "P12: unfilled roles become gaps[], never placeholder fragments"
       ]
     }
   }

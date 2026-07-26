@@ -1,0 +1,24 @@
+{
+  "id": "DQ015",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "architecture",
+  "question": "How do confidence tiers (extracted, asserted, heuristic, precise) differ?",
+  "accepted_answer_criteria": [
+    "Distinguishes code-extracted vs doc-asserted",
+    "Notes precise requires SCIP/LSP-class evidence",
+    "Heuristic stays labeled"
+  ],
+  "necessary_spans": [
+    "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md",
+    "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "doc sections or gaps",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

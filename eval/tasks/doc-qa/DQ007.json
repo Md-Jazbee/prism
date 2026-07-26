@@ -1,0 +1,24 @@
+{
+  "id": "DQ007",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "feature inventory",
+  "question": "What precision tiers does Prism use and what does T1 include today?",
+  "accepted_answer_criteria": [
+    "Mentions T1 syntactic / tree-sitter",
+    "Mentions T2 precise and T3/T4 semantic as later tiers",
+    "Honest about heuristic CALLS at T1"
+  ],
+  "necessary_spans": [
+    "README.md",
+    "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "architecture_prose",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

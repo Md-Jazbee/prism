@@ -1,0 +1,23 @@
+{
+  "id": "DQ010",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "install/bootstrap",
+  "question": "What does `prism setup .` do in one shot?",
+  "accepted_answer_criteria": [
+    "Builds or refreshes local index / .prism graph",
+    "Generates agent assets (AGENTS.md / rules)",
+    "Registers MCP host config"
+  ],
+  "necessary_spans": [
+    "README.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "doc sections or gaps",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "DQ014",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "architecture",
+  "question": "What is an Evidence Pack and what must every fragment carry?",
+  "accepted_answer_criteria": [
+    "Minimum-sufficient context under a token budget",
+    "Provenance / confidence / citations"
+  ],
+  "necessary_spans": [
+    "README.md",
+    "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "doc sections or gaps",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "DQ005",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "non-goals",
+  "question": "What is Prism explicitly not trying to be?",
+  "accepted_answer_criteria": [
+    "Not primarily a vector RAG wrapper or answer cache",
+    "Not replacing general code search products",
+    "Embeddings are fallback not spine"
+  ],
+  "necessary_spans": [
+    "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "architecture_prose from ADD non-goals",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

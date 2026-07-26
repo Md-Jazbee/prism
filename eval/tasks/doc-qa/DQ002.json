@@ -1,0 +1,24 @@
+{
+  "id": "DQ002",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "feature inventory",
+  "question": "What MCP tools does Prism expose and which is primary?",
+  "accepted_answer_criteria": [
+    "Names compile_context as primary",
+    "Mentions at least resolve_symbol, neighbors, impact, or repo_map",
+    "Notes read-only / confidence labels"
+  ],
+  "necessary_spans": [
+    "docs/architecture/MCP-TOOL-CATALOG.md",
+    "README.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "doc sections citing MCP catalog",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

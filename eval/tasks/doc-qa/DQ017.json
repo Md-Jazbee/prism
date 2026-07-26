@@ -1,0 +1,23 @@
+{
+  "id": "DQ017",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "feature inventory",
+  "question": "What languages or extractors does Prism support at T1?",
+  "accepted_answer_criteria": [
+    "Names more than one language family (e.g. Python/TS/Rust/Go/Java or markdown)",
+    "Notes unresolved edges are first-class"
+  ],
+  "necessary_spans": [
+    "README.md",
+    "docs/contributing/plugin-guide.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "doc sections or gaps",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

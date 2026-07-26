@@ -2,6 +2,7 @@
 
 use crate::explain::{DropRecord, ExplainFragment, ExplainReport};
 use crate::fragment::{CandidateFragment, EvidenceFragment, FragmentKind};
+use crate::gap::{EvidenceGap, WhyAbsent};
 use crate::pack::{Citation, EvidencePack, PackHierarchy, PackMeta};
 use prism_ir::PACK_SCHEMA_VERSION;
 use prism_plan::Plan;
@@ -33,7 +34,16 @@ pub struct BudgetExceeded {
 /// Debug pack gates (P4 Stage C): `ErrorVerbatim` and protected roles are forced must-include.
 pub fn pack_under_budget(
     plan: &Plan,
+    candidates: Vec<CandidateFragment>,
+) -> Result<EvidencePack, BudgetExceeded> {
+    pack_under_budget_with_gaps(plan, candidates, Vec::new())
+}
+
+/// Like [`pack_under_budget`], merging structured selection gaps into the pack.
+pub fn pack_under_budget_with_gaps(
+    plan: &Plan,
     mut candidates: Vec<CandidateFragment>,
+    selection_gaps: Vec<EvidenceGap>,
 ) -> Result<EvidencePack, BudgetExceeded> {
     // Tag must-include from roles ∩ plan.must_include + hard protected kinds/roles
     for c in &mut candidates {
@@ -135,8 +145,26 @@ pub fn pack_under_budget(
         })
         .collect();
 
-    let mut gaps = plan.gaps.clone();
-    gaps.sort();
+    let mut gaps: Vec<EvidenceGap> = plan
+        .gaps
+        .iter()
+        .map(|n| EvidenceGap::from_plan_note(n))
+        .collect();
+    gaps.extend(selection_gaps);
+
+    // Unfilled must-include roles → gaps (ACC-2), not placeholders.
+    for role in &plan.must_include {
+        let filled = kept.iter().any(|f| f.roles.contains(role));
+        if !filled && !gaps.iter().any(|g| g.role == *role) {
+            gaps.push(EvidenceGap::new(
+                role.clone(),
+                WhyAbsent::NoSuchNode,
+                format!("Provide a clearer anchor for `{role}`, or reindex docs/code"),
+            ));
+        }
+    }
+
+    gaps.sort_by(|a, b| a.role.cmp(&b.role).then_with(|| a.summary().cmp(&b.summary())));
 
     let explain = ExplainReport {
         plan_id: plan.plan_id.clone(),
@@ -149,6 +177,7 @@ pub fn pack_under_budget(
             "must-include fragments cannot be budget-evicted".into(),
             "error/stack + criterion slice never dropped under budget pressure".into(),
             "extractive default; no abstractive code summaries".into(),
+            "P12: unfilled roles become gaps[], never placeholder fragments".into(),
         ],
     };
 

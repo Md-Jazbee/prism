@@ -1,0 +1,117 @@
+{
+  "suite": "p12-five-arm",
+  "mode": "scripted_proxy",
+  "arms": [
+    {
+      "arm": "A",
+      "protocol": "explore",
+      "first_tool": "grep",
+      "chose_compile_first": false,
+      "hops": 12,
+      "tokens_proxy": 18000,
+      "quality_proxy": 0.7,
+      "citation_validity_proxy": 0.55,
+      "notes": "Scripted explore arm \u2014 hop\u00d7token proxy; not a live frontier call"
+    },
+    {
+      "arm": "B",
+      "protocol": "explore",
+      "first_tool": "grep",
+      "chose_compile_first": false,
+      "hops": 10,
+      "tokens_proxy": 12000,
+      "quality_proxy": 0.62,
+      "citation_validity_proxy": 0.5,
+      "notes": "Scripted explore arm \u2014 hop\u00d7token proxy; not a live frontier call"
+    },
+    {
+      "arm": "C",
+      "protocol": "prism",
+      "first_tool": "compile_context",
+      "chose_compile_first": true,
+      "hops": 1,
+      "tokens_proxy": 800,
+      "quality_proxy": 0.7,
+      "citation_validity_proxy": 0.85,
+      "notes": "Scripted Prism arm \u2014 P12 Stage B gaps+docs; quality_proxy is structural completeness"
+    },
+    {
+      "arm": "D",
+      "protocol": "prism",
+      "first_tool": "compile_context",
+      "chose_compile_first": true,
+      "hops": 1,
+      "tokens_proxy": 1200,
+      "quality_proxy": 0.72,
+      "citation_validity_proxy": 0.85,
+      "notes": "Scripted Prism arm \u2014 P12 Stage B gaps+docs; quality_proxy is structural completeness"
+    },
+    {
+      "arm": "E",
+      "protocol": "graphify",
+      "first_tool": "graph_query",
+      "chose_compile_first": false,
+      "hops": 2,
+      "tokens_proxy": 2000,
+      "quality_proxy": 0.74,
+      "citation_validity_proxy": 0.8,
+      "notes": "Doc-aware graph baseline (Graphify) \u2014 BFS budget ~2k; citation-validity scored"
+    }
+  ],
+  "agent_traces": {
+    "n_traces": 3,
+    "first_tool_choice_rate": 0.6666666666666666,
+    "refusal_repair_success_rate": 1.0,
+    "mean_refusals": 0.3333333333333333,
+    "target_first_tool_choice": 0.7
+  },
+  "doc_qa_tasks": {
+    "n": 25,
+    "ids": [
+      "DQ001",
+      "DQ002",
+      "DQ003",
+      "DQ004",
+      "DQ005",
+      "DQ006",
+      "DQ007",
+      "DQ008",
+      "DQ009",
+      "DQ010",
+      "DQ011",
+      "DQ012",
+      "DQ013",
+      "DQ014",
+      "DQ015",
+      "DQ016",
+      "DQ017",
+      "DQ018",
+      "DQ019",
+      "DQ020",
+      "DQ021",
+      "DQ022",
+      "DQ023",
+      "DQ024",
+      "DQ025"
+    ],
+    "target_n": 25,
+    "notes": "DQ001\u2013DQ025 authored under eval/tasks/doc-qa/; live adjudication pending"
+  },
+  "g1": {
+    "claim": "quality(Medium+Prism) >= quality(Frontier+explore) - 3pts",
+    "delta_proxy_pts": 0.0,
+    "status": "PASS_PROXY"
+  },
+  "acc5": {
+    "claim": "quality(Medium+Prism) >= quality(Graphify) - 2pts AND tokens(C) <= 0.5 * tokens(E)",
+    "quality_delta_pts": -4.0,
+    "token_ratio": 0.4,
+    "status": "FAIL_PROXY",
+    "caveat": "Scripted proxies until live-judged runs; citation-validity is co-reported"
+  },
+  "ablations_planned": [
+    "docs=on/off",
+    "communities=path_prefix/semantic",
+    "lexical_seeds=on/off"
+  ]
+}

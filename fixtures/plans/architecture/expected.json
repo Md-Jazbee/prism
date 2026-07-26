@@ -50,18 +50,23 @@
     ],
     "must_include": [
       "community_map",
-      "hub_nodes"
+      "hub_nodes",
+      "product_thesis"
     ],
     "drop_order": [
+      "architecture_prose",
       "deep_module_bodies",
       "embedding_fallback_seeds",
-      "secondary_exemplars"
+      "secondary_exemplars",
+      "usage_surface"
     ],
     "gaps": [],
     "notes": [
+      "Hub ranking excludes unresolved/builtin noise (ACC-4)",
+      "P12: product_thesis filled from Doc nodes when present; else gaps[]",
       "Uses CommunityOf / repo_map; anchors optional",
-      "expand: hub nodes + boundaries",
-      "seeds: communities (no symbol required)"
+      "expand: hub nodes + boundaries + doc product thesis",
+      "seeds: communities (no symbol required); optional README/docs anchors"
     ]
   }
 }

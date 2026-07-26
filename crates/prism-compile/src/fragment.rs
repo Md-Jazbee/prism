@@ -75,6 +75,13 @@ impl Provenance {
             tier: tier.into(),
         }
     }
+
+    /// True when every node id is a `synthetic:` placeholder (P12 Stage B ACC-2).
+    pub fn is_synthetic_only(&self) -> bool {
+        !self.node_ids.is_empty()
+            && self.node_ids.iter().all(|id| id.starts_with("synthetic:"))
+            && self.edge_ids.is_empty()
+    }
 }
 
 /// Pre-budget candidate (selection output).

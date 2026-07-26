@@ -106,6 +106,37 @@ impl SqliteKgStore {
         }
     }
 
+    /// List nodes whose `kind` is in `kinds` (P12 doc/section prose selection).
+    pub fn list_nodes_by_kinds(&self, kinds: &[&str], limit: usize) -> Result<Vec<GraphNodeView>> {
+        let limit = limit.clamp(1, 500);
+        if kinds.is_empty() {
+            return Ok(Vec::new());
+        }
+        let placeholders = (1..=kinds.len())
+            .map(|i| format!("?{i}"))
+            .collect::<Vec<_>>()
+            .join(", ");
+        let sql = format!(
+            "SELECT id, kind, name, file_path, attrs_json FROM nodes
+             WHERE kind IN ({placeholders})
+             ORDER BY kind, id
+             LIMIT ?{lim}",
+            lim = kinds.len() + 1
+        );
+        let mut stmt = self.conn.prepare(&sql)?;
+        let mut params: Vec<rusqlite::types::Value> = kinds
+            .iter()
+            .map(|k| rusqlite::types::Value::Text((*k).to_string()))
+            .collect();
+        params.push(rusqlite::types::Value::Integer(limit as i64));
+        let rows = stmt.query_map(rusqlite::params_from_iter(params), row_to_node)?;
+        let mut out = Vec::new();
+        for r in rows {
+            out.push(r?);
+        }
+        Ok(out)
+    }
+
     /// 1-hop neighbors filtered by optional edge kinds.
     pub fn neighbors(
         &self,

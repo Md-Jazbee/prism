@@ -1,0 +1,22 @@
+{
+  "id": "DQ006",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "workflow semantics",
+  "question": "What should an agent do when Prism returns PRECISION_REQUIRED?",
+  "accepted_answer_criteria": [
+    "Mentions precise import or continuing labeled heuristic",
+    "Does not silently upgrade confidence"
+  ],
+  "necessary_spans": [
+    "AGENTS.md",
+    "docs/architecture/MCP-TOOL-CATALOG.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "refusal-repair guidance",
+  "baseline_protocols": [
+    "medium+prism"
+  ]
+}

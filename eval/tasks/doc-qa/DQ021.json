@@ -1,0 +1,22 @@
+{
+  "id": "DQ021",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "feature inventory",
+  "question": "What refusal codes can Prism return and what repair does each suggest?",
+  "accepted_answer_criteria": [
+    "Lists at least three of SCOPE_UNRESOLVED, BUDGET_EXCEEDED, INDEX_UNAVAILABLE, PRECISION_REQUIRED, VIEW_TOO_LARGE",
+    "Gives a next action for one of them"
+  ],
+  "necessary_spans": [
+    "AGENTS.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "doc sections or gaps",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

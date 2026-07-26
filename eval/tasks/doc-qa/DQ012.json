@@ -1,0 +1,23 @@
+{
+  "id": "DQ012",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "workflows",
+  "question": "What should an agent do when compile_context returns SCOPE_UNRESOLVED?",
+  "accepted_answer_criteria": [
+    "Ask for / pick symbol, path, or stack frame anchors",
+    "Does not dump the whole repo"
+  ],
+  "necessary_spans": [
+    "AGENTS.md",
+    ".cursor/rules/prism-compile-first.mdc"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "doc sections or gaps",
+  "baseline_protocols": [
+    "medium+prism",
+    "medium+graphify"
+  ]
+}

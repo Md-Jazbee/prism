@@ -1,0 +1,21 @@
+{
+  "id": "DQ008",
+  "version": "0.0.1",
+  "type": "doc_narrative",
+  "category": "contradiction",
+  "question": "If documentation claims a feature the code does not implement, how should Evidence Packs label that claim?",
+  "accepted_answer_criteria": [
+    "Mentions asserted confidence for doc claims",
+    "Asserted never satisfies a precision gate"
+  ],
+  "necessary_spans": [
+    "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+  ],
+  "forbidden_sources": [
+    "fixtures/repos/"
+  ],
+  "expected_pack_shape": "gaps or asserted prose",
+  "baseline_protocols": [
+    "medium+prism"
+  ]
+}
