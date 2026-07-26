@@ -1,0 +1,77 @@
+{
+  "schema_version": "graph-view/v1",
+  "snapshot_id": "p7-arch-v1",
+  "view_kind": "architecture_map",
+  "nodes": [
+    {
+      "id": "comm:src/a/",
+      "label": "src/a",
+      "kind": "Community",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "lod_rank": 0,
+      "group": "comm:src/a/",
+      "citation": { "node_ids": ["comm:src/a/"], "file_path": "src/a/" },
+      "x": 40.0,
+      "y": 80.0,
+      "heat": 2.0
+    },
+    {
+      "id": "comm:src/b/",
+      "label": "src/b",
+      "kind": "Community",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "lod_rank": 0,
+      "group": "comm:src/b/",
+      "citation": { "node_ids": ["comm:src/b/"], "file_path": "src/b/" },
+      "x": 200.0,
+      "y": 80.0,
+      "heat": 1.0
+    },
+    {
+      "id": "sym:entry",
+      "label": "entry",
+      "kind": "Symbol",
+      "tier": "T1",
+      "confidence": "extracted",
+      "lod_rank": 1,
+      "group": "comm:src/a/",
+      "citation": {
+        "node_ids": ["sym:entry"],
+        "file_path": "src/a/mod.py",
+        "span": { "start_line": 1, "end_line": 2 }
+      },
+      "x": 40.0,
+      "y": 180.0
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "src": "comm:src/a/",
+      "dst": "comm:src/b/",
+      "kind": "DEPENDS_ON",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "citation": { "node_ids": ["e1"] }
+    },
+    {
+      "id": "e2",
+      "src": "sym:entry",
+      "dst": "comm:src/b/",
+      "kind": "CALLS",
+      "tier": "T1",
+      "confidence": "precise",
+      "citation": { "node_ids": ["e2"], "file_path": "src/a/mod.py" }
+    }
+  ],
+  "groups": [
+    { "id": "comm:src/a/", "label": "src/a", "kind": "community" },
+    { "id": "comm:src/b/", "label": "src/b", "kind": "community" }
+  ],
+  "budget": { "max_nodes": 80, "max_edges": 160, "nodes_used": 3, "edges_used": 2 },
+  "layout": { "algorithm": "layered", "seed": "p7archseed0001", "notes": ["golden"] },
+  "drops": [],
+  "notes": ["P7 architecture_map golden"]
+}

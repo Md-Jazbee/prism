@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="380" viewBox="0 0 360 380" data-view-kind="architecture_map" data-layout-seed="p7archseed0001" data-snapshot="p7-arch-v1">
+<title>architecture_map · p7-arch-v1</title>
+<rect width="100%" height="100%" fill="#F7F7F7"/>
+<line data-id="e1" x1="80" y1="120" x2="240" y2="120" stroke="#D55E00" stroke-width="2" stroke-dasharray="6 4" />
+<line data-id="e2" x1="80" y1="220" x2="240" y2="120" stroke="#000000" stroke-width="2" stroke-dasharray="none" />
+<g data-id="comm:src/a/" role="img" aria-label="src/a, Community, tier T1, confidence heuristic"><rect x="64.8" y="104.8" width="30.4" height="30.4" rx="4" fill="#0072B2" stroke="#111111" stroke-width="1" /><text x="80" y="147.2" text-anchor="middle" font-size="10" fill="#111111">src/a</text><text x="80" y="159.2" text-anchor="middle" font-size="8" fill="#111111">T1·heuristic</text></g>
+<g data-id="comm:src/b/" role="img" aria-label="src/b, Community, tier T1, confidence heuristic"><rect x="225.4" y="105.4" width="29.2" height="29.2" rx="4" fill="#0072B2" stroke="#111111" stroke-width="1" /><text x="240" y="146.6" text-anchor="middle" font-size="10" fill="#111111">src/b</text><text x="240" y="158.6" text-anchor="middle" font-size="8" fill="#111111">T1·heuristic</text></g>
+<g data-id="sym:entry" role="img" aria-label="entry, Symbol, tier T1, confidence extracted"><circle cx="80" cy="220" r="14" fill="#0072B2" stroke="#111111" stroke-width="1" /><text x="80" y="246" text-anchor="middle" font-size="10" fill="#111111">entry</text><text x="80" y="258" text-anchor="middle" font-size="8" fill="#111111">T1·extracted</text></g>
+<text x="8" y="332" font-size="10" fill="#111111">Precise — solid stroke</text>
+<text x="8" y="344" font-size="10" fill="#111111">Heuristic — dashed stroke</text>
+<text x="8" y="356" font-size="10" fill="#111111">Observed — dotted stroke</text>
+<text x="8" y="368" font-size="10" fill="#111111">Tier — badge + border weight (not color alone)</text>
+</svg>

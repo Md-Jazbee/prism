@@ -31,4 +31,4 @@ A view is a **budgeted, layout-ready projection** of the KG — the visual analo
 
 ## Layout determinism
 
-See [LAYOUT-DETERMINISM.md](./LAYOUT-DETERMINISM.md). Algorithm is a seeded grid/radial/path placement over **sorted node ids** — good enough for screenshot diffs; ELK/Cytoscape replace coordinates in P7 without changing the IR.
+See [LAYOUT-DETERMINISM.md](./LAYOUT-DETERMINISM.md). Algorithm is a seeded grid/radial/path placement over **sorted node ids**. P7 renderer (`@prism/graph-view`) consumes these coordinates (Cytoscape preset + SVG/Mermaid export); ELK refinement may overwrite coords under the same seed without changing the IR.

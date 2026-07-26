@@ -1,0 +1,47 @@
+{
+  "schema_version": "graph-view/v1",
+  "snapshot_id": "p7-pack-v1",
+  "view_kind": "pack_map",
+  "nodes": [
+    {
+      "id": "frag:must",
+      "label": "must:entry",
+      "kind": "Fragment",
+      "tier": "T1",
+      "confidence": "extracted",
+      "lod_rank": 0,
+      "citation": { "node_ids": ["frag:must"], "file_path": "src/a/mod.py", "span": { "start_line": 1, "end_line": 3 } },
+      "x": 60.0,
+      "y": 80.0
+    },
+    {
+      "id": "frag:support",
+      "label": "support:helper",
+      "kind": "Fragment",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "lod_rank": 1,
+      "citation": { "node_ids": ["frag:support"], "file_path": "src/b/mod.py" },
+      "x": 200.0,
+      "y": 80.0
+    }
+  ],
+  "edges": [
+    {
+      "id": "pe1",
+      "src": "frag:must",
+      "dst": "frag:support",
+      "kind": "SUPPORTS",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "citation": { "node_ids": ["pe1"] }
+    }
+  ],
+  "budget": { "max_nodes": 80, "max_edges": 160, "nodes_used": 2, "edges_used": 1 },
+  "layout": { "algorithm": "path", "seed": "p7packseed00001" },
+  "drops": [
+    { "id": "frag:noise", "reason": "BUDGET_SOFT_DROP" },
+    { "id": "frag:dup", "reason": "DEDUPE" }
+  ],
+  "notes": ["visual EXPLAIN shows drops"]
+}

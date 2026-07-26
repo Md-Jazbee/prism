@@ -1,0 +1,63 @@
+{
+  "schema_version": "graph-view/v1",
+  "snapshot_id": "p7-slice-v1",
+  "view_kind": "slice_path",
+  "nodes": [
+    {
+      "id": "src",
+      "label": "source",
+      "kind": "Symbol",
+      "tier": "T3",
+      "confidence": "precise",
+      "lod_rank": 0,
+      "citation": { "node_ids": ["src"], "file_path": "a.py", "span": { "start_line": 1, "end_line": 1 } },
+      "x": 40.0,
+      "y": 100.0
+    },
+    {
+      "id": "mid",
+      "label": "mid",
+      "kind": "Symbol",
+      "tier": "T3",
+      "confidence": "precise",
+      "lod_rank": 0,
+      "citation": { "node_ids": ["mid"], "file_path": "a.py", "span": { "start_line": 5, "end_line": 5 } },
+      "x": 160.0,
+      "y": 100.0
+    },
+    {
+      "id": "sink",
+      "label": "sink",
+      "kind": "Symbol",
+      "tier": "T3",
+      "confidence": "precise",
+      "lod_rank": 0,
+      "citation": { "node_ids": ["sink"], "file_path": "b.py", "span": { "start_line": 2, "end_line": 2 } },
+      "x": 280.0,
+      "y": 100.0
+    }
+  ],
+  "edges": [
+    {
+      "id": "se1",
+      "src": "src",
+      "dst": "mid",
+      "kind": "DATA_FLOW",
+      "tier": "T3",
+      "confidence": "precise",
+      "citation": { "node_ids": ["se1"] }
+    },
+    {
+      "id": "se2",
+      "src": "mid",
+      "dst": "sink",
+      "kind": "DATA_FLOW",
+      "tier": "T3",
+      "confidence": "precise",
+      "citation": { "node_ids": ["se2"] }
+    }
+  ],
+  "budget": { "max_nodes": 80, "max_edges": 160, "nodes_used": 3, "edges_used": 2 },
+  "layout": { "algorithm": "path", "seed": "p7sliceseed0001" },
+  "notes": ["criterion nodes never elided"]
+}

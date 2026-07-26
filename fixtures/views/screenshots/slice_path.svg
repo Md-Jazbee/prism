@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="380" viewBox="0 0 440 380" data-view-kind="slice_path" data-layout-seed="p7sliceseed0001" data-snapshot="p7-slice-v1">
+<title>slice_path · p7-slice-v1</title>
+<rect width="100%" height="100%" fill="#F7F7F7"/>
+<line data-id="se1" x1="80" y1="140" x2="200" y2="140" stroke="#000000" stroke-width="2" stroke-dasharray="none" />
+<line data-id="se2" x1="200" y1="140" x2="320" y2="140" stroke="#000000" stroke-width="2" stroke-dasharray="none" />
+<g data-id="mid" role="img" aria-label="mid, Symbol, tier T3, confidence precise"><circle cx="200" cy="140" r="14" fill="#E69F00" stroke="#111111" stroke-width="3" /><text x="200" y="166" text-anchor="middle" font-size="10" fill="#111111">mid</text><text x="200" y="178" text-anchor="middle" font-size="8" fill="#111111">T3·precise</text></g>
+<g data-id="sink" role="img" aria-label="sink, Symbol, tier T3, confidence precise"><circle cx="320" cy="140" r="14" fill="#E69F00" stroke="#111111" stroke-width="3" /><text x="320" y="166" text-anchor="middle" font-size="10" fill="#111111">sink</text><text x="320" y="178" text-anchor="middle" font-size="8" fill="#111111">T3·precise</text></g>
+<g data-id="src" role="img" aria-label="source, Symbol, tier T3, confidence precise"><circle cx="80" cy="140" r="14" fill="#E69F00" stroke="#111111" stroke-width="3" /><text x="80" y="166" text-anchor="middle" font-size="10" fill="#111111">source</text><text x="80" y="178" text-anchor="middle" font-size="8" fill="#111111">T3·precise</text></g>
+<text x="8" y="332" font-size="10" fill="#111111">Precise — solid stroke</text>
+<text x="8" y="344" font-size="10" fill="#111111">Heuristic — dashed stroke</text>
+<text x="8" y="356" font-size="10" fill="#111111">Observed — dotted stroke</text>
+<text x="8" y="368" font-size="10" fill="#111111">Tier — badge + border weight (not color alone)</text>
+</svg>

@@ -389,8 +389,8 @@ prism/
 │   └── examples/
 │       └── wit/                        # shared WIT contracts
 │
-├── packages/                           # ‹planned P7› TypeScript workspace (pnpm)
-│   └── prism-graph-view/               # renderer: view-model → Cytoscape/ELK; framework-agnostic
+├── packages/                           # TypeScript workspace (pnpm) — P7+
+│   └── prism-graph-view/               # renderer: view-model → Cytoscape/SVG/Mermaid
 │
 ├── extensions/                         # ‹planned P8›
 │   └── vscode/

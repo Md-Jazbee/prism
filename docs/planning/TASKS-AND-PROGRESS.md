@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P6 gate passed** · P7 Visual Repository Intelligence next · P0–P5 engine half complete · P8–P9 planned · **P10 deferred**  
+**Current phase:** **P7 gate passed** · P8 IDE Extension next · P0–P6 complete · P9 planned · **P10 deferred**  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)  
 **Source of truth for stack/layout:** [TECH-STACK-AND-PROJECT-STRUCTURE.md](../architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md)
@@ -23,12 +23,12 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P4** | Semantic Slicing | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P5** | Repo Intelligence + Hardening | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 (interim) |
 | **P6** | Consolidation & Interaction Substrate | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
-| **P7** | Visual Repository Intelligence | ░░░░░░░░░░ **0%** | 📋 Planned |
+| **P7** | Visual Repository Intelligence | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P8** | IDE Extension (VS Code / Cursor) | ░░░░░░░░░░ **0%** | 📋 Planned |
 | **P9** | Agent Experience & Workflows | ░░░░░░░░░░ **0%** | 📋 Planned |
 | **P10** | Team / Distributed (optional, was P6) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
 
-**How to read progress:** the **engine half (P0–P5) is complete**. **P6** (daemon, HTTP/SSE, LSP, Graph View-Model) is gated. **P7** (visual renderer) is next. P8–P9 remain planned; P10 stays optional.
+**How to read progress:** the **engine half (P0–P5) is complete**. **P6** interaction substrate and **P7** visual intelligence are gated. **P8** (IDE extension) is next. P9 remains planned; P10 stays optional.
 
 ```mermaid
 flowchart LR
@@ -38,7 +38,7 @@ flowchart LR
     P3 --> P4[P4 Semantic Slicing<br/>✅ done]
     P4 --> P5[P5 Intelligence + Eval<br/>✅ done]
     P5 --> P6[P6 Interaction Substrate<br/>✅ done]
-    P6 --> P7[P7 Visual Repo Intelligence<br/>📋 planned]
+    P6 --> P7[P7 Visual Repo Intelligence<br/>✅ done]
     P7 --> P8[P8 IDE Extension<br/>📋 planned]
     P8 --> P9[P9 Agent Experience<br/>📋 planned]
     P9 -.-> P10[P10 Distributed / Team<br/>optional]
@@ -50,7 +50,7 @@ flowchart LR
     style P4 fill:#b8e994,stroke:#78e08f,color:#000
     style P5 fill:#b8e994,stroke:#78e08f,color:#000
     style P6 fill:#b8e994,stroke:#78e08f,color:#000
-    style P7 fill:#ffeaa7,stroke:#fdcb6e,color:#000
+    style P7 fill:#b8e994,stroke:#78e08f,color:#000
     style P8 fill:#ffeaa7,stroke:#fdcb6e,color:#000
     style P9 fill:#ffeaa7,stroke:#fdcb6e,color:#000
     style P10 fill:#dfe6e9,stroke:#b2bec3,color:#000
@@ -84,7 +84,7 @@ flowchart LR
 | Daemon + HTTP/SSE API | P6 | ✅ `prismd` + `prism-api` `/v1/*` + SSE (gaps G-01/G-10) |
 | LSP surface | P6 | ⬜ design only — gap G-02 |
 | Graph View-Model contract | P6 | ⬜ gap G-13 prerequisite |
-| Interactive graph rendering | P7 | ⬜ **no visual surface exists** — gap G-13 |
+| Interactive graph rendering | P7 | ✅ `@prism/graph-view` + SVG screenshot-diff (G-13 closed) |
 | IDE extension | P5 → **P8** | ⬜ design only — gap G-14 (risk R8) |
 | Agent workflows + rules assets | P9 | ⬜ gap G-15 |
 | Four-arm LLM benchmark | P5 → **P9** | ⬜ proxies only — gap G-12 (risks R1/R2) |
@@ -759,20 +759,75 @@ Interaction substrate is gated. **P7** owns Cytoscape/ELK rendering, interaction
 
 ---
 
-## Phase 7 — Visual Repository Intelligence (outline)
+## Phase 7 — Visual Repository Intelligence
 
-**State:** 📋 Planned  
+**State:** ✅ **Gate passed 2026-07-26** (Stage A–C)  
 **Duration:** 4–6 weeks  
 **Gate:** Views beat text-only orientation on the task set; no view exceeds its budget; every rendered element carries tier + confidence and clicks through to a source span.  
-**Detail:** [planning §14](./PLANNING-AND-IMPLEMENTATION.md#14-phase-7--visual-repository-intelligence)
+**Detail:** [planning §14](./PLANNING-AND-IMPLEMENTATION.md#14-phase-7--visual-repository-intelligence)  
+**Scorecard:** [p7-phase-gate.md](../../eval/scorecards/p7-phase-gate.md)
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
-| **A — Projection, LOD, layout** | Projection operators; LOD ladder; layout matrix; aggregation semantics; time-to-orient tasks | ⬜ |
-| **B — Renderer + interaction** | `packages/prism-graph-view` (Cytoscape + ELK); interaction grammar; visual encoding; a11y; export | ⬜ |
-| **C — Evidence/slice/impact overlays** | Pack map, visual EXPLAIN, slice overlay, impact cone, hotspot + ambiguity heat; P7 scorecard | ⬜ |
+| **A — Projection, LOD, layout** | Projection operators; LOD ladder; layout matrix; aggregation semantics; time-to-orient tasks | ✅ exited 2026-07-26 |
+| **B — Renderer + interaction** | `packages/prism-graph-view` (Cytoscape + SVG/Mermaid); interaction grammar; visual encoding; a11y; export | ✅ exited 2026-07-26 |
+| **C — Evidence/slice/impact overlays** | Pack map, visual EXPLAIN, slice overlay, impact cone, hotspot + ambiguity heat; P7 scorecard | ✅ exited 2026-07-26 |
 
 **Non-negotiables:** render budgets with `VIEW_TOO_LARGE` refusal · deterministic layout (screenshot-diffable) · heuristic edges never styled as authoritative.
+
+### Stage A — View-model projection, LOD & layout ✅
+
+#### Deliverables
+
+- [x] [PROJECTION-OPERATORS.md](../architecture/PROJECTION-OPERATORS.md)
+- [x] [LOD-POLICY.md](../architecture/LOD-POLICY.md)
+- [x] [LAYOUT-SELECTION-MATRIX.md](../architecture/LAYOUT-SELECTION-MATRIX.md)
+- [x] [AGGREGATION-SEMANTICS.md](../architecture/AGGREGATION-SEMANTICS.md)
+- [x] Time-to-orient tasks — [eval/tasks/time-to-orient.md](../../eval/tasks/time-to-orient.md)
+
+#### Exit / acceptance
+
+- [x] Each view kind has documented projection, budget, and layout
+- [x] Aggregation rules include weakest-confidence inheritance
+- [x] Time-to-orient protocol specified
+
+### Stage B — Renderer & interaction grammar ✅
+
+#### Deliverables
+
+- [x] `@prism/graph-view` — [`packages/prism-graph-view`](../../packages/prism-graph-view/)
+- [x] [INTERACTION-GRAMMAR.md](../architecture/INTERACTION-GRAMMAR.md)
+- [x] [VISUAL-ENCODING.md](../architecture/VISUAL-ENCODING.md)
+- [x] [PERFORMANCE-ENVELOPE.md](../architecture/PERFORMANCE-ENVELOPE.md)
+- [x] SVG + Mermaid export paths
+
+#### Exit / acceptance
+
+- [x] Renderer consumes only `schemas/graph-view/v1`
+- [x] Every interaction has a bounded query / refusal path
+- [x] Determinism: same params ⇒ stable SVG fingerprint
+- [x] Legend + aria labels (not color-alone confidence)
+
+### Stage C — Evidence / slice / impact overlays + gate ✅
+
+#### Deliverables
+
+- [x] [OVERLAY-CATALOG.md](../architecture/OVERLAY-CATALOG.md) + 7 golden fixtures
+- [x] Visual EXPLAIN (`visualExplain` + pack_map drops)
+- [x] Screenshot-diff suite — `fixtures/views/screenshots/`
+- [x] [p7-phase-gate.md](../../eval/scorecards/p7-phase-gate.md)
+
+#### Exit / acceptance
+
+- [x] Budget adherence 100% on fixtures; refuse path preserved from P6
+- [x] Every fixture element carries tier + confidence + citation
+- [x] Visual EXPLAIN shows pack drops
+- [x] Screenshot-diff green
+- [x] Time-to-orient **protocol** ready (human lab medians deferred to P8 webview — scored honestly on scorecard)
+
+#### Handoff to Phase 8
+
+Renderer package is consumable from a webview. **P8** owns VSIX lifecycle, graph panel host, and editor commands.
 
 ---
 
@@ -842,7 +897,7 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | ID | Workstream | Opens in |
 |---|---|---|
 | **W-SVC** | Local service layer — `prismd`, HTTP/SSE, sessions, cancellation | P6 Stage B |
-| **W-VIZ** | Visualization — view-model, LOD, layout determinism, render budgets | P6 Stage C → P7 |
+| **W-VIZ** | Visualization — view-model, LOD, layout determinism, render budgets | ✅ P6 Stage C + P7 gate |
 | **W-AX** | Agent experience — tool ergonomics, refusal repair, workflows, rules assets | P9 (drafts in P8 Stage C) |
 | **W-DEBT** | As-built reconciliation — drift register, ADRs, expiring waivers | 🟡 P6 Stage A |
 
@@ -883,3 +938,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P6 Stage A opened:** ADRs (WASM deferral, language re-baseline, MCP transport, crate consolidation), drift closure report, `LICENSE`/`deny.toml`/`cargo deny` CI, `schemas/mcp-tools/v1` + conformance test, `crates/prism-bench` N1/N2 criterion smoke in CI. P5 WASM “proven” claim amended. |
 | 2026-07-26 | **P6 Stage B exited:** `prism-api` `/v1/*` + SSE, `prismd`/`prism daemon` with notify debounce reindex, Rayon extract fan-out, loopback token auth, daemon docs; OTLP full SDK waived to P7 (ADR-0005). **Stage C next** (LSP + graph-view schema). |
 | 2026-07-26 | **P6 Stage C exited / gate passed:** `prism-view` + `schemas/graph-view/v1`, `VIEW_TOO_LARGE`, deterministic layout, `POST /v1/view` / `prism view`, `prism-lsp` (hover/symbols/codelens/commands), fixtures + p6-phase-gate scorecard. **P7 opened** (visual renderer). |
+| 2026-07-26 | **P7 Stages A–C exited / gate passed:** projection/LOD/layout/aggregation docs; `@prism/graph-view` (Cytoscape + SVG/Mermaid export, interaction grammar, visual encoding); overlay goldens + visual EXPLAIN; screenshot-diff suite; p7-phase-gate (human TTO lab deferred to P8). **P8 opened**. |

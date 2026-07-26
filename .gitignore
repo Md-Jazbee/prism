@@ -6,6 +6,11 @@ graphify-out/
 **/*.rs.bk
 Cargo.lock.bak
 
+# Node / pnpm
+node_modules/
+packages/*/dist/
+*.tsbuildinfo
+
 # Python / eval
 .venv/
 __pycache__/

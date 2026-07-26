@@ -1,0 +1,35 @@
+{
+  "schema_version": "graph-view/v1",
+  "snapshot_id": "p7-amb-v1",
+  "view_kind": "ambiguity_heat",
+  "nodes": [
+    {
+      "id": "a1",
+      "label": "shared",
+      "kind": "AmbiguousSymbol",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "lod_rank": 0,
+      "citation": { "node_ids": ["a1"], "file_path": "src/a/dup.py" },
+      "x": 80.0,
+      "y": 120.0,
+      "heat": 2.0
+    },
+    {
+      "id": "a2",
+      "label": "shared",
+      "kind": "AmbiguousSymbol",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "lod_rank": 0,
+      "citation": { "node_ids": ["a2"], "file_path": "src/b/dup.py" },
+      "x": 200.0,
+      "y": 120.0,
+      "heat": 2.0
+    }
+  ],
+  "edges": [],
+  "budget": { "max_nodes": 80, "max_edges": 160, "nodes_used": 2, "edges_used": 0 },
+  "layout": { "algorithm": "radial", "seed": "p7ambseed000001" },
+  "notes": ["T2 precision ladder call-to-action"]
+}

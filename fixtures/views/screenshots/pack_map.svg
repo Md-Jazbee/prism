@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="380" viewBox="0 0 360 380" data-view-kind="pack_map" data-layout-seed="p7packseed00001" data-snapshot="p7-pack-v1">
+<title>pack_map · p7-pack-v1</title>
+<rect width="100%" height="100%" fill="#F7F7F7"/>
+<line data-id="pe1" x1="100" y1="120" x2="240" y2="120" stroke="#D55E00" stroke-width="2" stroke-dasharray="6 4" />
+<g data-id="frag:must" role="img" aria-label="must:entry, Fragment, tier T1, confidence extracted"><circle cx="100" cy="120" r="14" fill="#0072B2" stroke="#111111" stroke-width="1" /><text x="100" y="146" text-anchor="middle" font-size="10" fill="#111111">must:entry</text><text x="100" y="158" text-anchor="middle" font-size="8" fill="#111111">T1·extracted</text></g>
+<g data-id="frag:support" role="img" aria-label="support:helper, Fragment, tier T1, confidence heuristic"><circle cx="240" cy="120" r="14" fill="#0072B2" stroke="#111111" stroke-width="1" /><text x="240" y="146" text-anchor="middle" font-size="10" fill="#111111">support:helper</text><text x="240" y="158" text-anchor="middle" font-size="8" fill="#111111">T1·heuristic</text></g>
+<text x="8" y="332" font-size="10" fill="#111111">Precise — solid stroke</text>
+<text x="8" y="344" font-size="10" fill="#111111">Heuristic — dashed stroke</text>
+<text x="8" y="356" font-size="10" fill="#111111">Observed — dotted stroke</text>
+<text x="8" y="368" font-size="10" fill="#111111">Tier — badge + border weight (not color alone)</text>
+</svg>

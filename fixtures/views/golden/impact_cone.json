@@ -1,0 +1,63 @@
+{
+  "schema_version": "graph-view/v1",
+  "snapshot_id": "p7-impact-v1",
+  "view_kind": "impact_cone",
+  "nodes": [
+    {
+      "id": "seed",
+      "label": "entry",
+      "kind": "Symbol",
+      "tier": "T1",
+      "confidence": "extracted",
+      "lod_rank": 0,
+      "citation": { "node_ids": ["seed"], "file_path": "src/a/mod.py", "span": { "start_line": 1, "end_line": 2 } },
+      "x": 120.0,
+      "y": 40.0
+    },
+    {
+      "id": "hop1",
+      "label": "helper",
+      "kind": "Symbol",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "lod_rank": 1,
+      "citation": { "node_ids": ["hop1"], "file_path": "src/b/mod.py" },
+      "x": 120.0,
+      "y": 140.0
+    },
+    {
+      "id": "hop2",
+      "label": "leaf",
+      "kind": "Symbol",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "lod_rank": 2,
+      "citation": { "node_ids": ["hop2"] },
+      "x": 120.0,
+      "y": 240.0
+    }
+  ],
+  "edges": [
+    {
+      "id": "ie1",
+      "src": "seed",
+      "dst": "hop1",
+      "kind": "IMPACTS",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "citation": { "node_ids": ["ie1"] }
+    },
+    {
+      "id": "ie2",
+      "src": "hop1",
+      "dst": "hop2",
+      "kind": "IMPACTS",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "citation": { "node_ids": ["ie2"] }
+    }
+  ],
+  "budget": { "max_nodes": 80, "max_edges": 160, "nodes_used": 3, "edges_used": 2 },
+  "layout": { "algorithm": "radial", "seed": "p7impactseed01" },
+  "notes": ["impact cone with confidence decay by hop"]
+}

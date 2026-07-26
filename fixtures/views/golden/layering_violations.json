@@ -1,0 +1,42 @@
+{
+  "schema_version": "graph-view/v1",
+  "snapshot_id": "p7-layer-v1",
+  "view_kind": "layering_violations",
+  "nodes": [
+    {
+      "id": "L0",
+      "label": "api",
+      "kind": "Layer",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "lod_rank": 0,
+      "citation": { "node_ids": ["L0"], "file_path": "api/" },
+      "x": 60.0,
+      "y": 60.0
+    },
+    {
+      "id": "L1",
+      "label": "core",
+      "kind": "Layer",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "lod_rank": 0,
+      "citation": { "node_ids": ["L1"], "file_path": "core/" },
+      "x": 60.0,
+      "y": 160.0
+    }
+  ],
+  "edges": [
+    {
+      "id": "viol",
+      "src": "L1",
+      "dst": "L0",
+      "kind": "LAYER_VIOLATION",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "citation": { "node_ids": ["viol"] }
+    }
+  ],
+  "budget": { "max_nodes": 80, "max_edges": 160, "nodes_used": 2, "edges_used": 1 },
+  "layout": { "algorithm": "layered", "seed": "p7layerseed0001" }
+}

@@ -45,15 +45,21 @@ jobs:
           --warm-up-time 1
           --measurement-time 1
 
-  eval:
+  graph-view:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
+      - uses: pnpm/action-setup@v4
         with:
-          enable-cache: true
-      - name: eval smoke
-        working-directory: eval
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: install
+        run: pnpm install --frozen-lockfile
+      - name: typecheck + test + build
         run: |
-          uv sync
-          uv run prism-eval smoke
+          pnpm --filter @prism/graph-view typecheck
+          pnpm --filter @prism/graph-view test
+          pnpm --filter @prism/graph-view build
