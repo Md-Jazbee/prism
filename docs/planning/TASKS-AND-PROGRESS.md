@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P9 gate passed** · P0–P9 complete · **P10 deferred (optional)**  
+**Current phase:** **P9 gate passed** · P8 **cut** (CLI+MCP) · P0–P7+P9 complete · **P10 deferred**  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)  
 **Source of truth for stack/layout:** [TECH-STACK-AND-PROJECT-STRUCTURE.md](../architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md)
@@ -24,11 +24,11 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P5** | Repo Intelligence + Hardening | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 (interim) |
 | **P6** | Consolidation & Interaction Substrate | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P7** | Visual Repository Intelligence | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
-| **P8** | IDE Extension (VS Code / Cursor) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
+| **P8** | IDE Extension (VS Code / Cursor) | ░░░░░░░░░░ **—** | ✂️ **Cut** 2026-07-26 — superseded by CLI + MCP ([ADR-0007](../architecture/adr/0007-extension-cut-cli-mcp.md)) |
 | **P9** | Agent Experience & Workflows | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P10** | Team / Distributed (optional, was P6) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
 
-**How to read progress:** **P0–P9 are gated**. The engine half (P0–P5) and interaction half (P6–P9) are complete. **P10** (team/distributed) stays optional.
+**How to read progress:** **P0–P7 and P9 are gated**. **P8 was cut** — agent/IDE needs are met by `prism setup` + MCP, not a VSIX. **P10** stays optional.
 
 ```mermaid
 flowchart LR
@@ -39,8 +39,9 @@ flowchart LR
     P4 --> P5[P5 Intelligence + Eval<br/>✅ done]
     P5 --> P6[P6 Interaction Substrate<br/>✅ done]
     P6 --> P7[P7 Visual Repo Intelligence<br/>✅ done]
-    P7 --> P8[P8 IDE Extension<br/>✅ done]
-    P8 --> P9[P9 Agent Experience<br/>✅ done]
+    P7 --> P8[P8 IDE Extension<br/>✂️ cut]
+    P8 -.-> P9[P9 Agent Experience<br/>✅ done]
+    P7 --> P9
     P9 -.-> P10[P10 Distributed / Team<br/>optional]
 
     style P0 fill:#b8e994,stroke:#78e08f,color:#000
@@ -51,12 +52,10 @@ flowchart LR
     style P5 fill:#b8e994,stroke:#78e08f,color:#000
     style P6 fill:#b8e994,stroke:#78e08f,color:#000
     style P7 fill:#b8e994,stroke:#78e08f,color:#000
-    style P7 fill:#b8e994,stroke:#78e08f,color:#000
-    style P8 fill:#b8e994,stroke:#78e08f,color:#000
+    style P8 fill:#dfe6e9,stroke:#b2bec3,color:#000
     style P9 fill:#b8e994,stroke:#78e08f,color:#000
     style P10 fill:#dfe6e9,stroke:#b2bec3,color:#000
 ```
-
 ### Legend
 
 | Mark | Meaning |
@@ -86,7 +85,7 @@ flowchart LR
 | LSP surface | P6 | ✅ `prism-lsp` |
 | Graph View-Model contract | P6 | ✅ `schemas/graph-view/v1` |
 | Interactive graph rendering | P7 | ✅ `@prism/graph-view` + SVG screenshot-diff (G-13 closed) |
-| IDE extension | P5 → **P8** | ✅ `extensions/vscode` VSIX + panels + MCP auto-reg |
+| IDE extension | P5 → **P8** | ✂️ **cut** — CLI + MCP ([ADR-0007](../architecture/adr/0007-extension-cut-cli-mcp.md)); design retained in IDE-INTEGRATION.md |
 | Agent workflows + rules assets | P9 | ✅ `prism-agent` + catalog → AGENTS.md (G-15 closed) |
 | Four-arm LLM benchmark | P5 → **P9** | ✅ report v2 scripted-proxy + dual-review 70% (live LLM opt-in) |
 | Team/shared index | P10 | ⬜ deferred |
@@ -824,31 +823,30 @@ Interaction substrate is gated. **P7** owns Cytoscape/ELK rendering, interaction
 - [x] Every fixture element carries tier + confidence + citation
 - [x] Visual EXPLAIN shows pack drops
 - [x] Screenshot-diff green
-- [x] Time-to-orient **protocol** ready (human lab medians deferred to P8 webview — scored honestly on scorecard)
+- [x] Time-to-orient **protocol** ready (human lab medians deferred; webview host cut with P8)
 
-#### Handoff to Phase 8
+#### Handoff after Phase 7
 
-Renderer package is consumable from a webview. **P8** owns VSIX lifecycle, graph panel host, and editor commands.
+Renderer package (`@prism/graph-view`) remains for SVG/Mermaid. **P8 IDE extension was later cut** (ADR-0007); agent path is CLI + MCP via P9.
 
 ---
 
-## Phase 8 — IDE Extension (VS Code / Cursor)
+## Phase 8 — IDE Extension (VS Code / Cursor) — CUT
 
-**State:** ✅ Gate passed 2026-07-26  
-**Duration:** 4–5 weeks (compressed implementation pass)  
-**Gate:** Installable VSIX; cold repo → orientation → cited pack with zero terminal commands; Cursor auto-registers the MCP server.  
-**Detail:** [planning §15](./PLANNING-AND-IMPLEMENTATION.md#15-phase-8--ide-extension-vs-code--cursor)  
-**Scorecard:** [p8-phase-gate.md](../eval/scorecards/p8-phase-gate.md)
+**State:** ✂️ **Cut 2026-07-26** (ADR-0007)  
+**Reason:** Redundant with user-level Cursor MCP + `prism setup` / CLI; maintenance cost of a second language ecosystem not justified.  
+**Superseded by:** [PRODUCT-SETUP.md](../architecture/PRODUCT-SETUP.md) · MCP `compile_context` · `prism lsp`  
+**Former scorecard:** removed with the extension tree.
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
-| **A — Skeleton + lifecycle** | Activation budget; binary acquisition + verification (ADR-0006); transport fallback chain; first-run onboarding | ✅ |
-| **B — Commands + panels** | `IDE-INTEGRATION.md` command set; evidence panel; graph panel; decorations; peek round-trip | ✅ |
-| **C — Cursor integration + release** | MCP auto-registration; generated `AGENTS.md`/rules; actionable refusals; Marketplace copy + Open VSX-ready VSIX CI | ✅ |
+| **A–C** | Skeleton, panels, Marketplace VSIX | ✂️ removed from repo |
+
+**Retained from the P8 attempt:** `prism setup` / `doctor --ready`, daemon `.prism/daemon.token`, catalog-driven `AGENTS.md` generation (via `prism-agent`).
 
 #### Handoff to Phase 9
 
-Extension delivers packs/views locally; MCP is auto-registered. **P9** owns agent contract hardening, workflow catalog, and the four-arm closed-loop eval.
+P9 agent contract does **not** depend on a VSIX. MCP + workflows + assets are sufficient.
 
 ---
 
@@ -919,7 +917,7 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | **W-PLAN** | Query planning | ✅ executable `Slice` on debug |
 | **W-CC** | Context compiler | ✅ debug pack gates (never drop error/slice) |
 | **W-MCP** | Agent surface | ✅ AGENT-USAGE + intel tools |
-| **W-IDE** | IDE/LSP | ✅ extension + LSP design (`extensions/vscode`, P8) |
+| **W-IDE** | IDE/LSP | ✅ LSP + design; **extension cut** (ADR-0007) — CLI/MCP product path |
 | **W-EVAL** | Evaluation | ✅ P5 public report + p5-scorecard (interim) |
 | **W-OBS** | Observability | ✅ `pack_bound_for_llm` + OTel span design (**exporter still unbuilt** → P6-B); **N1/N2 benches live** |
 | **W-SEC** | Security & privacy | ✅ release checklist + audit/redaction; **LICENSE + cargo-deny** |
@@ -973,4 +971,5 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P6 Stage C exited / gate passed:** `prism-view` + `schemas/graph-view/v1`, `VIEW_TOO_LARGE`, deterministic layout, `POST /v1/view` / `prism view`, `prism-lsp` (hover/symbols/codelens/commands), fixtures + p6-phase-gate scorecard. **P7 opened** (visual renderer). |
 | 2026-07-26 | **P7 Stages A–C exited / gate passed:** projection/LOD/layout/aggregation docs; `@prism/graph-view` (Cytoscape + SVG/Mermaid export, interaction grammar, visual encoding); overlay goldens + visual EXPLAIN; screenshot-diff suite; p7-phase-gate (human TTO lab deferred to P8). **P8 opened**. |
 | 2026-07-26 | **P8 Stages A–C exited / gate passed:** `extensions/vscode` (daemon HTTP→CLI transport, ADR-0006 binary delivery, evidence+graph webviews, commands, decorations off-by-default, Cursor MCP auto-reg, AGENTS.md generation, actionable refusals, extension.yml VSIX CI, p8-phase-gate). Marketplace publish + `@vscode/test-electron` deferred. **P9 opened**. |
+| 2026-07-26 | **P8 cut (ADR-0007):** removed `extensions/vscode`, extension CI/docs/ADR-0006/p8-scorecard. Product surface is CLI (`prism setup`) + MCP. Kept `@prism/graph-view`, daemon token file, setup/doctor. Planning board updated. |
 | 2026-07-26 | **P9 Stages A–C exited / gate passed:** `prism-agent` (refusal repair, budget negotiation, progressive packs, traces); workflow catalog + CLI/HTTP; generated AGENTS.md/rules/skills; four-arm report v2 (scripted proxy + dual-review 70%); R1 restated, R2/R8/R15 closed. **P0–P9 program complete**; P10 remains optional. |

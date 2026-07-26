@@ -1,48 +1,40 @@
-# Product setup — Graphify-like one-shot (P8/P9)
+# Product setup — Graphify-like one-shot (CLI + MCP)
 
-**Goal:** One installable path that takes a cold workspace to indexed + agent-ready without hunting for docs.
+**Goal:** One installable path that takes a cold workspace to indexed + agent-ready without an IDE extension.
+
+**Decision:** The VS Code / Cursor extension was **removed** ([ADR-0007](./adr/0007-extension-cut-cli-mcp.md)). Product surface is **CLI + MCP**.
 
 ## Surfaces
 
 | Surface | Command |
 |---|---|
-| CLI | `prism setup .` |
-| IDE | **Prism: Setup Workspace** (`prism.setupWorkspace`) |
+| Setup | `prism setup .` |
 | Readiness | `prism doctor --ready` / `--json` |
+| Agent tools | `prism mcp .` (stdio) — register in Cursor MCP settings |
+| HTTP accelerator | `prism daemon .` (optional) |
 
 ## What `prism setup` does
 
-1. **Binary** — assumes `prism` is already running (CLI). Extension may `cargo build -p prism-cli` when opened on this source tree, or use PATH / `prism.binaryPath`.
-2. **Index** — `prism index` if `.prism/graph.sqlite` missing or refresh via indexer.
-3. **Assets** — `prism agent generate-assets` → `AGENTS.md`, `.cursor/rules/prism-compile-first.mdc`, `.prism/agent/skills.md` (catalog is the single source of truth).
-4. **MCP** — merge Prism into `.cursor/mcp.json` (or `.vscode/mcp.json`).
-5. **Daemon (extension only)** — spawn/attach `prism daemon` with token written to `.prism/daemon.token`.
+1. **Binary** — assumes `prism` is already running.
+2. **Index** — builds/refreshes `.prism/graph.sqlite`.
+3. **Assets** — `AGENTS.md`, `.cursor/rules/prism-compile-first.mdc`, `.prism/agent/skills.md` from the workflow catalog.
+4. **MCP** — merges Prism into `.cursor/mcp.json` (or `.vscode/mcp.json`).
 
-## Install Prism into Cursor
+## Install for Cursor (agent)
 
 ```bash
-# From this repo (dev)
 cargo build -p prism-cli
-pnpm --filter @prism/graph-view build
-pnpm --filter prism-vscode package
-cursor --install-extension extensions/vscode/prism-vscode-*.vsix --force
-
-# Then in Cursor: Command Palette → "Prism: Setup Workspace"
-# Or CLI:
 ./target/debug/prism setup .
 ./target/debug/prism doctor --ready
+# Cursor picks up .cursor/mcp.json, or register user-level:
+#   command: <path-to-prism>   args: ["mcp", "<workspace>"]
 ```
+
+## Renderer (no IDE host)
+
+`@prism/graph-view` remains for SVG/Mermaid export and tests. There is no in-editor webview host in-tree.
 
 ## Honest limits
 
-- Marketplace VSIX does **not** yet embed platform Rust binaries (ADR-0006). Cold machines without PATH/`cargo` need a binary first.
-- Download-on-demand activates when `prism.downloadBaseUrl` + `binaries/manifest.json` are populated.
-- Human time-to-orient lab numbers remain open; protocol lives under eval tasks.
-
-## Failure recovery
-
-| Symptom | Fix |
-|---|---|
-| UNAUTHORIZED / sticky daemon | Delete `.prism/daemon.lock` + restart via Setup (token now persisted in `.prism/daemon.token`) |
-| No binary | `cargo build -p prism-cli` or set `prism.binaryPath` |
-| Empty panels | Run Setup, then Repo Map / Compile Context |
+- No Marketplace VSIX; binary must be on PATH or built from this repo.
+- Interactive graph-in-panel UX is out of scope until a future product decision.

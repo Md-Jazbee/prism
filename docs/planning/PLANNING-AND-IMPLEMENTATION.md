@@ -1274,7 +1274,7 @@ Severity: **S1** blocks a stated claim · **S2** blocks planned product surface 
 | **G-11** | `schemas/mcp-tools/v1` was a P1 deliverable and does not exist; tool schemas live inline in Rust | S3 | `schemas/` tree | P6 Stage A |
 | **G-12** | Four-arm LLM benchmark still pending (R1); precision is a 60% proxy vs the 70% north star (R2) | **S1** | `PROGRAM-RESIDUAL-RISKS.md` | P9 Stage C |
 | **G-13** | **No visual surface at all.** `repo_map`, impact cones, slices and packs are JSON; a human must read a wall of text to orient | S2 | MCP/CLI output only | P7 |
-| **G-14** | No IDE extension (R8) | S2 | ✅ closed — `extensions/vscode` | P8 |
+| **G-14** | No IDE extension (R8) | S2 | ✂️ **waived by choice** — ADR-0007; CLI+MCP | P8 cut |
 | **G-15** | No agent-side assets — no rules, no `AGENTS.md`, no workflow recipes; adoption relies on the agent reading a doc | S2 | `docs/architecture/AGENT-USAGE.md` only | P9 |
 
 ### 12.3 What the audit did **not** find
@@ -1620,10 +1620,14 @@ Connect views to the things that make Prism distinctive: Evidence Packs, EXPLAIN
 
 ## 15. Phase 8 — IDE Extension (VS Code / Cursor)
 
-**Phase goal:** Put the whole capability inside the editor: index, orient, compile, peek, slice, and inspect impact without a terminal — and register Prism as an agent tool automatically in Cursor.
+> **CUT 2026-07-26 ([ADR-0007](../architecture/adr/0007-extension-cut-cli-mcp.md)).**  
+> The VSIX / `extensions/vscode` tree was removed. Product install is **`prism setup` + MCP** ([PRODUCT-SETUP.md](../architecture/PRODUCT-SETUP.md)).  
+> The stages below are retained as historical planning context only.
+
+**Phase goal (original):** Put the whole capability inside the editor: index, orient, compile, peek, slice, and inspect impact without a terminal — and register Prism as an agent tool automatically in Cursor.
 
 **Phase duration:** 4–5 weeks  
-**Phase gate (summary):** An installable extension takes a developer from a cold repository to a rendered orientation and a cited Evidence Pack without the command line; Cursor picks Prism up as an MCP server with no manual JSON editing.
+**Phase gate (summary):** ~~An installable extension…~~ **Superseded:** cold repo → `prism setup` → MCP `compile_context` without a VSIX.
 
 ```mermaid
 flowchart LR

@@ -40,7 +40,6 @@ fixtures/repos/snapshots/
 *.pem
 credentials.json
 
-# Extension build artifacts
-extensions/*/dist/
+# Extension build artifacts (legacy; tree removed — ADR-0007)
 *.vsix
 .cursor/mcp.json

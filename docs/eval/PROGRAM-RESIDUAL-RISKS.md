@@ -11,7 +11,7 @@ Known failure modes after the P9 gate.
 | R5 | Language coverage uneven (Python/Rust first) | Accepted | Plugin guide; ADR-0002 |
 | R6 | Eval contamination / non-repro | Mitigated | Pinned SHAs + suite version |
 | R7 | Agents bypass `compile_context` | **Measured** | Trace first-tool-choice on fixtures + Prism arms; workflows + generated AGENTS.md |
-| R8 | IDE extension not shipped | **Closed** | P8 gate — `extensions/vscode` |
+| R8 | IDE extension not shipped | **Waived (choice)** | ADR-0007 — CLI + MCP; no VSIX |
 | R9 | Multi-tenant / shared index | Deferred | Phase 10 optional |
 | R10 | Narrative overlap Graphify/GitNexus | Mitigated | Packs + slice + eval |
 | R11 | WASM host claim | **Waived** | ADR-0001 |

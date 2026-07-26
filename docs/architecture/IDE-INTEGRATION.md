@@ -1,12 +1,24 @@
 # IDE integration design (P5 Stage B)
 
-**Status:** Design locked; extension may ship phased  
+**Status:** Design retained; **VS Code extension cut** ([ADR-0007](./adr/0007-extension-cut-cli-mcp.md))  
 **Stub predecessor:** [IDE-EVIDENCE-PEEK.md](./IDE-EVIDENCE-PEEK.md)  
-**Surface:** VS Code / Cursor TypeScript extension calling `prism` CLI or MCP
+**As-built product surface:** CLI + MCP + optional `prismd` / `prism lsp` — see [PRODUCT-SETUP.md](./PRODUCT-SETUP.md)
 
 ---
 
-## Commands
+## As-built (post–extension cut)
+
+| Need | Use |
+|---|---|
+| Agent compile-first | MCP `compile_context` (`prism mcp`) |
+| Cold workspace | `prism setup` |
+| Orientation / impact / slice | `prism query` / `prism compile` / `prism semantic slice` / `prism view` |
+| In-editor LSP augment | `prism lsp` (hover / symbols / codelens) |
+| Interactive graph panel | **Out of tree** — `@prism/graph-view` for SVG/Mermaid only |
+
+---
+
+## Historical command surface (design only)
 
 | Command | Behavior |
 |---|---|
@@ -16,21 +28,7 @@
 | `prism.slice` | Local/interproc slice for line under cursor |
 | `prism.explain` | Toggle EXPLAIN / drops for last pack |
 
----
-
-## Side panel UX
-
-```text
-┌ Evidence Pack ─────────────────────┐
-│ Intent · tokens used/budget        │
-│ Citations C1…Cn (click → peek)     │
-│ Layers: Arch · Mod · Core · …      │
-│ Gaps / uncertainty notes           │
-│ [EXPLAIN] [Copy for LLM]           │
-└────────────────────────────────────┘
-```
-
-**Copy for LLM** triggers client-side `pack_bound_for_llm` audit event and applies redaction policy.
+These remain a UX sketch if an IDE host is reconsidered; they are **not** shipped.
 
 ---
 
@@ -38,18 +36,19 @@
 
 | Mode | Use |
 |---|---|
-| Daemon HTTP/SSE (`prismd`) | Preferred for IDE panels (P8) |
-| `prism compile` / `query` CLI | Extension fallback without daemon |
-| MCP stdio | Preferred for agents inside Cursor (auto-registered in P8) |
+| MCP stdio | Preferred for agents inside Cursor |
+| `prism compile` / `query` CLI | Scripts, CI, humans without MCP |
+| Daemon HTTP/SSE (`prismd`) | Optional local accelerator |
 | `prism lsp` | Native LSP commands (augments; does not replace language servers) |
 
 ---
 
-## Non-goals (Stage B)
+## Non-goals
 
 - Write / apply rename from IDE  
 - Hosting a language server that replaces rust-analyzer / pylsp  
 - Cloud sync of packs  
+- Marketplace VSIX (cut)
 
 ## Relationship to native LSP
 

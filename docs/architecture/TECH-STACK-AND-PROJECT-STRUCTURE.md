@@ -736,7 +736,7 @@ schemas/
 |---|---|---|
 | Intel | Entrypoints, hubs, layering, hotspots (git history) | ✅ shipped in `prism-store::intel` |
 | Plugin SDK | Public docs + native ABI conformance; WASM host **deferred** (not proven) | ⚠️ claim amended — [ADR-0001](./adr/0001-wasm-plugin-host-deferred.md) |
-| IDE | VS Code extension (peek evidence, impact, slice, compile) | ✅ `extensions/vscode` (P8) |
+| IDE | VS Code extension (peek evidence, impact, slice, compile) | ✂️ **cut** — ADR-0007; CLI + MCP + `prism lsp` |
 | Security | Secret redaction, pack audit logs | ✅ policies written |
 | Public eval | Four-arm scorecard published | ⚠️ **proxy metrics only**; real four-arm run moves to P9 Stage C |
 
@@ -748,7 +748,7 @@ crates/
 ├── prism-plugin-host/             # ❌ not built — deferred to P6 Stage A
 ├── prism-lsp/                     # ✅ P6 Stage C — stdio LSP (hover/symbols/codelens/commands)
 plugins/examples/hello-extractor/  # ❌ not built
-extensions/vscode/                 # ✅ P8 — thin host, thick daemon
+extensions/vscode/                 # ✂️ removed — ADR-0007 (CLI + MCP)
 eval/reports/                      # ✅ p1…p5 scorecard JSON
 docs/
 ├── contributing/plugin-guide.md   # ✅
@@ -888,57 +888,27 @@ A legend is mandatory in every view. Confidence must never be conveyed by color 
 
 ## 13. Phase 8 — IDE Extension (VS Code / Cursor)
 
-**Planning ref:** P8 Stages A–C  
-**Duration:** 4–5 weeks  
-**Goal:** Ship the editor surface — commands, evidence panel, graph panel, decorations, and automatic Cursor MCP registration.
+> **CUT** — see [ADR-0007](./adr/0007-extension-cut-cli-mcp.md). No `extensions/vscode` in-tree.  
+> Setup / agent path: [PRODUCT-SETUP.md](./PRODUCT-SETUP.md).
 
-### 13.1 Tech activated in P8
+**Planning ref:** P8 Stages A–C (historical)  
+**Status:** Removed from repository 2026-07-26
 
-| Area | Activate |
+### 13.1 What remains after the cut
+
+| Area | Status |
 |---|---|
-| Extension host | TypeScript strict + **VS Code Extension API**, **esbuild** bundle |
-| Webview | **React 18+** + **Vite**, VS Code theme CSS variables |
-| Transport | Daemon HTTP/SSE first → CLI fallback → MCP for agent paths |
-| Binary delivery | Platform-specific VSIX **or** verified download-on-demand (ADR in Stage A) |
-| Testing | **vitest**, **@vscode/test-electron**, **Playwright** for the webview |
-| Packaging | **@vscode/vsce** → VS Code Marketplace + **Open VSX** |
-| CI | `extension.yml`: lint, typecheck, unit, e2e, VSIX artifact |
+| `@prism/graph-view` | Kept (SVG/Mermaid renderer package) |
+| `prism setup` / `doctor --ready` | Kept (CLI bootstrap) |
+| MCP stdio | Kept (`prism mcp`) |
+| VSIX / extension host / `extension.yml` | Removed |
 
-### 13.2 Repository structure added in P8
+### 13.2 Former structure (deleted)
 
 ```text
-extensions/vscode/
-├── src/
-│   ├── extension.ts               # activation, command registration
-│   ├── transport/                 # daemon client, CLI fallback, version handshake
-│   ├── lifecycle/                 # binary resolution, spawn, health, upgrade prompts
-│   ├── panels/                    # evidence panel, graph panel hosts
-│   ├── decorations/               # ambiguity, hotspot, slice highlighting
-│   └── agent/                     # MCP auto-registration, AGENTS.md/rules generation
-├── webview/                       # React app consuming prism-graph-view
-├── media/
-├── package.json                   # contributes: commands, views, settings, keybindings
-└── tsconfig.json
-.github/workflows/extension.yml    # NEW
+extensions/vscode/   # removed
+.github/workflows/extension.yml  # removed
 ```
-
-### 13.3 Command surface (implements IDE-INTEGRATION.md)
-
-| Command | Backed by |
-|---|---|
-| `prism.compileContext` | `POST /v1/context/compile` |
-| `prism.evidencePeek` | pack citations → file spans |
-| `prism.impact` | `/v1/query/impact` (`require_precise` optional) |
-| `prism.slice` | `/v1/semantic/slice` |
-| `prism.explain` | EXPLAIN payload of the last pack |
-| `prism.repoMap` / `prism.entrypoints` | `/v1/intel/*` → graph panel |
-
-### 13.4 P8 gate (tech view)
-
-- Clean install works on macOS, Linux, Windows; activation within the stated budget.
-- Cold repo → index → orientation → cited pack with zero terminal commands.
-- Cursor MCP registration is automatic, visible, and disableable.
-- Extension CI green, including end-to-end against a pinned fixture repo.
 
 ---
 
@@ -1060,7 +1030,7 @@ deploy/
 | **Incremental edit + query P95 bench gate** | P6 | ✅ smoke job (numeric fail thresholds TBD) |
 | **View-model golden fixtures** | P6 | ⬜ planned |
 | **Screenshot-diff render suite** | P7 | ⬜ planned |
-| **Extension lint / unit / e2e / VSIX** | P8 (was P5) | ✅ `extension.yml` (vitest; electron e2e deferred) |
+| **Extension lint / unit / e2e / VSIX** | P8 (was P5) | ✂️ removed with extension (ADR-0007) |
 | **Workflow trace conformance** | P9 | ⬜ planned |
 | **Four-arm eval run** (scheduled, not per-PR) | P9 | ⬜ planned |
 
@@ -1109,7 +1079,7 @@ Prefer **subcommand-unified** (`prism mcp`, `prism lsp`) to keep one binary for 
 | **async-lsp server** | §24 | W-IDE | **P6** |
 | **Graph View-Model schema** | §11, §18 (budget discipline) | **W-VIZ** | **P6** |
 | **Cytoscape + ELK renderer** | §24 | **W-VIZ** | **P7** |
-| **VS Code / Cursor extension** | §24 | W-IDE | **P8** |
+| **VS Code / Cursor extension** | §24 | W-IDE | **P8 cut** (ADR-0007) |
 | **Workflow catalog + agent assets** | §25 | **W-AX** | **P9** |
 | Shared server | §26 | P10 stages | P10 |
 

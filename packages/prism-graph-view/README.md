@@ -32,7 +32,7 @@ const cy = mountCytoscape({ container, view, onSelect: (id) => ... });
 | Path | Purpose |
 |---|---|
 | SVG / Mermaid | Docs, scorecards, screenshot-diff |
-| Cytoscape mount | Interactive IDE webview (P8) |
+| Cytoscape mount | Interactive render (optional hosts; IDE webview cut — ADR-0007) |
 | Interaction grammar | Bounded gestures → local/server requests |
 
 See `docs/architecture/VISUAL-ENCODING.md` and `OVERLAY-CATALOG.md`.

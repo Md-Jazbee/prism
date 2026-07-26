@@ -21,7 +21,7 @@ Standing rule: no claim without an artifact. Each row is `built`, `waived` (date
 | **G-11** | `schemas/mcp-tools/v1` missing | **built** | `schemas/mcp-tools/v1/` + conformance test | — |
 | **G-12** | Four-arm LLM / precision ≥70% | deferred | P9 Stage C (out of P6 Stage A scope) | P9-C |
 | **G-13** | No visual surface | deferred | P6-C view-model → P7 renderer | P7 |
-| **G-14** | No IDE extension | deferred | P8 | P8 |
+| **G-14** | No IDE extension | waived | P8 → **cut** ADR-0007 | CLI+MCP |
 | **G-15** | No agent workflow assets | deferred | P9 | P9 |
 
 ## Crate inventory note
