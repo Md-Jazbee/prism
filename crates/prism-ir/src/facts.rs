@@ -36,12 +36,19 @@ pub struct Span {
 }
 
 /// T1 node kinds from fact schema (+ Module for packages/files).
+///
+/// `Doc` / `Section` are the P12 Stage A documentation layer: they make repository
+/// *intent* (READMEs, ADRs, planning docs) queryable instead of invisible.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum NodeKind {
     File,
     Symbol,
     Module,
     Package,
+    /// A documentation file (markdown), P12 Stage A.
+    Doc,
+    /// A heading-scoped span inside a documentation file, P12 Stage A.
+    Section,
 }
 
 impl NodeKind {
@@ -51,11 +58,22 @@ impl NodeKind {
             Self::Symbol => "Symbol",
             Self::Module => "Module",
             Self::Package => "Package",
+            Self::Doc => "Doc",
+            Self::Section => "Section",
         }
+    }
+
+    /// Documentation-layer kinds (P12). Used by selectors/queries that want to
+    /// include or exclude prose from code-only results.
+    pub fn is_doc(self) -> bool {
+        matches!(self, Self::Doc | Self::Section)
     }
 }
 
 /// T1 edge kinds (+ best-effort inheritance).
+///
+/// `Describes` / `Mentions` are the P12 Stage A doc↔code bindings: a section that
+/// documents a symbol (`DESCRIBES`) or that names one in prose/inline-code (`MENTIONS`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EdgeKind {
     Contains,
@@ -65,6 +83,10 @@ pub enum EdgeKind {
     References,
     Extends,
     Implements,
+    /// Documentation section describes a code symbol/file (P12 Stage A).
+    Describes,
+    /// Documentation mentions an identifier (bound in Stage B), P12 Stage A.
+    Mentions,
 }
 
 impl EdgeKind {
@@ -77,6 +99,8 @@ impl EdgeKind {
             Self::References => "REFERENCES",
             Self::Extends => "EXTENDS",
             Self::Implements => "IMPLEMENTS",
+            Self::Describes => "DESCRIBES",
+            Self::Mentions => "MENTIONS",
         }
     }
 }
@@ -181,6 +205,37 @@ pub fn unresolved_node_id(name: &str) -> String {
     format!("unresolved:{name}")
 }
 
+/// Deterministic documentation-file node id (P12 Stage A).
+pub fn doc_node_id(path: &str) -> String {
+    format!("doc:{path}")
+}
+
+/// Deterministic documentation-section node id: `section:{path}#{slug}` (P12 Stage A).
+pub fn section_node_id(path: &str, slug: &str) -> String {
+    format!("section:{path}#{slug}")
+}
+
+/// GitHub-style heading slug: lowercase, drop punctuation, spaces → `-`.
+/// Deterministic and dependency-free so doc goldens stay reproducible.
+pub fn slugify(heading: &str) -> String {
+    let mut out = String::with_capacity(heading.len());
+    let mut prev_dash = false;
+    for ch in heading.trim().chars() {
+        if ch.is_ascii_alphanumeric() {
+            out.push(ch.to_ascii_lowercase());
+            prev_dash = false;
+        } else if (ch == '-' || ch == '_' || ch.is_whitespace()) && !prev_dash && !out.is_empty() {
+            out.push('-');
+            prev_dash = true;
+        }
+        // all other punctuation dropped (matches common markdown anchor rules)
+    }
+    while out.ends_with('-') {
+        out.pop();
+    }
+    out
+}
+
 /// Deterministic edge id.
 pub fn edge_id(kind: EdgeKind, src: &str, dst: &str, start_byte: u32) -> String {
     format!("edge:{}:{src}:{dst}:{start_byte}", kind.as_str())
@@ -193,6 +248,21 @@ mod tests {
     #[test]
     fn unresolved_prefix_is_stable() {
         assert_eq!(unresolved_node_id("foo"), "unresolved:foo");
+    }
+
+    #[test]
+    fn doc_ids_and_slug_are_stable() {
+        assert_eq!(doc_node_id("README.md"), "doc:README.md");
+        assert_eq!(
+            section_node_id("README.md", "quick-start"),
+            "section:README.md#quick-start"
+        );
+        assert_eq!(slugify("  Quick Start  "), "quick-start");
+        assert_eq!(slugify("CLI surface & tools"), "cli-surface-tools");
+        assert_eq!(slugify("Phase 12 — Accuracy"), "phase-12-accuracy");
+        assert!(NodeKind::Doc.is_doc());
+        assert!(NodeKind::Section.is_doc());
+        assert!(!NodeKind::Symbol.is_doc());
     }
 
     #[test]

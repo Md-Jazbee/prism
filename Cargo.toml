@@ -9,6 +9,7 @@ members = [
     "crates/prism-extract",
     "crates/prism-extract-python",
     "crates/prism-extract-rust",
+    "crates/prism-extract-markdown",
     "crates/prism-mcp",
     "crates/prism-plan",
     "crates/prism-compile",
@@ -66,6 +67,7 @@ prism-obs = { path = "crates/prism-obs" }
 prism-extract = { path = "crates/prism-extract" }
 prism-extract-python = { path = "crates/prism-extract-python" }
 prism-extract-rust = { path = "crates/prism-extract-rust" }
+prism-extract-markdown = { path = "crates/prism-extract-markdown" }
 prism-mcp = { path = "crates/prism-mcp" }
 prism-plan = { path = "crates/prism-plan" }
 prism-compile = { path = "crates/prism-compile" }

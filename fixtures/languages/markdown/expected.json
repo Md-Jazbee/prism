@@ -1,0 +1,270 @@
+{
+  "schema_version": "0.0.1",
+  "analyzer": "prism-markdown@0.1",
+  "tier": "T1",
+  "language": "markdown",
+  "path": "sample.md",
+  "nodes": [
+    {
+      "id": "doc:sample.md",
+      "kind": "Doc",
+      "name": "Sample Doc",
+      "file_path": "sample.md",
+      "span": {
+        "start_byte": 0,
+        "end_byte": 358,
+        "start_line": 0,
+        "start_col": 0,
+        "end_line": 19,
+        "end_col": 0
+      },
+      "language": "markdown",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "fenced_code_blocks": 1,
+        "section_count": 4,
+        "title": "Sample Doc"
+      }
+    },
+    {
+      "id": "section:sample.md#detail",
+      "kind": "Section",
+      "name": "Detail",
+      "file_path": "sample.md",
+      "span": {
+        "start_byte": 243,
+        "end_byte": 318,
+        "start_line": 13,
+        "start_col": 0,
+        "end_line": 17,
+        "end_col": 0
+      },
+      "language": "markdown",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "level": 3,
+        "slug": "detail",
+        "title": "Detail"
+      }
+    },
+    {
+      "id": "section:sample.md#sample-doc",
+      "kind": "Section",
+      "name": "Sample Doc",
+      "file_path": "sample.md",
+      "span": {
+        "start_byte": 0,
+        "end_byte": 93,
+        "start_line": 0,
+        "start_col": 0,
+        "end_line": 4,
+        "end_col": 0
+      },
+      "language": "markdown",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "level": 1,
+        "slug": "sample-doc",
+        "title": "Sample Doc"
+      }
+    },
+    {
+      "id": "section:sample.md#setup",
+      "kind": "Section",
+      "name": "Setup",
+      "file_path": "sample.md",
+      "span": {
+        "start_byte": 93,
+        "end_byte": 243,
+        "start_line": 4,
+        "start_col": 0,
+        "end_line": 13,
+        "end_col": 0
+      },
+      "language": "markdown",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "level": 2,
+        "slug": "setup",
+        "title": "Setup"
+      }
+    },
+    {
+      "id": "section:sample.md#setup-1",
+      "kind": "Section",
+      "name": "Setup",
+      "file_path": "sample.md",
+      "span": {
+        "start_byte": 318,
+        "end_byte": 358,
+        "start_line": 17,
+        "start_col": 0,
+        "end_line": 19,
+        "end_col": 0
+      },
+      "language": "markdown",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "level": 2,
+        "slug": "setup-1",
+        "title": "Setup"
+      }
+    },
+    {
+      "id": "unresolved:NodeKind",
+      "kind": "Symbol",
+      "name": "NodeKind",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "attrs": {
+        "from_doc": true,
+        "unresolved": true
+      }
+    },
+    {
+      "id": "unresolved:compile_context",
+      "kind": "Symbol",
+      "name": "compile_context",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "attrs": {
+        "from_doc": true,
+        "unresolved": true
+      }
+    },
+    {
+      "id": "unresolved:crates/prism-ir",
+      "kind": "Symbol",
+      "name": "crates/prism-ir",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "attrs": {
+        "from_doc": true,
+        "unresolved": true
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge:CONTAINS:doc:sample.md:section:sample.md#sample-doc:0",
+      "kind": "Contains",
+      "src": "doc:sample.md",
+      "dst": "section:sample.md#sample-doc",
+      "file_path": "sample.md",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:CONTAINS:section:sample.md#sample-doc:section:sample.md#setup-1:318",
+      "kind": "Contains",
+      "src": "section:sample.md#sample-doc",
+      "dst": "section:sample.md#setup-1",
+      "file_path": "sample.md",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:CONTAINS:section:sample.md#sample-doc:section:sample.md#setup:93",
+      "kind": "Contains",
+      "src": "section:sample.md#sample-doc",
+      "dst": "section:sample.md#setup",
+      "file_path": "sample.md",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:CONTAINS:section:sample.md#setup:section:sample.md#detail:243",
+      "kind": "Contains",
+      "src": "section:sample.md#setup",
+      "dst": "section:sample.md#detail",
+      "file_path": "sample.md",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:MENTIONS:section:sample.md#detail:unresolved:NodeKind:260",
+      "kind": "Mentions",
+      "src": "section:sample.md#detail",
+      "dst": "unresolved:NodeKind",
+      "file_path": "sample.md",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "asserted",
+      "attrs": {
+        "raw": "NodeKind"
+      }
+    },
+    {
+      "id": "edge:MENTIONS:section:sample.md#sample-doc:unresolved:compile_context:41",
+      "kind": "Mentions",
+      "src": "section:sample.md#sample-doc",
+      "dst": "unresolved:compile_context",
+      "file_path": "sample.md",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "asserted",
+      "attrs": {
+        "raw": "compile_context"
+      }
+    },
+    {
+      "id": "edge:MENTIONS:section:sample.md#sample-doc:unresolved:crates/prism-ir:67",
+      "kind": "Mentions",
+      "src": "section:sample.md#sample-doc",
+      "dst": "unresolved:crates/prism-ir",
+      "file_path": "sample.md",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "asserted",
+      "attrs": {
+        "raw": "crates/prism-ir"
+      }
+    },
+    {
+      "id": "edge:REFERENCES:section:sample.md#setup:file:guide.md:122",
+      "kind": "References",
+      "src": "section:sample.md#setup",
+      "dst": "file:guide.md",
+      "file_path": "sample.md",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "raw": "./guide.md",
+        "text": "the guide"
+      }
+    },
+    {
+      "id": "edge:REFERENCES:section:sample.md#setup:section:sample.md#sample-doc:150",
+      "kind": "References",
+      "src": "section:sample.md#setup",
+      "dst": "section:sample.md#sample-doc",
+      "file_path": "sample.md",
+      "analyzer": "prism-markdown@0.1",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "anchor": true,
+        "raw": "#sample-doc",
+        "text": "jump back"
+      }
+    }
+  ]
+}

@@ -2,8 +2,8 @@
 
 **Project working name:** Prism — Repository Intelligence Platform  
 **Document type:** Detailed Planning & Implementation Guide (phase → stage)  
-**Status:** Active — P0–P7 + P9 delivered; P8 cut (CLI+MCP); P10 deferred; **P11 Install & Distribution planned**  
-**Date:** 2026-07-19 · **Revised:** 2026-07-26 (P11 install/distribution phase added; P10 remains skipped/deferred)  
+**Status:** Active — P0–P7 + P9 delivered; P8 cut (CLI+MCP); P10 deferred; **P11 Install & Distribution in progress**; **P12 Accuracy & Grounding planned**  
+**Date:** 2026-07-19 · **Revised:** 2026-07-26 (P12 accuracy/grounding phase added after a doc-aware-graph head-to-head; P11 Stage C pending; P10 remains skipped/deferred)  
 **Governs:** Execution of the [Architecture Design Document](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)  
 **Audience:** Project leads, architects, implementers, evaluators, open-source contributors  
 
@@ -45,14 +45,17 @@ This document turns the ADD’s high-level roadmap into an executable plan. It d
 16. [Phase 9 — Agent Experience & Workflows](#16-phase-9--agent-experience--workflows)
 17. [Phase 10 — Team / Distributed (optional)](#17-phase-10--team--distributed-optional)
 18. [Phase 11 — Install & Distribution (any system)](#18-phase-11--install--distribution-any-system)
-19. [Evaluation program (runs across phases)](#19-evaluation-program-runs-across-phases)
-20. [Risk register & guardrails](#20-risk-register--guardrails)
-21. [Definition of Done (program-level)](#21-definition-of-done-program-level)
-22. [Appendix — Checklists & templates](#22-appendix--checklists--templates)
+19. [Phase 12 — Accuracy & Grounding (doc-aware evidence)](#19-phase-12--accuracy--grounding-doc-aware-evidence)
+20. [Evaluation program (runs across phases)](#20-evaluation-program-runs-across-phases)
+21. [Risk register & guardrails](#21-risk-register--guardrails)
+22. [Definition of Done (program-level)](#22-definition-of-done-program-level)
+23. [Appendix — Checklists & templates](#23-appendix--checklists--templates)
 
 > **Phase renumbering note (2026-07-26).** The former *Phase 6 — Team / Distributed* is now **Phase 10** and stays optional/deferred. Phases 6–9 cover the *interaction* half: service surfaces, graph rendering, IDE extension (later cut), and agent experience. Historical references to “P6 Stage C certified caches” now mean **P10 Stage C**.
 >
 > **P11 note (2026-07-26).** **Phase 11 — Install & Distribution** is planned next and does **not** depend on Phase 10. P10 remains skipped. Inspiration: Graphify’s ensure-installed skill step, host adapters (`claude install` / hooks), and one-shot project bootstrap — adapted to Prism’s single Rust binary + MCP surface ([PRODUCT-SETUP.md](../architecture/PRODUCT-SETUP.md), ADR-0007).
+>
+> **P12 note (2026-07-26).** **Phase 12 — Accuracy & Grounding** is opened and runs **parallel to P11 Stage C**. It answers a measured failure: on a product/architecture narrative question, Prism returned tiny packs made of *role placeholders* while a doc-aware graph (Graphify) answered from README/ADD concept nodes. P12 adds a documentation layer, kills synthetic fragments in favour of honest `gaps[]`, replaces directory “communities” with seeded semantic clustering, and settles accuracy with a five-arm benchmark. Token efficiency is already won; **sufficiency** is the open goal.
 
 ---
 
@@ -140,12 +143,18 @@ flowchart LR
     subgraph Distribution["Distribution half — planned"]
       P11[P11 Install & Distribution]
     end
+    subgraph Accuracy["Accuracy half — planned"]
+      P12[P12 Accuracy & Grounding]
+    end
     P5 --> P6 --> P7 --> P8
     P7 --> P9
     P9 --> P11
+    P9 --> P12
     P9 -.skipped for now.-> P10[P10 Distributed / Team]
     P11 -.optional later.-> P10
 ```
+
+**P12 is parallel, not sequential:** it depends on the P9 agent surface and the P2 compiler, not on install work. P11 makes Prism *reachable*; P12 makes its answers *sufficient*.
 
 | Phase | Intent | Duration (calendar) | Primary user-visible outcome |
 |---|---|---|---|
@@ -161,6 +170,7 @@ flowchart LR
 | **P9** | Agents choose Prism first, and we can prove it | ~4 weeks | Agent workflows, rules/skills assets, closed-loop eval |
 | **P10** | Team/CI scale (optional) | TBD | Shared index, authz, optional certified caches — **deferred / skipped for now** |
 | **P11** | Anyone can install Prism on any common OS | 3–5 weeks | One-shot installers + Graphify-like agent bootstrap; cold machine → MCP-ready |
+| **P12** | Packs are sufficient, not merely small | 5–7 weeks | Doc-aware evidence, honest gaps instead of placeholders, semantic communities, five-arm accuracy report |
 
 ### 3.2 Capability maturity ladder
 
@@ -184,6 +194,24 @@ flowchart LR
 | Team/shared index | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ● | ○ |
 
 ● = required deliverable · ◐ = partial / heuristic · ○ = not yet · ✂ = cut (ADR-0007)
+
+#### 3.2.1 Accuracy-half capability ladder (P12)
+
+Kept as a separate table so the P0–P11 ladder above stays a historical record.
+
+| Capability | Today (post-P11 Stage B) | P12 Stage A | Stage B | Stage C | Stage D |
+|---|---|---|---|---|---|
+| Documentation / prose nodes (`Doc`, `Section`) | ○ | ● | ● | ● | ● |
+| Doc↔code binding (`DESCRIBES` / `MENTIONS`) | ○ | ◐ | ● | ● | ● |
+| `asserted` confidence for doc-sourced claims | ○ | ● | ● | ● | ● |
+| Fragments always cite a real node/edge | ○ (placeholders emitted) | ○ | ● | ● | ● |
+| `gaps[]` with `why_absent` + repair action | ◐ (field exists, unused) | ◐ | ● | ● | ● |
+| Grounded seed resolution + candidate refusal | ○ | ○ | ● | ● | ● |
+| Lexical seed index (structure-first fallback) | ○ | ○ | ● | ● | ● |
+| First-party vs vendored/fixture scoping | ○ | ○ | ● | ● | ● |
+| Semantic communities (seeded Leiden) + labels | ○ (path prefixes) | ○ | ○ | ● | ● |
+| Centrality hubs excluding language builtins | ○ (degree, noisy) | ○ | ○ | ● | ● |
+| Live-judged accuracy vs doc-aware baseline | ○ (proxies only) | ○ | ○ | ○ | ● |
 
 ### 3.3 What “implementation” means here
 
@@ -234,12 +262,20 @@ These run in every phase. Stage plans reference them by ID.
 |---|---|---|---|
 | **W-DIST** | Install & distribution | Release artifacts, installers, package managers, checksum/signing, PATH placement, upgrade/uninstall | Graph algorithms, pack quality, team/shared indexes (P10) |
 
+### 4.3 Workstreams added for the accuracy half (P12)
+
+| ID | Workstream | Owns | Never owns |
+|---|---|---|---|
+| **W-DOC** | Documentation intelligence | Doc/section extraction, link & mention resolution, doc↔code binding, `asserted` confidence, doc goldens | Writing or rewriting the repo’s docs; abstractive summaries |
+| **W-ACC** | Accuracy program | Doc-QA gold sets, adjudication protocol, citation-validity scoring, cross-tool baseline arms, ablation discipline | Shipping features; choosing retrieval algorithms |
+
 **Planning rules:**
 
 1. Every phase exit must update **W-EVAL** and **W-OBS**, even if the product surface barely changed.
 2. From P6 onward, every phase exit must also update **W-DEBT** — either close a drift item or record a written waiver.
 3. **W-VIZ never invents evidence.** A view may only render facts the KG or a pack already contains, with the same provenance and confidence labels.
 4. **W-DIST never requires a network after install** for the core index + MCP path (N5 / G8). Installers may download the binary once; day-2 usage stays local-first.
+5. **W-DOC never invents evidence, and W-ACC never ships features.** Documentation facts are extractive and labeled `asserted`; the accuracy program grades what exists rather than negotiating the gate. From P12 onward, no fragment may reach a pack without a citation to a real node or edge.
 
 ---
 
@@ -2231,9 +2267,308 @@ Prove the north-star user journey: **cold machine → indexed workspace → agen
 
 ---
 
-## 19. Evaluation program (runs across phases)
+## 19. Phase 12 — Accuracy & Grounding (doc-aware evidence)
 
-### 19.1 Benchmark arms (always)
+> **Opened 2026-07-26.** Runs **parallel to P11 Stage C**; depends on P9, not on P10/P11. Motivation: a head-to-head against Graphify on a *product/architecture narrative* question — “summarize this repo’s features and use cases” — where Prism packs were token-cheap but **content-poor**, while Graphify’s graph answered from README/ADD concept nodes. See [`docs/REPO-FEATURE-SUMMARY-AND-TOKEN-COMPARISON.md`](../REPO-FEATURE-SUMMARY-AND-TOKEN-COMPARISON.md).
+
+**Phase goal:** Make Evidence Packs *sufficient*, not merely small. Prism must answer documentation-grounded and architecture-narrative questions from compiled evidence with real quoted spans — matching or beating a doc-aware graph baseline (Graphify) — while keeping the token advantage, the extractive default, and local-first indexing.
+
+**Phase duration:** 5–7 weeks  
+**Phase gate (summary):** On a pinned doc-QA + architecture gold set, a medium model answering **only** from one `compile_context` pack matches or beats the Graphify arm on quality at ≤½ its tokens; **zero** packs contain role-placeholder text; unmet roles appear as `gaps[]` with repair actions.
+
+### 19.1 Measured baseline (why this phase exists)
+
+Evidence collected 2026-07-26 on this workspace (T1 · 375 files · 1,629 nodes · 8,676 edges):
+
+| Observation | Measurement / location | Consequence |
+|---|---|---|
+| Doc/prose questions return **role stubs, not content** | `repo_qa` pack `tokens_used=149`; `prism compile` `tokens_used=92`; fragment text `// must-include \`primary_symbol_definition\` locus near README.md` and `[optional:architecture_prose] related context for README.md` | Pack looks successful, teaches the model nothing |
+| Placeholders are generated by design | `role_template()` in `crates/prism-compile/src/select.rs` returns synthetic text for any role the KG cannot fill; `fragment.rs` stamps `synthetic:<label>` provenance | Unfillable roles silently become fake evidence |
+| **Markdown is not extracted** | `detect_language("readme.md") == None` (`crates/prism-extract/src/lib.rs`); `NodeKind = File \| Symbol \| Module \| Package` (`crates/prism-ir/src/facts.rs`) | README/ADD/docs have no queryable nodes at all |
+| Seed grounding picks the wrong anchor | Question anchored on `README.md` resolved its primary symbol to `module:json` | Pack is *about* the wrong thing |
+| Communities are directories, not subsystems | `"Communities are directory prefixes (deterministic), not Leiden yet."` (`crates/prism-store/src/communities.rs`) | Orientation packs restate the folder tree |
+| Hub ranking is dominated by language noise | `into` 456 · `clone` 364 · `Some` 293 · `unwrap` 235 (top hubs by degree) | Budget spent on `unwrap` instead of architecture |
+| Fixture corpora rank alongside first-party code | `fixtures/repos/snapshots/{ripgrep,httpx}` communities indexed | Evidence can come from vendored sample repos |
+| Graphify comparison | BFS query (~1.5k tokens) surfaced `Product Goals & Thesis`, `MCP & Precision Tiers`, `T2 Precise Symbol Tier` concept nodes with `source_location` | A doc-aware graph beats us on narrative questions today |
+
+**Reframing:** G2 (token reduction) is met; G3 (context precision) is measured on a thin sample and **G1 quality is unproven for prose intents**. Phase 12 moves the program from *cheap* to *cheap and sufficient*.
+
+### 19.2 Inspiration from Graphify (adopt / adapt / reject)
+
+| Graphify pattern | Prism P12 stance |
+|---|---|
+| Extract doc/markdown entities as first-class nodes with `source_location` | **Adopt:** `Doc` / `Section` node kinds, extractive spans, provenance per heading |
+| Cross-document + doc→code edges (concept ↔ implementation) | **Adopt:** `DESCRIBES` / `MENTIONS` edges, confidence-labeled |
+| Community detection (Louvain/Leiden) + human-readable community labels | **Adopt:** seeded Leiden on import+call+doc graph; labels synthesized **extractively** from headings/paths |
+| God nodes + “surprising connections” (bridge report) | **Adapt:** centrality on *resolved* nodes only; bridges reported as orientation fragments, labeled heuristic |
+| Question vocabulary expansion before traversal | **Adopt:** expand question terms against graph vocabulary before seeding; record expansion in EXPLAIN |
+| Honest audit labels (`EXTRACTED` / `INFERRED` / `AMBIGUOUS`) | **Already have** confidence IR; **extend** with `asserted` for doc-sourced claims |
+| LLM semantic extraction at index time (Gemini / host agent subagents) | **Reject as default:** index path stays deterministic, offline, key-free (G8); structural doc extraction only |
+| Answering from a rebuilt graph per query | **Reject:** incremental index + compiled packs remain the spine |
+| HTML / wiki / Obsidian output | **Reject here:** rendering belongs to P7 (W-VIZ), not to an accuracy phase |
+
+```mermaid
+flowchart LR
+    A[Stage A Documentation layer] --> B[Stage B Grounded selection + honest gaps]
+    B --> C[Stage C Semantic communities + orientation]
+    C --> D[Stage D Accuracy gate: five-arm eval]
+```
+
+### 19.3 Accuracy targets (new, measurable)
+
+| ID | Target | Baseline today |
+|---|---|---|
+| **ACC-1** | ≥80% of doc-QA gold tasks answerable from **one** pack with quoted doc spans | ~0% (no doc nodes) |
+| **ACC-2** | **Zero** placeholder fragments in any pack; unfilled roles → `gaps[]` + repair action | placeholders are the norm for prose intents |
+| **ACC-3** | Seed-grounding precision ≥90%; wrong-seed rate ≤5%; otherwise `SCOPE_UNRESOLVED` with ranked candidate anchors | wrong seed observed on first prose attempt |
+| **ACC-4** | ≥70% of semantic community labels accepted by dual review; **0** language-builtin symbols in top-10 hubs | labels = directory names; 4 of top-5 hubs are builtins |
+| **ACC-5** | Prism ≥ the doc-aware graph arm (A5) on a shared 20-task product/architecture set at ≤½ tokens | Graphify currently better on narrative |
+| **ACC-6** | 0 vendored/fixture fragments in packs unless the question anchors there | fixtures indexed indistinguishably |
+| **ACC-7** | G3 precision sample extended to n≥20 dual-reviewed, still ≥70% | n=10 (T001), κ=0.78 |
+
+> **Naming:** `ACC-n` are P12 accuracy targets; `A1`–`A5` remain **benchmark arms** (§20.1). Arm A5 is the doc-aware graph baseline that target ACC-5 measures against.
+
+---
+
+### Stage A — Documentation & narrative layer
+
+#### Purpose
+
+Give the KG the nodes it is missing. Repository *intent* lives in markdown; today Prism indexes only code, so any “what is this / why does it exist / how do I use it” question has nothing to retrieve and falls through to placeholders.
+
+#### Entry criteria
+
+- P9 gate passed (workflows + assets stable)  
+- Schema versioning path available for a node/edge-kind extension (`prism-ir`)  
+- Written decision that doc extraction is **structural and offline** — no LLM in the index path
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| **W-DOC** (new) | **Markdown/doc extractor:** headings → `Section` nodes with byte ranges; front-matter; lists/tables preserved as extractive spans; fenced code blocks tagged with language |
+| **W-DOC** | **Doc graph edges:** `CONTAINS` (doc→section), `REFERENCES` (relative links / anchors), `MENTIONS` (identifier or path occurrences in prose) |
+| **W-DOC / W-KG** | **Doc↔code binding:** bind `MENTIONS` to real symbols/files when the token resolves; label unresolved mentions `ambiguous` rather than dropping them |
+| **W-KG / W-IR** | **IR extension:** add `Doc` / `Section` node kinds and `DESCRIBES` edge kind; add confidence value **`asserted`** (documentation claims it) as distinct from `extracted` (code proves it) |
+| **W-STORE** | Storage + query support for doc nodes; keep them out of code-only queries by default (`kind` filters) |
+| **W-PLUGIN** | Golden fixtures: a doc corpus fixture with expected sections/links/mentions, mirroring language-extractor goldens |
+| **W-SEC** | Redaction pass on docs (secrets/tokens pasted in markdown must not enter the graph) |
+| **W-DEBT** | Record that doc-sourced facts can be **stale by nature**; `asserted` never satisfies a precision gate |
+
+#### Deliverables
+
+1. **Doc extraction spec** — what becomes a node, span rules, link/mention resolution, determinism guarantees  
+2. **IR schema delta** — `Doc`/`Section`/`DESCRIBES`/`asserted`, with schema version bump and migration note  
+3. **Doc golden fixture set** + expected-facts JSON  
+4. **Indexing policy** — which paths count as documentation, cost/size caps, incremental behavior on doc edits  
+5. **Honesty rule** — `asserted` facts must be visually/semantically distinguishable in packs, views, and reports  
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Doc layer drifts into abstractive summarization | Extractive spans only; guardrail added to §21.4 |
+| Docs contradict code and the model believes the doc | `asserted` confidence + never precision-gated; review sample includes contradiction cases |
+| Markdown-heavy monorepos blow up index size | Section-level granularity + size caps + `index_status` reporting doc share |
+| Doc nodes pollute code queries | Default `kind` filtering; opt-in inclusion by recipe |
+
+#### Exit / acceptance
+
+- [x] `docs/` appears as indexed content with section-level nodes and byte ranges *(markdown extractor + `Doc`/`Section` nodes; verified end-to-end in a temp workspace)*  
+- [x] Doc goldens pass deterministically *(`fixtures/languages/markdown` + `golden_sample_conformance`; regenerate via `cargo run -p prism-extract-markdown --example gen_golden`)*  
+- [x] `asserted` confidence flows store-side *(IR `Confidence::Asserted`; MENTIONS persisted with `confidence=asserted`)* — pack/EXPLAIN surfacing lands with Stage B  
+- [ ] Secret-redaction verified on a planted-secret fixture *(inherits `ignore_policy::is_secret_sensitive`; doc-specific fixture pending)*  
+- [ ] Doc-edit re-index still meets the N-series incremental target (G4) *(inherits content-hash incremental path; measurement pending)*
+
+> **Delivered (2026-07-26):** IR extension (`Doc`/`Section`/`Describes`/`Mentions`/`asserted`), `prism-extract-markdown` crate, dispatch + `detect_language` for `.md/.markdown/.mdx`, golden fixture, and full build/clippy/test green. Remaining boxes are Stage B / measurement work.
+
+#### Handoff
+
+Stage B gains real fragments to select for prose roles (`architecture_prose`, `primary_symbol_definition` on doc anchors) instead of templates.
+
+---
+
+### Stage B — Grounded selection & honest gaps
+
+#### Purpose
+
+Stop manufacturing evidence. Today an unfillable role becomes synthetic text; a mis-parsed question becomes a confident pack about the wrong symbol. Both are accuracy failures that a token metric rewards.
+
+#### Entry criteria
+
+- Stage A doc nodes queryable  
+- Agreement that a smaller-but-honest pack is a **pass**, not a regression  
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| **W-CC** | **Delete the placeholder path:** every fragment must cite ≥1 real node/edge with a source range; `role_template()`-style synthesis is removed, not merely relabeled |
+| **W-CC** | **`gaps[]` semantics:** unfilled role → gap entry with `role`, `why_absent` (no such node / below tier / budget), and a repair action mirroring the refusal-repair style |
+| **W-PLAN** | **Seed grounding:** score candidate anchors (exact symbol > path > heading > lexical); require a minimum score; below it, refuse `SCOPE_UNRESOLVED` **with ranked candidates** instead of guessing |
+| **W-PLAN** | **Vocabulary expansion** (Graphify analogue): expand question terms against graph vocabulary (identifiers, paths, headings) before planning; record expansion + rejected terms in EXPLAIN |
+| **W-KG** | **Lexical seed index** (trigram/BM25 over identifiers, paths, headings) as the structure-first fallback; embeddings remain out of scope for this phase |
+| **W-CC** | **First-party scoping:** classify vendored / fixture / generated paths; exclude from evidence and hubs unless the question anchors there; report the policy in EXPLAIN |
+| **W-CC** | **Prose recipes:** `repo_qa` / `architecture` gain doc-backed roles (`product_thesis`, `usage_surface`, `architecture_prose`) bound to real sections with never-drop rules |
+| **W-MCP / W-AX** | Tool docs + generated assets state that a pack may legitimately return gaps, and what the agent should do next |
+| **W-OBS** | New counters: placeholder attempts (must trend to 0), gap rate by role, seed-refusal rate, lexical-fallback share |
+
+#### Deliverables
+
+1. **Fragment integrity rule** — “no fragment without a citation”, written as a testable invariant  
+2. **Gap & refusal spec update** — `gaps[]` shape, `why_absent` taxonomy, repair actions  
+3. **Seed-grounding design** — scoring, thresholds, candidate ranking, refusal copy  
+4. **Vocabulary-expansion design** — term sources, expansion caps, EXPLAIN disclosure  
+5. **Path-class policy** — first-party vs vendored/fixture/generated, with per-repo overrides  
+6. **Updated intent recipe cards** for `repo_qa` and `architecture` (template §23.3)  
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Packs get smaller and look “worse” to existing token dashboards | Report answerability alongside tokens; ACC-1/ACC-2 are the gate, not pack size |
+| Lexical fallback becomes the retrieval spine | Lexical may only *seed* anchors, never emit fragments; EXPLAIN records seed origin; guardrail in §21.4 |
+| More refusals annoy agents | Refusals must carry ranked candidates; measure repair success as in P9 |
+| Path classification hides real first-party code | Overrides + `index_status` reporting of excluded classes |
+
+#### Exit / acceptance
+
+- [ ] Invariant test: no pack fragment lacks a node/edge citation with a source range  
+- [ ] Prose questions either quote real doc/code spans or return explicit gaps — never templates  
+- [ ] Seed-grounding precision ≥90% on the gold anchor set (**ACC-3**)  
+- [ ] Wrong-seed cases refuse with ranked candidates and recover on the second call  
+- [ ] Fixture/vendored fragments absent unless anchored (**ACC-6**)
+
+#### Handoff
+
+Stage C can rank orientation content knowing hubs/communities feed *real* fragments and that noise paths are already classified.
+
+---
+
+### Stage C — Semantic communities & orientation quality
+
+#### Purpose
+
+Make architecture packs describe subsystems rather than folders, and hubs describe design rather than `unwrap`. This is where Prism should decisively beat a syntactic graph baseline: same community idea, but with precise-tier edges and budgeted, provenance-bearing output.
+
+#### Entry criteria
+
+- Stages A and B delivered (doc nodes + honest fragments)  
+- Path-class policy active so clustering is not dominated by fixtures  
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| **W-KG** | **Seeded Leiden/Louvain** over import + call + `DESCRIBES` edges; deterministic seed, versioned algorithm id, snapshot-tested membership |
+| **W-KG** | **Extractive community labels:** derive from dominant doc headings, module names, and shared path segments — no LLM required; keep directory label as fallback |
+| **W-KG** | **Hub ranking v2:** centrality (PageRank/betweenness) over **resolved** nodes; language-builtin/stdlib denylist; unresolved symbols reported separately as an index-quality metric, not as architecture |
+| **W-KG** | **Bridge report** (“surprising connections” analogue): cross-community edges ranked by betweenness, labeled heuristic |
+| **W-CC** | Architecture recipe consumes v2 communities/hubs/bridges; never-drop the community map; cap bridge fragments |
+| **W-VIZ** | Graph View-Model consumes semantic communities so views and packs agree (no second clustering) |
+| **W-AX** | `repo_map` / `entrypoints` notes updated: honesty text must change when the algorithm changes (the “not Leiden yet” note is a contract, not decoration) |
+| **W-OBS** | Metrics: unresolved-hub share, community stability across commits, label acceptance rate |
+
+#### Deliverables
+
+1. **Clustering design** — algorithm, seeding, determinism, versioning, incremental strategy  
+2. **Label synthesis spec** — sources, precedence, fallback, review protocol  
+3. **Hub/centrality spec** — measure choice, denylist policy, resolved-only rule  
+4. **Bridge report spec** — ranking, caps, confidence labeling  
+5. **Updated orientation notes** for `repo_map` / architecture packs (docs + tool `confidence_note`)  
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Clustering nondeterminism breaks reproducible packs | Fixed seed + snapshot tests + algorithm id in provenance |
+| Community labels become marketing prose | Extractive only; dual review; fallback to path label |
+| Incremental clustering cost per commit | Cluster on demand + cache by snapshot id; recluster budget documented |
+| Doc edges distort code communities | Weight `DESCRIBES` below structural edges; ablation recorded in the report |
+
+#### Exit / acceptance
+
+- [ ] Communities are semantic and stable across two adjacent commits (documented drift bound)  
+- [ ] Top-10 hubs contain **0** language builtins (**ACC-4**)  
+- [ ] ≥70% of labels accepted in dual review (**ACC-4**)  
+- [ ] Architecture pack for this repo names subsystems (compiler / store / precise / agent surface), not just crate paths  
+- [ ] Views and packs cite the **same** community ids
+
+#### Handoff
+
+Stage D can benchmark orientation against a doc-aware baseline with a stable, versioned clustering to cite.
+
+---
+
+### Stage D — Accuracy gate (five-arm eval & adjudication)
+
+#### Purpose
+
+Settle the accuracy claim the same way P9 settled tool choice: with a published, reproducible head-to-head — including an external doc-aware graph baseline that currently wins on narrative questions.
+
+#### Entry criteria
+
+- Stages A–C deliverables reviewed  
+- Pinned repo SHAs + pinned Graphify graph build for reproducibility  
+- Dual-review labeling capacity available (mandatory since P9 Stage C)  
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| **W-EVAL** | **Doc-QA / narrative gold set** (≥25 tasks): product thesis, feature inventory, use cases, install/bootstrap, workflow semantics, non-goals — each with accepted-answer criteria and necessary doc spans |
+| **W-EVAL** | **Five-arm harness:** extend four-arm with **arm E = doc-aware graph baseline (Graphify)**; record tokens, hops, quality, and citation validity per arm |
+| **W-ACC** (new) | **Adjudication protocol:** blind grading, tie-breaks, κ reporting, and a rule that a *fluent answer with invalid citations* scores zero |
+| **W-EVAL** | Extend precision sample to n≥20 dual-reviewed (**ACC-7**); include prose fragments, not only code |
+| **W-EVAL** | Ablations: docs off/on, semantic communities off/on, lexical seeds off/on — so the accuracy delta is attributable |
+| **W-DEBT** | Reconcile every published accuracy claim with the as-built repo; retire the “thin pack looks like success” failure mode from docs |
+| **W-OBS** | Ship the accuracy counters (ACC-2 / ACC-3 rates) as part of the standard scorecard |
+
+#### Deliverables
+
+1. **Doc-QA gold suite v1** (task cards per template §23.9)  
+2. **Five-arm accuracy report v1** — per-arm tokens/quality/citation validity + ablation table  
+3. **Adjudication protocol** doc + κ results  
+4. **P12 scorecard** — ACC-1…ACC-7 pass/fail with artifacts  
+5. **Phase 12 gate evidence pack** archived under `docs/eval/`  
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Baseline comparison is unfair or unstable | Pin baseline version + graph build; publish its exact invocation; let it use its best settings |
+| Scripted proxies substituted for real judging again | Arm quality must come from live judged runs; proxies may not satisfy the P12 gate |
+| Gold set written to flatter Prism | Author tasks from user questions and README/ADD claims *before* seeing packs; external review of the set |
+| Accuracy work quietly regresses tokens | Token budget adherence stays a co-gate: quality wins must hold at ≤½ baseline tokens |
+
+#### Exit / acceptance (Phase 12 gate)
+
+- [ ] ACC-1…ACC-7 met or explicitly waived with residual risk recorded  
+- [ ] Five-arm report published with live-judged quality (not proxies) and citation-validity scores  
+- [ ] Prism ≥ arm A5 (doc-aware graph) on the shared narrative set at ≤½ tokens (**ACC-5**)  
+- [ ] Ablations show which capability bought which accuracy points  
+- [ ] No published claim without an archived artifact (guardrail §21.5 rule 7)
+
+#### Non-goals (this phase)
+
+- LLM-based extraction or summarization in the index path (stays offline / key-free — G8)  
+- Embedding-first retrieval (lexical seeds only; embeddings remain a later, labeled fallback)  
+- HTML/wiki/vault generation (P7 owns rendering)  
+- Answer caching (blocked until P10 Stage C)  
+- Auto-rewriting the repository’s documentation  
+- New precision tiers (T2/T4 semantics unchanged)
+
+#### Handoff
+
+- P7 views inherit semantic communities; P10 (if opened) inherits a stable accuracy scorecard  
+- Agent assets inherit “packs may return gaps” guidance  
+- The program can finally state G1/G3 for prose intents with evidence rather than proxies
+
+---
+
+## 20. Evaluation program (runs across phases)
+
+### 20.1 Benchmark arms (always)
 
 | Arm | Description |
 |---|---|
@@ -2241,10 +2576,11 @@ Prove the north-star user journey: **cold machine → indexed workspace → agen
 | A2 | Medium model + explore tools |
 | A3 | Medium model + Prism |
 | A4 | Frontier model + Prism (optional best) |
+| **A5** | **Medium model + doc-aware graph baseline (Graphify)** — added P12 Stage D |
 
-**Program success:** A3 approaches A1; A4 optional ceiling. The four-arm run with real models is **executed in P9 Stage C** — until then, published numbers are structural proxies and must say so.
+**Program success:** A3 approaches A1; A4 optional ceiling. The four-arm run with real models is **executed in P9 Stage C** — until then, published numbers are structural proxies and must say so. **From P12 Stage D the suite is five-arm:** A5 exists so “we beat naive explore” is never mistaken for “we beat a doc-aware graph”, which measurement on 2026-07-26 showed we did not on narrative questions.
 
-### 19.2 Task categories by phase emphasis
+### 20.2 Task categories by phase emphasis
 
 | Category | Introduce | Primary phase gate |
 |---|---|---|
@@ -2258,8 +2594,11 @@ Prove the north-star user journey: **cold machine → indexed workspace → agen
 | **Terminal-free task completion** | P8 | P8 *(cut — CLI+MCP path)* |
 | **Agent tool-choice & refusal repair** | P9 | P9 |
 | **Cold-machine install → MCP-ready** | P11 | P11 |
+| **Doc-grounded product / narrative QA** | P12 | P12 |
+| **Citation validity (does the answer’s evidence exist?)** | P12 | P12 |
+| **Cross-tool parity vs doc-aware graph** | P12 | P12 |
 
-### 19.3 Metrics ownership
+### 20.3 Metrics ownership
 
 | Metric | Owner workstream | First measured |
 |---|---|---|
@@ -2280,19 +2619,25 @@ Prove the north-star user journey: **cold machine → indexed workspace → agen
 | **Refusal-repair success rate** | W-AX | P9 |
 | **Cold-machine time-to-ready** | W-DIST + W-EVAL | P11 |
 | **Install path success rate** (script / brew / scoop / …) | W-DIST | P11 |
+| **Doc-QA answerability from one pack** (ACC-1) | W-ACC + W-CC | P12 |
+| **Placeholder-fragment rate** (must reach 0 — ACC-2) | W-CC + W-OBS | P12 |
+| **Seed-grounding precision / wrong-seed rate** (ACC-3) | W-PLAN + W-ACC | P12 |
+| **Community label acceptance + unresolved-hub share** (ACC-4) | W-KG + W-ACC | P12 |
+| **Parity delta vs doc-aware baseline arm A5** (ACC-5) | W-ACC + W-EVAL | P12 |
 
-### 19.4 Labeling discipline
+### 20.4 Labeling discipline
 
 - Necessary-span labels are **versioned** with pack algorithm version.  
 - Prefer dual review on precision samples; dual review becomes **mandatory** from P9 Stage C.  
 - Never change gold answers silently after a published report—cut a new suite version.  
 - Visual-surface metrics (P7) are reported alongside token metrics, never instead of them: a faster-to-read wrong answer is still wrong.
+- **Token metrics are never reported without an answerability metric (added P12):** a 149-token pack that teaches the model nothing is a failure, not a 22× win.
 
 ---
 
-## 20. Risk register & guardrails
+## 21. Risk register & guardrails
 
-### 20.1 Program risks (from ADD, planning actions)
+### 21.1 Program risks (from ADD, planning actions)
 
 | Risk | Planning guardrail |
 |---|---|
@@ -2305,7 +2650,7 @@ Prove the north-star user journey: **cold machine → indexed workspace → agen
 | AOE cache bet returns | Answer cache blocked until P10 Stage C |
 | Prism only usable by Rust contributors | P11 cold-machine install gate; PRODUCT-SETUP must not lead with `cargo build` |
 
-### 20.2 Interaction-half risks (added 2026-07-26)
+### 21.2 Interaction-half risks (added 2026-07-26)
 
 | Risk | Planning guardrail |
 |---|---|
@@ -2318,7 +2663,7 @@ Prove the north-star user journey: **cold machine → indexed workspace → agen
 | Editor/agent platform churn | Feature-detect, degrade to plain MCP, pin API versions in CI |
 | The four-arm benchmark never happens (again) | It is the P9 gate; the phase cannot exit without it |
 
-### 20.3 Distribution-half risks (added 2026-07-26 — P11)
+### 21.3 Distribution-half risks (added 2026-07-26 — P11)
 
 | Risk | Planning guardrail |
 |---|---|
@@ -2328,7 +2673,21 @@ Prove the north-star user journey: **cold machine → indexed workspace → agen
 | P11 quietly absorbs P10 shared-index work | Explicit non-goal; shared index stays deferred |
 | VSIX revived under distribution pressure | ADR-0007; CLI + MCP only |
 
-### 20.4 Stage churn guardrails
+### 21.4 Accuracy-half risks (added 2026-07-26 — P12)
+
+| Risk | Planning guardrail |
+|---|---|
+| Placeholder fragments make empty packs look successful | P12 Stage B invariant: no fragment without a citation; placeholder rate is a gated metric (ACC-2) |
+| Token efficiency is optimized at the cost of sufficiency | Every token claim ships beside an answerability claim (§20.4); ACC-5 requires quality parity *and* ≤½ tokens |
+| The doc layer becomes an LLM summarizer | Extractive spans only; no model in the index path (G8); `asserted` confidence, never precision-gated |
+| Documentation lies and Prism launders the lie | `asserted` ≠ `extracted`; contradiction cases are part of the review sample; W-DEBT owns drift |
+| Lexical seeding slides into embedding-first retrieval | Lexical may seed anchors only, never emit fragments; “structure before similarity” stays a release-notes guardrail |
+| Semantic clustering becomes nondeterministic | Fixed seed, versioned algorithm id in provenance, snapshot-tested membership |
+| Honesty notes outlive the code they describe | If clustering or hub ranking changes, the `confidence_note` / `repo_map` notes change in the same stage |
+| Accuracy phase quietly reopens tiers or caching | T2/T4 semantics and answer caching are explicit P12 non-goals |
+| Baseline arm is dropped when it wins | Arm A5 stays in the suite regardless of outcome; removing an arm requires a written waiver |
+
+### 21.5 Stage churn guardrails
 
 1. **No skipping phase gates** without a written waiver listing residual risk.  
 2. **No embedding-centric retrieval narrative** in release notes.  
@@ -2337,11 +2696,13 @@ Prove the north-star user journey: **cold machine → indexed workspace → agen
 5. **Vertical first:** correctness + tokens on one large repo before distributed work.  
 6. **No unbounded rendering** — views obey budgets and refuse, exactly as packs do.  
 7. **No claim without an artifact.** If a gate says “proven”, the repository must contain the thing that proves it (this rule exists because of gap G-03).  
-8. **No “works on my machine” install story.** If a gate claims cross-platform install, evidence is cold VMs or CI matrix artifacts — not a maintainer laptop.
+8. **No “works on my machine” install story.** If a gate claims cross-platform install, evidence is cold VMs or CI matrix artifacts — not a maintainer laptop.  
+9. **No synthesized evidence.** A fragment either cites a real node/edge with a source range or it does not ship; absence is expressed as a gap, never as plausible-looking filler (added P12).  
+10. **No accuracy claim from proxies alone.** Structural proxies may report progress; a *quality* gate requires live-judged runs against the baseline arms (added P12).
 
 ---
 
-## 21. Definition of Done (program-level)
+## 22. Definition of Done (program-level)
 
 Prism’s planning program (P0–P5) is done when all are true:
 
@@ -2355,7 +2716,7 @@ Prism’s planning program (P0–P5) is done when all are true:
 
 **Status:** items 1–3 and 5–7 are met as of the P5 gate. Item 4 is **interim** — the four-arm benchmark lands in P9 Stage C.
 
-### 21.1 Definition of Done — interaction half (P6–P9)
+### 22.1 Definition of Done — interaction half (P6–P9)
 
 The interaction program is done when all are true:
 
@@ -2369,7 +2730,7 @@ The interaction program is done when all are true:
 
 Phase 10 is an **optional expansion**, not required for MVP product identity — and is **skipped for now**.
 
-### 21.2 Definition of Done — distribution half (P11)
+### 22.2 Definition of Done — distribution half (P11)
 
 The distribution program is done when all are true:
 
@@ -2380,11 +2741,23 @@ The distribution program is done when all are true:
 5. **Docs match reality.** PRODUCT-SETUP / INSTALL lead with the release path; from-source is contributor-only.
 6. **Local-first survived install.** After the one-time binary download, indexing and MCP do not require network.
 
+### 22.3 Definition of Done — accuracy half (P12)
+
+The accuracy program is done when all are true:
+
+1. **Packs are sufficient.** A medium model answers doc-grounded and architecture questions from one pack, quoting real spans — no placeholders anywhere in the surface.
+2. **Absence is honest.** When evidence does not exist, the pack says so in `gaps[]` with a repair action, and the agent recovers on the next call.
+3. **Seeds are grounded.** Questions resolve to the right anchors or refuse with ranked candidates; “confidently about the wrong symbol” is a tracked defect class with a target of ≤5%.
+4. **The repository is described in its own terms.** Communities and hubs name subsystems and design, not directories and `unwrap`.
+5. **Documentation is a first-class, clearly-labeled source.** Doc claims carry `asserted` confidence and never satisfy precision gates.
+6. **The comparison is public.** A five-arm, live-judged report — including a doc-aware graph baseline — shows Prism at parity or better on narrative tasks at ≤½ the tokens, with ablations attributing the gains.
+7. **Local-first survived accuracy.** No LLM, key, or network entered the index path to achieve any of the above.
+
 ---
 
-## 22. Appendix — Checklists & templates
+## 23. Appendix — Checklists & templates
 
-### 22.1 Stage kickoff checklist
+### 23.1 Stage kickoff checklist
 
 - [ ] Re-read relevant ADD sections for this stage  
 - [ ] Confirm entry criteria  
@@ -2393,7 +2766,7 @@ The distribution program is done when all are true:
 - [ ] Identify eval measurement (even qualitative)  
 - [ ] List non-goals for this stage (what we refuse to build now)  
 
-### 22.2 Stage exit review template
+### 23.2 Stage exit review template
 
 | Field | Content |
 |---|---|
@@ -2404,7 +2777,7 @@ The distribution program is done when all are true:
 | Waiver? | none / signed waiver |
 | Next stage entry | confirmed / blocked by X |
 
-### 22.3 Intent recipe card (template)
+### 23.3 Intent recipe card (template)
 
 ```text
 Intent: <name>
@@ -2417,7 +2790,7 @@ Refuse when: <SCOPE_UNRESOLVED conditions>
 Eval tasks: <IDs>
 ```
 
-### 22.4 Gold task card (template)
+### 23.4 Gold task card (template)
 
 ```text
 Task ID:
@@ -2431,7 +2804,7 @@ Labels (necessary spans):
 Scoring method:
 ```
 
-### 22.5 Phase gate evidence pack (required artifacts)
+### 23.5 Phase gate evidence pack (required artifacts)
 
 | Phase | Evidence to archive |
 |---|---|
@@ -2447,8 +2820,9 @@ Scoring method:
 | P9 | Four-arm benchmark report v2, dual-reviewed precision sample, agent trace metrics |
 | P10 | Authz pilot notes, SLA, cache certificate design *(deferred)* |
 | P11 | Release archives + `SHA256SUMS`, installer smoke logs (3 OS), host-adapter matrix, P11 scorecard, INSTALL/PRODUCT-SETUP as-built |
+| P12 | Doc extraction spec + goldens, IR schema delta (`Doc`/`Section`/`asserted`), fragment-integrity invariant test, doc-QA gold suite, five-arm accuracy report v1 + ablations, adjudication protocol + κ, P12 scorecard (ACC-1…ACC-7) |
 
-### 22.6 View kind card (template — P7)
+### 23.6 View kind card (template — P7)
 
 ```text
 View kind: <name>
@@ -2465,7 +2839,7 @@ Refuse when: <VIEW_TOO_LARGE conditions + suggested anchors>
 Eval tasks: <IDs>
 ```
 
-### 22.7 Glossary (planning-oriented)
+### 23.7 Glossary (planning-oriented)
 
 | Term | Meaning |
 |---|---|
@@ -2483,8 +2857,17 @@ Eval tasks: <IDs>
 | **Host adapter** | Idempotent writer for a specific agent host’s MCP/rules/skills config (`cursor`, `claude`, `vscode`, …) |
 | **Cold-machine path** | Install + setup + doctor on a VM with no Rust toolchain and no prior Prism state |
 | **Time-to-ready** | Wall clock from zero install to first successful `compile_context` on a fixture repo |
+| **Placeholder fragment** | Role-shaped text with no cited node/edge behind it — the P12 defect class being eliminated |
+| **Gap (`gaps[]`)** | Declared absence of evidence for a role, with a reason and a repair action; the honest alternative to a placeholder |
+| **Seed grounding** | Resolving a question to the anchors it is actually about, or refusing with ranked candidates |
+| **Vocabulary expansion** | Expanding question terms against the graph’s own identifiers/paths/headings before planning |
+| **`asserted` confidence** | A fact the documentation claims but code does not prove; never satisfies a precision gate |
+| **Doc / Section node** | Documentation file and heading-scoped span, indexed extractively with byte ranges |
+| **Semantic community** | Cluster from seeded Leiden over import+call+`DESCRIBES` edges, labeled extractively — successor to path-prefix communities |
+| **Citation validity** | Whether the evidence an answer cites actually exists and says what the answer claims |
+| **Answerability** | Whether one pack is sufficient to answer a gold task — reported beside every token metric |
 
-### 22.8 Install journey card (template — P11)
+### 23.8 Install journey card (template — P11)
 
 ```text
 OS / arch: <macos-arm64 | linux-x86_64 | windows-x86_64 | …>
@@ -2500,6 +2883,36 @@ Uninstall clean: pass/fail
 Notes / limitations:
 ```
 
+### 23.9 Doc-QA gold task card (template — P12)
+
+```text
+Task ID:
+Repo + commit (pinned SHA):
+Category: product thesis | feature inventory | use cases | install/bootstrap | workflow semantics | non-goals | contradiction
+Prompt (as a real user would ask it):
+Accepted answer criteria (facts that must appear):
+Necessary spans (doc sections and/or code ranges, with paths + line ranges):
+Forbidden sources (vendored/fixture paths that must not be cited):
+Expected pack shape: <roles that must be filled | roles allowed to be gaps>
+Expected refusal (if under-specified): SCOPE_UNRESOLVED + candidate anchors
+Baseline arm notes (explore / doc-aware graph):
+Scoring: quality rubric + citation validity (invalid citation ⇒ 0)
+```
+
+### 23.10 Accuracy defect card (template — P12)
+
+```text
+Defect ID:
+Class: placeholder fragment | wrong seed | missing doc node | noisy hub | vendored leak | stale asserted fact | invalid citation
+Question that exposed it:
+Observed pack (tokens, fragment ids, texts):
+Why it is wrong (what a correct pack would have contained):
+Root cause (component + file):
+Metric affected: ACC-1 | ACC-2 | ACC-3 | ACC-4 | ACC-5 | ACC-6 | ACC-7
+Fix stage: P12 Stage A | B | C | D
+Regression artifact added: <fixture / invariant test / gold task id>
+```
+
 ---
 
 ## Related documents
@@ -2509,8 +2922,10 @@ Notes / limitations:
 - [Product setup](../architecture/PRODUCT-SETUP.md) — current CLI+MCP bootstrap (P11 expands this to any system)  
 - [Tasks & Progress](./TASKS-AND-PROGRESS.md) — living checklist and phase state  
 - [Program residual risks](../eval/PROGRAM-RESIDUAL-RISKS.md) — R1/R2/R8 are the P9 targets  
+- [Repo feature summary & token comparison](../REPO-FEATURE-SUMMARY-AND-TOKEN-COMPARISON.md) — the 2026-07-26 measurement that motivated P12  
+- [Public benchmark report v2](../eval/PUBLIC-BENCHMARK-REPORT-V2.md) — four-arm proxies that P12 Stage D replaces with live-judged five-arm results  
 - ADD §36 Phased Implementation Roadmap — phase durations and high-level gates (expanded here)
 
 ---
 
-*End of Planning & Implementation Document. P0–P7 + P9 delivered; P8 cut; P10 optional/deferred (skipped for now); P11 Install & Distribution planned — not yet implemented.*
+*End of Planning & Implementation Document. P0–P7 + P9 delivered; P8 cut; P10 optional/deferred (skipped for now); P11 Install & Distribution in progress (Stage A+B complete, Stage C pending a public release); P12 Accuracy & Grounding planned — not yet implemented.*

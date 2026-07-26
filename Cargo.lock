@@ -1107,12 +1107,22 @@ name = "prism-extract"
 version = "0.0.1"
 dependencies = [
  "anyhow",
+ "prism-extract-markdown",
  "prism-extract-python",
  "prism-extract-rust",
  "prism-ir",
  "serde",
  "serde_json",
  "thiserror",
+]
+
+[[package]]
+name = "prism-extract-markdown"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "prism-ir",
+ "serde_json",
 ]
 
 [[package]]

@@ -10,8 +10,8 @@ pub mod versions;
 
 pub use confidence::Confidence;
 pub use facts::{
-    edge_id, file_node_id, symbol_node_id, unresolved_node_id, EdgeKind, FactBundle, FactEdge,
-    FactNode, NodeKind, Span, Tier,
+    doc_node_id, edge_id, file_node_id, section_node_id, slugify, symbol_node_id,
+    unresolved_node_id, EdgeKind, FactBundle, FactEdge, FactNode, NodeKind, Span, Tier,
 };
 pub use identity::{FileId, RepositoryId, SnapshotId};
 pub use versions::{

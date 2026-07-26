@@ -15,5 +15,6 @@ serde_json = { workspace = true }
 prism-ir = { workspace = true }
 prism-extract-python = { workspace = true }
 prism-extract-rust = { workspace = true }
+prism-extract-markdown = { workspace = true }
 
 [dev-dependencies]
