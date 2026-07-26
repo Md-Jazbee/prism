@@ -320,7 +320,7 @@ flowchart TB
 | `prism-graph` crate | Merged into `prism-store` | Accept — ADR in P6 Stage A; this doc's §3 layout updated |
 | `prism-intel` crate | Merged as `prism-store::intel` | Accept — same ADR |
 | `prism-api` (axum `/v1/*`) | **Not built**; no axum dependency anywhere | Build in P6 Stage B |
-| `prism-lsp` (async-lsp) | **Not built** | Build in P6 Stage C |
+| `prism-lsp` (lsp-server) | **Built** (P6 Stage C) | Augments; does not replace rust-analyzer/pylsp |
 | `prism-daemon` | **Not built**; every call cold-opens SQLite | Build in P6 Stage B as `prismd` |
 | `prism-plugin-host` (wasmtime + WIT) | **Not built**; the P5 tech-view claim of a *proven* WASM host is unmet | P6 Stage A: build it or amend the claim |
 | MCP via `rmcp` | Hand-rolled stdio JSON-RPC | Open ADR in P6 Stage A |
@@ -378,10 +378,10 @@ prism/
 │   ├── prism-mcp/                      # MCP tool surface (stdio JSON-RPC)
 │   ├── prism-ir/                       # shared schemas: facts, packs, plans, provenance
 │   ├── prism-obs/                      # metrics, tracing helpers, event schema
-│   ├── prism-view/                     # ‹planned P6› KG → Graph View-Model projection, LOD, budgets
-│   ├── prism-api/                      # ‹planned P6› axum HTTP + SSE `/v1/*`
-│   ├── prism-daemon/                   # ‹planned P6› `prismd` — watcher, warm caches, sessions
-│   ├── prism-lsp/                      # ‹planned P6› LSP server + IDE commands
+│   ├── prism-view/                     # KG → Graph View-Model projection, LOD, budgets (P6)
+│   ├── prism-api/                      # axum HTTP + SSE `/v1/*` (P6)
+│   ├── prism-daemon/                   # `prismd` — watcher, warm caches, sessions (P6)
+│   ├── prism-lsp/                      # LSP server + IDE commands (P6)
 │   ├── prism-plugin-host/              # ‹planned P6› wasmtime WIT host
 │   └── prism-agent/                    # ‹planned P9› workflow catalog + rules/asset generation
 │
@@ -413,7 +413,7 @@ prism/
 │   ├── plan/ · evidence-pack/
 │   ├── precise-index/ · semantic-artifact/
 │   ├── mcp-tools/                      # ‹planned P6› tool contract of record
-│   ├── graph-view/                     # ‹planned P6› view-model schema — renderer input
+│   ├── graph-view/                     # view-model schema — renderer input (P6 frozen)
 │   ├── agent-workflow/                 # ‹planned P9› workflow catalog schema
 │   ├── scip/                           # vendored or generated protobuf
 │   └── plugins/                        # ABI cards + WIT
@@ -746,7 +746,7 @@ schemas/
 crates/
 ├── prism-store/src/intel.rs       # ✅ actual — intel landed here, not in prism-intel/
 ├── prism-plugin-host/             # ❌ not built — deferred to P6 Stage A
-├── prism-lsp/                     # ❌ not built — deferred to P6 Stage C
+├── prism-lsp/                     # ✅ P6 Stage C — stdio LSP (hover/symbols/codelens/commands)
 plugins/examples/hello-extractor/  # ❌ not built
 extensions/vscode/                 # ❌ not built — deferred to P8
 eval/reports/                      # ✅ p1…p5 scorecard JSON
@@ -781,7 +781,7 @@ docs/
 | Parallelism | **Rayon** fan-out in the indexing pipeline |
 | HTTP | **axum** + **tower-http** + **SSE** — `prism-api` |
 | Daemon | `prism-daemon` (`prismd`): **notify** file watcher, debounce, warm caches, session + cancellation |
-| LSP | **async-lsp** — `prism-lsp` hover, code lens, custom commands |
+| LSP | **lsp-server** — `prism-lsp` hover, code lens, custom commands |
 | View model | `prism-view` — projection, LOD, render budgets → `schemas/graph-view/v1` |
 | Observability | **opentelemetry** + OTLP exporter, opt-in |
 | Contracts | `schemas/mcp-tools/v1`, `schemas/graph-view/v1` |
@@ -795,7 +795,7 @@ crates/
 │   └── src/{project,lod,layout_hints,budget}.rs
 ├── prism-api/                     # NEW — axum routes + SSE streams
 ├── prism-daemon/                  # NEW — prismd lifecycle, watcher, sessions, cancellation
-├── prism-lsp/                     # NEW — async-lsp server
+├── prism-lsp/                     # ✅ — lsp-server stdio LSP
 ├── prism-plugin-host/             # NEW (or formally deferred by ADR)
 schemas/
 ├── mcp-tools/v1/                  # NEW — tool contract of record

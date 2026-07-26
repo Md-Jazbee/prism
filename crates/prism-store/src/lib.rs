@@ -13,6 +13,6 @@ pub use intel::{DetectChangesReport, Entrypoint, Hotspot, RepoIntelReport, INTEL
 pub use kg::{KgStore, SqliteKgStore};
 pub use meta::SqliteMetaStore;
 pub use query::{
-    parse_edge_kinds, EdgeDirection, GraphEdgeView, GraphNodeView, ImpactHit, IndexSizeStats,
-    NeighborHit,
+    parse_edge_kinds, AmbiguousSymbolGroup, EdgeDirection, GraphEdgeView, GraphNodeView, ImpactHit,
+    IndexSizeStats, NeighborHit,
 };

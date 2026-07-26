@@ -116,6 +116,26 @@ enum Commands {
         #[arg(long, default_value_t = 250)]
         debounce_ms: u64,
     },
+    /// Project a Graph View-Model (P6 Stage C).
+    View {
+        /// architecture_map|impact_cone|slice_path|pack_map|hotspot_heat|layering_violations|ambiguity_heat
+        kind: String,
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long)]
+        seed: Option<String>,
+        #[arg(long = "anchor")]
+        anchors: Vec<String>,
+        #[arg(long)]
+        question: Option<String>,
+        #[arg(long, default_value_t = 80)]
+        max_nodes: usize,
+    },
+    /// Start Prism LSP on stdio (augments editors; does not replace rust-analyzer).
+    Lsp {
+        #[arg(long, default_value = ".")]
+        workspace: PathBuf,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -983,6 +1003,37 @@ fn main() -> Result<()> {
             };
             let rt = tokio::runtime::Runtime::new()?;
             rt.block_on(prism_daemon::run(cfg))?;
+        }
+        Commands::View {
+            kind,
+            path,
+            seed,
+            anchors,
+            question,
+            max_nodes,
+        } => {
+            let wm = WorkspaceManager::open(&path)?;
+            let kg = SqliteKgStore::open(wm.root().join(".prism/graph.sqlite"))?;
+            let view_kind = prism_view::ViewKind::from_str(&kind)
+                .map_err(|e| anyhow::anyhow!("{e}"))?;
+            let outcome = prism_view::project_view(
+                &kg,
+                wm.root(),
+                view_kind,
+                &prism_view::ViewParams {
+                    snapshot_id: "cli".into(),
+                    seed_id: seed,
+                    anchors,
+                    question,
+                    max_nodes: Some(max_nodes),
+                    ..Default::default()
+                },
+            )?;
+            println!("{}", serde_json::to_string_pretty(&outcome)?);
+        }
+        Commands::Lsp { workspace } => {
+            let workspace = std::fs::canonicalize(&workspace).unwrap_or(workspace);
+            prism_lsp::run_stdio(prism_lsp::LspConfig { workspace })?;
         }
     }
     Ok(())

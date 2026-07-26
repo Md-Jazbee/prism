@@ -13,6 +13,7 @@ use prism_mcp::ToolError;
 use prism_plan::{plan_query, Intent, PlanHints, PlanOutcome};
 use prism_semantic::{interproc_slice, SliceDirection, SliceParams};
 use prism_store::{parse_edge_kinds, EdgeDirection, SqliteKgStore, SqliteMetaStore};
+use prism_view::{project_view, ViewKind, ViewOutcome, ViewParams};
 use serde::Deserialize;
 use serde_json::{json, Value};
 use std::convert::Infallible;
@@ -35,6 +36,7 @@ pub fn router(state: AppState) -> Router {
         .route("/v1/slice", post(slice))
         .route("/v1/repo/map", get(repo_map))
         .route("/v1/intel/entrypoints", get(entrypoints))
+        .route("/v1/view", post(graph_view))
         .route("/v1/events", get(events_sse))
         .layer(axum::middleware::from_fn_with_state(
             state.clone(),
@@ -454,6 +456,47 @@ async fn entrypoints(
         )
     })?;
     Ok(Json(json!({ "snapshot_id": snap, "entrypoints": eps })))
+}
+
+#[derive(Debug, Deserialize)]
+struct ViewBody {
+    view_kind: String,
+    #[serde(default)]
+    seed_id: Option<String>,
+    #[serde(default)]
+    anchors: Vec<String>,
+    #[serde(default)]
+    question: Option<String>,
+    #[serde(default)]
+    path: Option<String>,
+    #[serde(default)]
+    max_nodes: Option<usize>,
+    #[serde(default)]
+    max_edges: Option<usize>,
+}
+
+async fn graph_view(
+    State(state): State<AppState>,
+    Json(body): Json<ViewBody>,
+) -> Result<Json<Value>, ApiError> {
+    let snap = state.snapshot_id().await;
+    let kind = ViewKind::from_str(&body.view_kind).map_err(ApiError::invalid_args)?;
+    let kg = open_kg(&state)?;
+    let params = ViewParams {
+        snapshot_id: snap.clone(),
+        seed_id: body.seed_id,
+        anchors: body.anchors,
+        question: body.question,
+        path: body.path,
+        max_nodes: body.max_nodes,
+        max_edges: body.max_edges,
+    };
+    let outcome = project_view(&kg, &state.workspace, kind, &params)
+        .map_err(|e| ApiError::internal(e.to_string()))?;
+    match outcome {
+        ViewOutcome::Ok(view) => Ok(Json(json!({ "snapshot_id": snap, "view": view }))),
+        ViewOutcome::TooLarge(t) => Err(ApiError::view_too_large(t)),
+    }
 }
 
 async fn events_sse(

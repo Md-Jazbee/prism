@@ -26,6 +26,7 @@ prism-plan = { workspace = true }
 prism-precise = { workspace = true }
 prism-semantic = { workspace = true }
 prism-store = { workspace = true }
+prism-view = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }

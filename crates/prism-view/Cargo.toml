@@ -1,0 +1,22 @@
+[package]
+name = "prism-view"
+description = "KG → Graph View-Model projection, LOD, budgets (P6 Stage C)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+xxhash-rust = { workspace = true }
+prism-store = { workspace = true }
+prism-compile = { workspace = true }
+prism-plan = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+prism-core = { workspace = true }

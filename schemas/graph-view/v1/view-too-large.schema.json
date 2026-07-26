@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/graph-view/v1/view-too-large.schema.json",
+  "title": "VIEW_TOO_LARGE",
+  "description": "Refusal when a view cannot fit its budget without silently truncating required seeds.",
+  "type": "object",
+  "required": ["code", "message", "suggested_anchors", "view_kind"],
+  "properties": {
+    "code": { "const": "VIEW_TOO_LARGE" },
+    "message": { "type": "string" },
+    "view_kind": { "type": "string" },
+    "snapshot_id": { "type": "string" },
+    "candidate_nodes": { "type": "integer" },
+    "max_nodes": { "type": "integer" },
+    "suggested_anchors": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "hint": { "type": "string" }
+  }
+}

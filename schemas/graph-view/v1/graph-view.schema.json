@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/graph-view/v1/graph-view.schema.json",
+  "title": "Prism Graph View-Model v1",
+  "description": "Budgeted, layout-ready projection of the KG for renderers. Not the knowledge graph itself. Versioning: breaking changes bump the path to v2/.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["schema_version", "snapshot_id", "view_kind", "nodes", "edges", "budget", "layout"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string", "const": "graph-view/v1" },
+    "snapshot_id": { "type": "string" },
+    "view_kind": {
+      "type": "string",
+      "enum": [
+        "architecture_map",
+        "impact_cone",
+        "slice_path",
+        "pack_map",
+        "hotspot_heat",
+        "layering_violations",
+        "ambiguity_heat"
+      ]
+    },
+    "nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "edges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/edge" }
+    },
+    "groups": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/group" }
+    },
+    "budget": {
+      "type": "object",
+      "required": ["max_nodes", "max_edges", "nodes_used", "edges_used"],
+      "properties": {
+        "max_nodes": { "type": "integer", "minimum": 1 },
+        "max_edges": { "type": "integer", "minimum": 0 },
+        "nodes_used": { "type": "integer", "minimum": 0 },
+        "edges_used": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "required": ["algorithm", "seed"],
+      "properties": {
+        "algorithm": { "type": "string" },
+        "seed": { "type": "string" },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "drops": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "reason"],
+        "properties": {
+          "id": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "citation": {
+      "type": "object",
+      "required": ["node_ids"],
+      "properties": {
+        "node_ids": { "type": "array", "items": { "type": "string" } },
+        "file_path": { "type": "string" },
+        "span": {
+          "type": "object",
+          "properties": {
+            "start_line": { "type": "integer" },
+            "end_line": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "node": {
+      "type": "object",
+      "required": ["id", "label", "kind", "tier", "confidence", "lod_rank", "citation", "x", "y"],
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "kind": { "type": "string" },
+        "tier": { "type": "string", "enum": ["T1", "T2", "T3", "T4"] },
+        "confidence": {
+          "type": "string",
+          "enum": ["extracted", "heuristic", "precise", "observed"]
+        },
+        "lod_rank": { "type": "integer", "minimum": 0 },
+        "group": { "type": "string" },
+        "citation": { "$ref": "#/$defs/citation" },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "heat": { "type": "number" }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": ["id", "src", "dst", "kind", "tier", "confidence", "citation"],
+      "properties": {
+        "id": { "type": "string" },
+        "src": { "type": "string" },
+        "dst": { "type": "string" },
+        "kind": { "type": "string" },
+        "tier": { "type": "string" },
+        "confidence": { "type": "string" },
+        "citation": { "$ref": "#/$defs/citation" }
+      }
+    },
+    "group": {
+      "type": "object",
+      "required": ["id", "label"],
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "kind": { "type": "string" }
+      }
+    }
+  }
+}

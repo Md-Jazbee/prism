@@ -1,0 +1,10 @@
+{
+  "code": "VIEW_TOO_LARGE",
+  "message": "view 'architecture_map' has 40 candidates; budget max_nodes=2 — refusing silent truncation",
+  "view_kind": "architecture_map",
+  "snapshot_id": "fixture",
+  "candidate_nodes": 40,
+  "max_nodes": 2,
+  "suggested_anchors": ["comm:src/a/", "comm:src/b/"],
+  "hint": "Narrow anchors (symbol/path/community) or raise max_nodes explicitly for exploration."
+}

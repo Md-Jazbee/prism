@@ -28,4 +28,6 @@ prism-precise = { workspace = true }
 prism-semantic = { workspace = true }
 prism-api = { workspace = true }
 prism-daemon = { workspace = true }
+prism-view = { workspace = true }
+prism-lsp = { workspace = true }
 tokio = { workspace = true }

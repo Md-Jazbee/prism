@@ -67,6 +67,22 @@ impl ApiError {
         Self::from_tool(ToolError::invalid_args(message), None)
     }
 
+    pub fn view_too_large(body: prism_view::ViewTooLarge) -> Self {
+        Self {
+            status: StatusCode::UNPROCESSABLE_ENTITY,
+            body: ApiErrorBody {
+                code: "VIEW_TOO_LARGE".into(),
+                message: body.message,
+                hint: Some(format!(
+                    "{}; anchors: {}",
+                    body.hint,
+                    body.suggested_anchors.join(", ")
+                )),
+                snapshot_id: body.snapshot_id,
+            },
+        }
+    }
+
     pub fn internal(message: impl Into<String>) -> Self {
         Self {
             status: StatusCode::INTERNAL_SERVER_ERROR,

@@ -1,4 +1,4 @@
-//! HTTP API smoke tests (P6 Stage B).
+//! HTTP API smoke tests (P6 Stage B/C).
 
 use axum::body::Body;
 use http::{Request, StatusCode};
@@ -114,6 +114,40 @@ async fn health_and_status_and_compile() {
     .await;
     assert_eq!(st, StatusCode::OK, "{body}");
     assert!(body.get("pack").is_some());
+
+    // P6 gate: status → view → pack over HTTP
+    let (st, body) = json_post(
+        fx.state.clone(),
+        &fx.token,
+        "/v1/view",
+        serde_json::json!({
+            "view_kind": "architecture_map",
+            "max_nodes": 80
+        }),
+    )
+    .await;
+    assert_eq!(st, StatusCode::OK, "{body}");
+    assert!(body.get("view").is_some(), "{body}");
+    assert_eq!(body["view"]["schema_version"], "graph-view/v1");
+
+    let (st, body) = json_post(
+        fx.state.clone(),
+        &fx.token,
+        "/v1/view",
+        serde_json::json!({
+            "view_kind": "architecture_map",
+            "max_nodes": 0
+        }),
+    )
+    .await;
+    // max_nodes=0 may refuse or return empty depending on seed count
+    assert!(
+        st == StatusCode::OK || st == StatusCode::UNPROCESSABLE_ENTITY,
+        "{st} {body}"
+    );
+    if st == StatusCode::UNPROCESSABLE_ENTITY {
+        assert_eq!(body["error"]["code"], "VIEW_TOO_LARGE");
+    }
 
     let (st, body) = json_get(
         fx.state.clone(),

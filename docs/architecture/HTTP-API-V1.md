@@ -1,8 +1,8 @@
 # HTTP + SSE API v1
 
-**Phase:** P6 Stage B  
+**Phase:** P6 Stage B–C  
 **Transport:** `prism-api` behind `prismd`  
-**Error model:** mirrors MCP (`SCOPE_UNRESOLVED`, `BUDGET_EXCEEDED`, `PRECISION_REQUIRED`, …)  
+**Error model:** mirrors MCP (`SCOPE_UNRESOLVED`, `BUDGET_EXCEEDED`, `PRECISION_REQUIRED`, `VIEW_TOO_LARGE`, …)  
 **Auth:** `Authorization: Bearer <token>` or `X-Prism-Token: <token>` (except `/health`)
 
 Base URL (default): `http://127.0.0.1:7420`
@@ -16,6 +16,7 @@ Base URL (default): `http://127.0.0.1:7420`
 | POST | `/v1/index` | Trigger incremental re-index (`{ "paths": [] }`) |
 | POST | `/v1/query/plan` | Plan IR only |
 | POST | `/v1/context/compile` | Evidence Pack |
+| POST | `/v1/view` | Graph View-Model projection ([GRAPH-VIEW-MODEL.md](./GRAPH-VIEW-MODEL.md)) |
 | GET | `/v1/symbols?name=` | Symbol resolve |
 | POST | `/v1/query/neighbors` | 1-hop neighbors |
 | POST | `/v1/impact` | Blast radius (`require_precise` optional) |
@@ -24,11 +25,14 @@ Base URL (default): `http://127.0.0.1:7420`
 | GET | `/v1/intel/entrypoints` | Heuristic entrypoints |
 | GET | `/v1/events` | **SSE** invalidation stream |
 
-## Example
+## Example (status → view → pack)
 
 ```bash
 TOKEN=secret
 curl -s -H "Authorization: Bearer $TOKEN" http://127.0.0.1:7420/v1/index/status
+curl -s -H "Authorization: Bearer $TOKEN" -H 'content-type: application/json' \
+  -d '{"view_kind":"architecture_map","max_nodes":80}' \
+  http://127.0.0.1:7420/v1/view
 curl -s -H "Authorization: Bearer $TOKEN" -H 'content-type: application/json' \
   -d '{"question":"Explain entry","anchors":["entry"],"intent":"repo_qa"}' \
   http://127.0.0.1:7420/v1/context/compile
@@ -45,6 +49,7 @@ curl -N -H "Authorization: Bearer $TOKEN" http://127.0.0.1:7420/v1/events
 |---|---|
 | `SCOPE_UNRESOLVED` | 422 |
 | `BUDGET_EXCEEDED` | 422 |
+| `VIEW_TOO_LARGE` | 422 |
 | `PRECISION_REQUIRED` | 409 |
 | `INDEX_UNAVAILABLE` | 503 |
 | `INVALID_ARGS` | 400 |

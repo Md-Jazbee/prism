@@ -17,6 +17,8 @@ members = [
     "crates/prism-bench",
     "crates/prism-api",
     "crates/prism-daemon",
+    "crates/prism-view",
+    "crates/prism-lsp",
 ]
 default-members = ["crates/prism-cli"]
 
@@ -53,6 +55,8 @@ rayon = "1"
 uuid = { version = "1", features = ["v4"] }
 futures-util = "0.3"
 tokio-stream = { version = "0.1", features = ["sync"] }
+lsp-server = "0.7"
+lsp-types = "0.97"
 
 prism-ir = { path = "crates/prism-ir" }
 prism-core = { path = "crates/prism-core" }
@@ -68,3 +72,5 @@ prism-precise = { path = "crates/prism-precise" }
 prism-semantic = { path = "crates/prism-semantic" }
 prism-api = { path = "crates/prism-api" }
 prism-daemon = { path = "crates/prism-daemon" }
+prism-view = { path = "crates/prism-view" }
+prism-lsp = { path = "crates/prism-lsp" }

@@ -7,6 +7,9 @@ use std::collections::{HashSet, VecDeque};
 
 use super::SqliteKgStore;
 
+/// `(symbol_name, occurrences of (symbol_id, file_path))` for ambiguity heat.
+pub type AmbiguousSymbolGroup = (String, Vec<(String, Option<String>)>);
+
 /// Lightweight node view returned by queries.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GraphNodeView {
@@ -244,6 +247,40 @@ impl SqliteKgStore {
             edges,
             files_indexed: files,
         })
+    }
+
+    /// Symbols that share a name across multiple files (ambiguity heat heuristic).
+    ///
+    /// Each entry is `(name, Vec<(symbol_id, file_path)>)`.
+    pub fn ambiguous_symbol_names(
+        &self,
+        limit_names: usize,
+    ) -> Result<Vec<AmbiguousSymbolGroup>> {
+        let mut by_name: std::collections::BTreeMap<String, Vec<(String, Option<String>)>> =
+            std::collections::BTreeMap::new();
+        let mut stmt = self.conn.prepare(
+            "SELECT id, name, file_path FROM nodes
+             WHERE kind = 'Symbol' AND name IS NOT NULL
+             ORDER BY name, id
+             LIMIT 5000",
+        )?;
+        let rows = stmt.query_map([], |r| {
+            Ok((
+                r.get::<_, String>(0)?,
+                r.get::<_, String>(1)?,
+                r.get::<_, Option<String>>(2)?,
+            ))
+        })?;
+        for row in rows {
+            let (id, name, path) = row?;
+            by_name.entry(name).or_default().push((id, path));
+        }
+        let mut out: Vec<_> = by_name
+            .into_iter()
+            .filter(|(_, ids)| ids.len() >= 2)
+            .collect();
+        out.truncate(limit_names.clamp(1, 200));
+        Ok(out)
     }
 
     /// CALLS confidence histogram for the ambiguity index (P3 Stage B).

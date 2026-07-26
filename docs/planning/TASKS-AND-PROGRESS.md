@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P6 Stage B complete** · Stage C (LSP + Graph View-Model) next · P0–P5 engine half complete · P7–P9 planned · **P10 deferred**  
+**Current phase:** **P6 gate passed** · P7 Visual Repository Intelligence next · P0–P5 engine half complete · P8–P9 planned · **P10 deferred**  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)  
 **Source of truth for stack/layout:** [TECH-STACK-AND-PROJECT-STRUCTURE.md](../architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md)
@@ -22,13 +22,13 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P3** | Precise Tier (T2) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P4** | Semantic Slicing | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P5** | Repo Intelligence + Hardening | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 (interim) |
-| **P6** | Consolidation & Interaction Substrate | ▓▓▓▓▓▓░░░░ **65%** | 🟡 Stage B done → Stage C next |
+| **P6** | Consolidation & Interaction Substrate | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P7** | Visual Repository Intelligence | ░░░░░░░░░░ **0%** | 📋 Planned |
 | **P8** | IDE Extension (VS Code / Cursor) | ░░░░░░░░░░ **0%** | 📋 Planned |
 | **P9** | Agent Experience & Workflows | ░░░░░░░░░░ **0%** | 📋 Planned |
 | **P10** | Team / Distributed (optional, was P6) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
 
-**How to read progress:** the **engine half (P0–P5) is complete**. **P6** is mid-flight: Stage A (debt) and Stage B (daemon/HTTP/SSE) are done; **Stage C** (LSP + graph-view schema) is next. P7–P9 remain planned; P10 stays optional.
+**How to read progress:** the **engine half (P0–P5) is complete**. **P6** (daemon, HTTP/SSE, LSP, Graph View-Model) is gated. **P7** (visual renderer) is next. P8–P9 remain planned; P10 stays optional.
 
 ```mermaid
 flowchart LR
@@ -37,7 +37,7 @@ flowchart LR
     P2 --> P3[P3 Precise Tier<br/>✅ done]
     P3 --> P4[P4 Semantic Slicing<br/>✅ done]
     P4 --> P5[P5 Intelligence + Eval<br/>✅ done]
-    P5 --> P6[P6 Interaction Substrate<br/>🟡 Stage A]
+    P5 --> P6[P6 Interaction Substrate<br/>✅ done]
     P6 --> P7[P7 Visual Repo Intelligence<br/>📋 planned]
     P7 --> P8[P8 IDE Extension<br/>📋 planned]
     P8 --> P9[P9 Agent Experience<br/>📋 planned]
@@ -49,7 +49,7 @@ flowchart LR
     style P3 fill:#b8e994,stroke:#78e08f,color:#000
     style P4 fill:#b8e994,stroke:#78e08f,color:#000
     style P5 fill:#b8e994,stroke:#78e08f,color:#000
-    style P6 fill:#74b9ff,stroke:#0984e3,color:#000
+    style P6 fill:#b8e994,stroke:#78e08f,color:#000
     style P7 fill:#ffeaa7,stroke:#fdcb6e,color:#000
     style P8 fill:#ffeaa7,stroke:#fdcb6e,color:#000
     style P9 fill:#ffeaa7,stroke:#fdcb6e,color:#000
@@ -668,17 +668,18 @@ P0–P5 program complete with documented interim gaps. The 2026-07-26 re-analysi
 
 ## Phase 6 — Consolidation & Interaction Substrate
 
-**State:** 🟡 **Stage B exited 2026-07-26** — Stage C next  
+**State:** ✅ **Gate passed 2026-07-26** (Stage A–C)  
 **Duration:** 3–5 weeks  
 **Gate:** Every audit gap closed or waived with an expiry; a non-CLI, non-MCP client completes status → view-model → pack over HTTP; `schemas/graph-view/v1` frozen.  
 **Detail:** [planning §13](./PLANNING-AND-IMPLEMENTATION.md#13-phase-6--consolidation--interaction-substrate)  
-**Drift report:** [DRIFT-CLOSURE-P6A.md](../eval/DRIFT-CLOSURE-P6A.md)
+**Drift report:** [DRIFT-CLOSURE-P6A.md](../eval/DRIFT-CLOSURE-P6A.md)  
+**Scorecard:** [p6-phase-gate.md](../../eval/scorecards/p6-phase-gate.md)
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
 | **A — Reconciliation + debt** | Close gaps G-03…G-11; ADRs; criterion benches as CI gates; `LICENSE`/`deny.toml`; `schemas/mcp-tools/v1` | ✅ exited 2026-07-26 |
 | **B — Daemon + HTTP/SSE** | `prismd` watcher/warm caches; axum `/v1/*` + SSE; Tokio/Rayon; OTLP exporter; cancellation | ✅ exited 2026-07-26 |
-| **C — LSP + Graph View-Model** | `prism-lsp`; `prism-view` projection + LOD + render budgets; `schemas/graph-view/v1`; golden view fixtures | ⬜ next |
+| **C — LSP + Graph View-Model** | `prism-lsp`; `prism-view` projection + LOD + render budgets; `schemas/graph-view/v1`; golden view fixtures | ✅ exited 2026-07-26 |
 
 **Entry checklist:**
 
@@ -732,6 +733,29 @@ Stage A debt artifacts are in-tree (ADRs, benches with numbers, LICENSE/deny, mc
 #### Handoff to Stage C
 
 HTTP surface is live. Next: `prism-lsp` + `schemas/graph-view/v1` so a non-CLI client can do status → view-model → pack.
+
+### Stage C — LSP + Graph View-Model ✅
+
+#### Deliverables
+
+- [x] Graph View-Model schema — [`schemas/graph-view/v1/`](../../schemas/graph-view/v1/) + [GRAPH-VIEW-MODEL.md](../architecture/GRAPH-VIEW-MODEL.md)
+- [x] Layout determinism — [LAYOUT-DETERMINISM.md](../architecture/LAYOUT-DETERMINISM.md)
+- [x] `prism-view` projection / LOD / budgets / `VIEW_TOO_LARGE`
+- [x] Golden fixtures — [`fixtures/views/`](../../fixtures/views/)
+- [x] `POST /v1/view` + CLI `prism view`
+- [x] `prism-lsp` / `prism lsp` — [LSP-CAPABILITY-MATRIX.md](../architecture/LSP-CAPABILITY-MATRIX.md)
+- [x] Phase gate scorecard — [p6-phase-gate.md](../../eval/scorecards/p6-phase-gate.md)
+
+#### Exit / acceptance
+
+- [x] Non-CLI client: status → view → pack over HTTP (`http_smoke`)
+- [x] Oversized views refuse with `VIEW_TOO_LARGE` + suggested anchors
+- [x] Same snapshot + params ⇒ deterministic layout seed / coordinates
+- [x] LSP provides hover / workspace symbols / code lens / executeCommand (augmentative)
+
+#### Handoff to Phase 7
+
+Interaction substrate is gated. **P7** owns Cytoscape/ELK rendering, interaction grammar, and evidence/slice/impact overlays on top of the frozen view IR.
 
 ---
 
@@ -858,3 +882,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **Full repo re-analysis + program re-plan.** Audit found 15 gaps (G-01…G-15), mostly unbuilt surfaces and doc/repo drift: no HTTP API, no LSP, no daemon, no WASM host despite the P5 claim, no visual surface, no extension, no agent assets, unmeasured N2. Old *P6 Team/Distributed* renumbered to **P10**; new **P6 Consolidation & Interaction Substrate**, **P7 Visual Repository Intelligence**, **P8 IDE Extension**, **P9 Agent Experience** planned. New workstreams W-SVC / W-VIZ / W-AX / W-DEBT. Planning and tech-stack documents updated; **no code written** |
 | 2026-07-26 | **P6 Stage A opened:** ADRs (WASM deferral, language re-baseline, MCP transport, crate consolidation), drift closure report, `LICENSE`/`deny.toml`/`cargo deny` CI, `schemas/mcp-tools/v1` + conformance test, `crates/prism-bench` N1/N2 criterion smoke in CI. P5 WASM “proven” claim amended. |
 | 2026-07-26 | **P6 Stage B exited:** `prism-api` `/v1/*` + SSE, `prismd`/`prism daemon` with notify debounce reindex, Rayon extract fan-out, loopback token auth, daemon docs; OTLP full SDK waived to P7 (ADR-0005). **Stage C next** (LSP + graph-view schema). |
+| 2026-07-26 | **P6 Stage C exited / gate passed:** `prism-view` + `schemas/graph-view/v1`, `VIEW_TOO_LARGE`, deterministic layout, `POST /v1/view` / `prism view`, `prism-lsp` (hover/symbols/codelens/commands), fixtures + p6-phase-gate scorecard. **P7 opened** (visual renderer). |

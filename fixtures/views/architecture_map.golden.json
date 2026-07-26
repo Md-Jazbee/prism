@@ -1,0 +1,37 @@
+{
+  "schema_version": "graph-view/v1",
+  "snapshot_id": "fixture-arch-v0",
+  "view_kind": "architecture_map",
+  "nodes": [
+    {
+      "id": "comm:src/a/",
+      "label": "src/a",
+      "kind": "Community",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "lod_rank": 0,
+      "group": "comm:src/a/",
+      "citation": { "node_ids": ["comm:src/a/"], "file_path": "src/a/" },
+      "x": 0.0,
+      "y": 0.0,
+      "heat": 2.0
+    }
+  ],
+  "edges": [],
+  "groups": [
+    { "id": "comm:src/a/", "label": "src/a", "kind": "community" }
+  ],
+  "budget": {
+    "max_nodes": 80,
+    "max_edges": 160,
+    "nodes_used": 1,
+    "edges_used": 0
+  },
+  "layout": {
+    "algorithm": "layered",
+    "seed": "deadbeefcafebabe",
+    "notes": ["golden fixture — coordinates illustrative"]
+  },
+  "drops": [],
+  "notes": ["Golden architecture_map shape for schema conformance."]
+}
