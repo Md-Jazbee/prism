@@ -503,7 +503,7 @@ Hybrid resolve runs on the compile path. Next: precision-gated product behaviors
 
 Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 
-| ID | Workstream | P3 Stage A exit status |
+| ID | Workstream | P3 Stage B exit status |
 |---|---|---|
 | **W-STORE** | Storage & identity | ✅ + `.prism/scip/` overlay |
 | **W-PLUGIN** | Plugin ABI | ✅ + PreciseImporter card |
@@ -539,3 +539,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P2 Stage B exited:** `prism-compile` Evidence Pack IR, must-include budget invariant, EXPLAIN, `BUDGET_EXCEEDED`, `prism compile`, labeling process. **Stage C opened** (`compile_context` MCP + scorecard) |
 | 2026-07-26 | **P2 Stage C exited / gate passed (proxies):** MCP `compile_context` + `query_plan`, AGENT-USAGE primary path, precision ≥60% proxy labels, refuse-dump fixture, p2-scorecard. **P3 Stage A opened** |
 | 2026-07-26 | **P3 Stage A exited:** PreciseIndex ingest (`prism-precise`), ID mapping + SCIP runbook, oracle P/R fixtures (Python), `PRECISION_REQUIRED`, CLI `prism precise`. **Stage B opened** (hybrid resolve) |
+| 2026-07-26 | **P3 Stage B exited:** hybrid resolve + ambiguity index, executable `UpgradePrecision` (mandatory refactor/debug; optional impact), prefer-precise packs, `precision_upgrade` obs. **Stage C opened** |

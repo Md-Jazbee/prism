@@ -853,8 +853,8 @@ Planner can insert `UpgradePrecision` only for critical ambiguous edges; default
 
 #### Exit / acceptance
 
-- [ ] Documented policy: high-stakes intents prefer T2 on critical path  
-- [ ] Latency cost of upgrade bounded or explicitly async/background  
+- [x] Documented policy: high-stakes intents prefer T2 on critical path  
+- [x] Latency cost of upgrade bounded or explicitly async/background  
 
 ---
 
