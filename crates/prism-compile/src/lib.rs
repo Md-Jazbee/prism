@@ -210,6 +210,65 @@ mod tests {
     }
 
     #[test]
+    fn whitespace_only_change_keeps_must_include_stable() {
+        // See docs/architecture/PACK-STABILITY.md
+        let hints = PlanHints {
+            intent_override: Some(Intent::RepoQa),
+            anchors: vec!["Helper".into()],
+            budget_tokens: Some(400),
+            ..Default::default()
+        };
+        let plan = match plan_query("explain `Helper`", &hints).unwrap() {
+            PlanOutcome::Ok(p) => p,
+            other => panic!("{other:?}"),
+        };
+        let mut cands_a = select_candidates(&plan);
+        cands_a.push(CandidateFragment {
+            id: "frag:opt:ws".into(),
+            kind: FragmentKind::Signature,
+            layer: PackLayer::Nbr,
+            text: "neighbor body".into(),
+            token_estimate: 20,
+            provenance: Provenance::synthetic("nbr"),
+            confidence: "heuristic".into(),
+            why_included: "neighbor_bodies".into(),
+            drop_priority: 40,
+            roles: vec!["neighbor_bodies".into()],
+            must_include: false,
+        });
+        let mut cands_b = cands_a.clone();
+        // Whitespace-only mutation on optional fragment text
+        if let Some(c) = cands_b.iter_mut().find(|c| c.id == "frag:opt:ws") {
+            c.text = "neighbor   body\n\n".into();
+            c.token_estimate = 22;
+        }
+        let pack_a = match compile_from_candidates(&plan, cands_a) {
+            CompileOutcome::Ok(p) => p,
+            other => panic!("{other:?}"),
+        };
+        let pack_b = match compile_from_candidates(&plan, cands_b) {
+            CompileOutcome::Ok(p) => p,
+            other => panic!("{other:?}"),
+        };
+        let must_a: Vec<_> = pack_a
+            .fragments
+            .iter()
+            .filter(|f| f.must_include)
+            .map(|f| (f.id.clone(), f.roles.clone()))
+            .collect();
+        let must_b: Vec<_> = pack_b
+            .fragments
+            .iter()
+            .filter(|f| f.must_include)
+            .map(|f| (f.id.clone(), f.roles.clone()))
+            .collect();
+        assert_eq!(
+            must_a, must_b,
+            "must-include ids/roles must be citation-stable under whitespace-only optional changes"
+        );
+    }
+
+    #[test]
     fn budget_exceeded_when_must_include_cannot_fit() {
         let hints = PlanHints {
             intent_override: Some(Intent::RepoQa),

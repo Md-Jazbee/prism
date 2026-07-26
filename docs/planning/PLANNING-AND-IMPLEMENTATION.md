@@ -1119,9 +1119,9 @@ Make Prism maintainable and safe: SDK, tests, security, observability, IDE comma
 
 #### Exit / acceptance
 
-- [ ] External contributor can add a language using ABI + golden fixtures without core engine changes (documented path)  
-- [ ] Audit + redaction policies written  
-- [ ] Pack stability property (whitespace-only change) specified and tested in design |
+- [x] External contributor can add a language using ABI + golden fixtures without core engine changes (documented path)  
+- [x] Audit + redaction policies written  
+- [x] Pack stability property (whitespace-only change) specified and tested in design  
 
 ---
 

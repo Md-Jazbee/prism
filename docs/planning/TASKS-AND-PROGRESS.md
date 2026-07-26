@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P5 Stage B open** · Stage A (repo intel) exited · LLM quality / dual-review labels still pending  
+**Current phase:** **P5 Stage C open** · Stage B (hardening/SDK/IDE) exited · LLM quality / dual-review labels still pending  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)
 
@@ -18,7 +18,7 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P2** | Context Compiler | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 (proxies) |
 | **P3** | Precise Tier (T2) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P4** | Semantic Slicing | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
-| **P5** | Repo Intelligence + Hardening | ▓▓▓░░░░░░░ **33%** | 🟡 Stage B open |
+| **P5** | Repo Intelligence + Hardening | ▓▓▓▓▓▓░░░░ **67%** | 🟡 Stage C open |
 | **P6** | Team / Distributed (optional) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
 
 **How to read progress:** P5 % ≈ stages done ÷ 3 (A/B/C). Later phases stay at 0% until their entry gate passes.
@@ -29,7 +29,7 @@ flowchart LR
     P1 --> P2[P2 Context Compiler<br/>✅ done]
     P2 --> P3[P3 Precise Tier<br/>✅ done]
     P3 --> P4[P4 Semantic Slicing<br/>✅ done]
-    P4 --> P5[P5 Intelligence + Eval<br/>🟡 Stage B]
+    P4 --> P5[P5 Intelligence + Eval<br/>🟡 Stage C]
     P5 --> P6[P6 Distributed / Team<br/>optional]
 
     style P0 fill:#b8e994,stroke:#78e08f,color:#000
@@ -562,15 +562,59 @@ Debug packs are slice-minimal on the agent path. Next: repository intelligence p
 
 ## Phase 5 — Repository Intelligence + Hardening
 
-**State:** 🟡 **Stage A open** (entry: P4 gate passed)  
+**State:** 🟡 **Stage C open** (Stage B exited 2026-07-26)  
 **Duration:** ~4 weeks  
 **Gate:** Published benchmark; medium+Prism ≈ frontier+explore within 3 pts; external plugin SDK usable.
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
-| **A — Repo intelligence** | Architecture maps, communities productized, orientation answers | 🟡 open |
-| **B — Hardening + SDK + IDE** | Security checklist, plugin SDK polish, LSP/IDE commands | ⬜ |
-| **C — Public eval** | Published scorecard; release readiness | ⬜ |
+| **A — Repo intelligence** | Architecture maps, communities productized, orientation answers | ✅ exited 2026-07-26 |
+| **B — Hardening + SDK + IDE** | Security checklist, plugin SDK polish, LSP/IDE commands | ✅ exited 2026-07-26 |
+| **C — Public eval** | Published scorecard; release readiness | 🟡 open |
+
+### Stage A — Repository intelligence products ✅
+
+#### Deliverables
+
+- [x] Derived intelligence catalog — [REPO-INTELLIGENCE.md](../architecture/REPO-INTELLIGENCE.md)
+- [x] Refresh/invalidation rules — [INTEL-REFRESH.md](../architecture/INTEL-REFRESH.md)
+- [x] Ambiguity auto-T2 usage — [AMBIGUITY-INDEX.md](../architecture/AMBIGUITY-INDEX.md)
+- [x] Entrypoints / layering / hotspots / contracts — `prism-store::intel`
+- [x] MCP `entrypoints`, `detect_changes`, `repo_map.full_intel`
+- [x] CLI `prism query intel|entrypoints|detect-changes|repo-map --full`
+- [x] Architecture packs include tiny entrypoint list
+
+#### Exit / acceptance
+
+- [x] Each derived product has method + confidence notes
+- [x] LLM naming of communities not required (path-prefix labels)
+
+#### Handoff to Stage B
+
+Orientation intel is productized. Next: hardening, plugin SDK contributor path, IDE commands, security checklist.
+
+### Stage B — Hardening, plugin SDK, IDE ✅
+
+#### Deliverables
+
+- [x] Contributor plugin guide — [docs/contributing/plugin-guide.md](../contributing/plugin-guide.md)
+- [x] Security release checklist — [docs/security/RELEASE-CHECKLIST.md](../security/RELEASE-CHECKLIST.md)
+- [x] Audit + redaction — [docs/security/AUDIT-AND-REDACTION.md](../security/AUDIT-AND-REDACTION.md) + `SECURITY.md`
+- [x] IDE integration design — [IDE-INTEGRATION.md](../architecture/IDE-INTEGRATION.md)
+- [x] Test matrix — [TEST-MATRIX.md](../architecture/TEST-MATRIX.md)
+- [x] Pack stability property — [PACK-STABILITY.md](../architecture/PACK-STABILITY.md) + unit test
+- [x] Conformance script — `scripts/plugins/conformance-check.sh` (CI)
+- [x] OTel span design + `pack_bound_for_llm` / `token_savings_shadow` events
+
+#### Exit / acceptance
+
+- [x] Documented path to add a language via ABI + goldens (no core engine changes)
+- [x] Audit + redaction policies written
+- [x] Pack stability specified and tested
+
+#### Handoff to Stage C
+
+Hardening docs and SDK path are ready. Next: public eval report, release readiness, Phase 5 gate.
 
 ---
 
@@ -594,15 +638,15 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | ID | Workstream | P4 gate exit status |
 |---|---|---|
 | **W-STORE** | Storage & identity | ✅ + `.prism/semantic/` shards/memo |
-| **W-PLUGIN** | Plugin ABI | ✅ + semantic backend contract |
+| **W-PLUGIN** | Plugin ABI | ✅ + contributor plugin guide + conformance CI |
 | **W-KG** | Knowledge graph | ✅ + overlay DATA_FLOW/CONTROL_DEP |
 | **W-PLAN** | Query planning | ✅ executable `Slice` on debug |
 | **W-CC** | Context compiler | ✅ debug pack gates (never drop error/slice) |
 | **W-MCP** | Agent surface | ✅ AGENT-USAGE debug path |
-| **W-IDE** | IDE/LSP | 🟡 evidence-peek stub; LSP hybrid later |
-| **W-EVAL** | Evaluation | ✅ P4 scorecard (debug token proxy) |
-| **W-OBS** | Observability | ✅ `slice_finished` |
-| **W-SEC** | Security & privacy | ✅ sink/source hooks design; runtime optional |
+| **W-IDE** | IDE/LSP | ✅ IDE-INTEGRATION design (extension phased) |
+| **W-EVAL** | Evaluation | ✅ P4 scorecard; P5 public report pending |
+| **W-OBS** | Observability | ✅ `pack_bound_for_llm` + OTel span design |
+| **W-SEC** | Security & privacy | ✅ release checklist + audit/redaction |
 
 ---
 
@@ -632,3 +676,5 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P4 Stage A exited:** T3 Python CFG/DFG (`prism-semantic`), `.prism/semantic/` artifacts, crash policy, local slice CLI + property tests. **Stage B opened** (inter-proc / Slice operator) |
 | 2026-07-26 | **P4 Stage B exited:** T4 shards + executable `Slice`, memo keys, overlay DATA_FLOW/CONTROL_DEP, compile/obs wiring, sink/source hooks design. **Stage C opened** (debug recipes + P4 gate) |
 | 2026-07-26 | **P4 Stage C exited / gate passed:** debug recipes + pack gates, runtime enrichment design-only, p4-scorecard (40× debug token proxy). **P5 Stage A opened** |
+| 2026-07-26 | **P5 Stage A exited:** repo intel catalog (entrypoints, layering, hotspots, contracts), MCP/CLI surfaces, ambiguity→T2 hints. **Stage B opened** (hardening/SDK/IDE) |
+| 2026-07-26 | **P5 Stage B exited:** plugin guide, security/audit policies, IDE design, test matrix, pack-stability test, conformance CI. **Stage C opened** (public eval) |

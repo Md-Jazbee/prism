@@ -69,6 +69,20 @@ pub enum IndexEvent {
         latency_ms: u64,
         shard_build_ms: u64,
     },
+    /// Evidence Pack marked as bound for an LLM (P5 Stage B audit).
+    PackBoundForLlm {
+        plan_id: String,
+        token_estimate: u64,
+        fragment_count: u64,
+        redacted: bool,
+        workspace_fingerprint: String,
+    },
+    /// Shadow comparison of explore proxy vs pack tokens (not a hard gate).
+    TokenSavingsShadow {
+        explore_tokens_proxy: u64,
+        pack_tokens: u64,
+        savings_ratio: f64,
+    },
 }
 
 /// Emit an index event via `tracing` (JSON-friendly fields).
@@ -180,6 +194,36 @@ pub fn emit_index_event(event: &IndexEvent) {
                 latency_ms = latency_ms,
                 shard_build_ms = shard_build_ms,
                 "slice finished"
+            );
+        }
+        IndexEvent::PackBoundForLlm {
+            plan_id,
+            token_estimate,
+            fragment_count,
+            redacted,
+            workspace_fingerprint,
+        } => {
+            info!(
+                event = "pack_bound_for_llm",
+                plan_id = %plan_id,
+                token_estimate = token_estimate,
+                fragment_count = fragment_count,
+                redacted = redacted,
+                workspace_fingerprint = %workspace_fingerprint,
+                "pack bound for llm"
+            );
+        }
+        IndexEvent::TokenSavingsShadow {
+            explore_tokens_proxy,
+            pack_tokens,
+            savings_ratio,
+        } => {
+            info!(
+                event = "token_savings_shadow",
+                explore_tokens_proxy = explore_tokens_proxy,
+                pack_tokens = pack_tokens,
+                savings_ratio = savings_ratio,
+                "token savings shadow"
             );
         }
     }

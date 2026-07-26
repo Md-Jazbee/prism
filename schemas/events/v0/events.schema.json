@@ -47,6 +47,20 @@
       ],
       "notes": "P4 Stage B inter-procedural Slice operator"
     },
+    "pack_bound_for_llm": {
+      "fields": [
+        "plan_id",
+        "token_estimate",
+        "fragment_count",
+        "redacted",
+        "workspace_fingerprint"
+      ],
+      "notes": "P5 Stage B audit when a pack is exported to an LLM"
+    },
+    "token_savings_shadow": {
+      "fields": ["explore_tokens_proxy", "pack_tokens", "savings_ratio"],
+      "notes": "Shadow metric; not a hard CI gate until baselines land"
+    },
     "placeholders_later": {
       "tokens_per_task": "eval harness",
       "tool_calls_per_task": "eval harness"

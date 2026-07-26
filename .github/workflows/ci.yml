@@ -20,6 +20,8 @@ jobs:
         run: cargo clippy --workspace --all-targets -- -D warnings
       - name: test
         run: cargo test --workspace
+      - name: plugin conformance
+        run: ./scripts/plugins/conformance-check.sh
 
   eval:
     runs-on: ubuntu-latest
