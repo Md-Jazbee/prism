@@ -444,10 +444,12 @@ pub fn select_from_kg(
             }
             Operator::CommunityOf => {
                 let map = kg.repo_map(10)?;
+                let eps = kg.detect_entrypoints(8).unwrap_or_default();
                 let summary = format!(
-                    "communities={} hubs={}",
+                    "communities={} hubs={} entrypoints={}",
                     map.communities.len(),
-                    map.hubs.len()
+                    map.hubs.len(),
+                    eps.len()
                 );
                 let mut lines = vec![summary];
                 for c in map.communities.iter().take(8) {
@@ -458,6 +460,13 @@ pub fn select_from_kg(
                 }
                 for h in map.hubs.iter().take(5) {
                     lines.push(format!("  hub {} degree={}", h.node_id, h.degree));
+                }
+                for e in eps.iter().take(5) {
+                    lines.push(format!(
+                        "  entry {} ({})",
+                        e.name.as_deref().unwrap_or(&e.node_id),
+                        e.reason
+                    ));
                 }
                 let text = lines.join("\n");
                 out.push(CandidateFragment {

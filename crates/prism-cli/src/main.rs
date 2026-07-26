@@ -246,9 +246,35 @@ enum QueryCmd {
         #[arg(default_value = ".")]
         path: PathBuf,
     },
-    /// Path-prefix communities + hubs (Stage D).
+    /// Path-prefix communities + hubs (Stage D / P5).
     #[command(name = "repo-map")]
     RepoMap {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long, default_value_t = 15)]
+        hub_limit: usize,
+        /// Include entrypoints, layering, hotspots, contracts.
+        #[arg(long)]
+        full: bool,
+    },
+    /// Heuristic entrypoints (main/cli/handlers).
+    Entrypoints {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long, default_value_t = 40)]
+        limit: usize,
+    },
+    /// Dirty reverse-deps + change hotspots.
+    #[command(name = "detect-changes")]
+    DetectChanges {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        /// Changed repo-relative paths (repeatable).
+        #[arg(long = "changed")]
+        changed: Vec<String>,
+    },
+    /// Full repo intelligence report (P5 Stage A).
+    Intel {
         #[arg(default_value = ".")]
         path: PathBuf,
         #[arg(long, default_value_t = 15)]
@@ -482,22 +508,92 @@ fn main() -> Result<()> {
                 println!("{}", serde_json::to_string_pretty(&dirty)?);
                 eprintln!("# dirty files={} latency_ms={ms}", dirty.len());
             }
-            QueryCmd::RepoMap { path, hub_limit } => {
+            QueryCmd::RepoMap {
+                path,
+                hub_limit,
+                full,
+            } => {
+                let (wm, kg) = open_kg(&path)?;
+                let started = Instant::now();
+                if full {
+                    let report = kg.repo_intel(Some(wm.root()), hub_limit)?;
+                    let ms = started.elapsed().as_millis() as u64;
+                    emit_index_event(&IndexEvent::QueryFinished {
+                        op: "repo_intel".into(),
+                        latency_ms: ms,
+                        hit_count: (report.entrypoints.len() + report.repo_map.hubs.len()) as u64,
+                    });
+                    println!("{}", serde_json::to_string_pretty(&report)?);
+                    eprintln!(
+                        "# intel entrypoints={} hubs={} layering={} require_t2={} latency_ms={ms}",
+                        report.entrypoints.len(),
+                        report.repo_map.hubs.len(),
+                        report.layering_violations.len(),
+                        report.require_t2_hint
+                    );
+                } else {
+                    let map = kg.repo_map(hub_limit)?;
+                    let ms = started.elapsed().as_millis() as u64;
+                    let hits = (map.communities.len() + map.hubs.len()) as u64;
+                    emit_index_event(&IndexEvent::QueryFinished {
+                        op: "repo_map".into(),
+                        latency_ms: ms,
+                        hit_count: hits,
+                    });
+                    println!("{}", serde_json::to_string_pretty(&map)?);
+                    eprintln!(
+                        "# repo_map communities={} hubs={} latency_ms={ms}",
+                        map.communities.len(),
+                        map.hubs.len()
+                    );
+                }
+            }
+            QueryCmd::Entrypoints { path, limit } => {
                 let (_wm, kg) = open_kg(&path)?;
                 let started = Instant::now();
-                let map = kg.repo_map(hub_limit)?;
+                let eps = kg.detect_entrypoints(limit)?;
                 let ms = started.elapsed().as_millis() as u64;
-                let hits = (map.communities.len() + map.hubs.len()) as u64;
                 emit_index_event(&IndexEvent::QueryFinished {
-                    op: "repo_map".into(),
+                    op: "entrypoints".into(),
                     latency_ms: ms,
-                    hit_count: hits,
+                    hit_count: eps.len() as u64,
                 });
-                println!("{}", serde_json::to_string_pretty(&map)?);
+                println!("{}", serde_json::to_string_pretty(&eps)?);
+                eprintln!("# entrypoints count={} latency_ms={ms}", eps.len());
+            }
+            QueryCmd::DetectChanges { path, changed } => {
+                let (wm, kg) = open_kg(&path)?;
+                let started = Instant::now();
+                let report = kg.detect_changes(Some(wm.root()), &changed)?;
+                let ms = started.elapsed().as_millis() as u64;
+                emit_index_event(&IndexEvent::QueryFinished {
+                    op: "detect_changes".into(),
+                    latency_ms: ms,
+                    hit_count: (report.dirty_files.len() + report.hotspots.len()) as u64,
+                });
+                println!("{}", serde_json::to_string_pretty(&report)?);
                 eprintln!(
-                    "# repo_map communities={} hubs={} latency_ms={ms}",
-                    map.communities.len(),
-                    map.hubs.len()
+                    "# detect_changes dirty={} hotspots={} latency_ms={ms}",
+                    report.dirty_files.len(),
+                    report.hotspots.len()
+                );
+            }
+            QueryCmd::Intel { path, hub_limit } => {
+                let (wm, kg) = open_kg(&path)?;
+                let started = Instant::now();
+                let report = kg.repo_intel(Some(wm.root()), hub_limit)?;
+                let ms = started.elapsed().as_millis() as u64;
+                emit_index_event(&IndexEvent::QueryFinished {
+                    op: "repo_intel".into(),
+                    latency_ms: ms,
+                    hit_count: report.entrypoints.len() as u64,
+                });
+                println!("{}", serde_json::to_string_pretty(&report)?);
+                eprintln!(
+                    "# intel algo={} entrypoints={} require_t2={} latency_ms={ms}",
+                    report.algo_version,
+                    report.entrypoints.len(),
+                    report.require_t2_hint
                 );
             }
             QueryCmd::Plan {

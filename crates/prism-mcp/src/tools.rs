@@ -13,7 +13,7 @@ use std::str::FromStr;
 use std::time::Instant;
 use tracing::info;
 
-/// Allowlisted MCP tool names (no write/rename until P3).
+/// Allowlisted MCP tool names (structural + compile + intel).
 pub const ALLOWED_TOOLS: &[&str] = &[
     "compile_context",
     "query_plan",
@@ -22,6 +22,8 @@ pub const ALLOWED_TOOLS: &[&str] = &[
     "neighbors",
     "impact",
     "repo_map",
+    "entrypoints",
+    "detect_changes",
 ];
 
 #[derive(Debug, Clone)]
@@ -193,11 +195,42 @@ pub fn list_tools_schema() -> Value {
         },
         {
             "name": "repo_map",
-            "description": "Lightweight orientation: path-prefix communities and degree hubs.",
+            "description": "Lightweight orientation: path-prefix communities, hubs, and intel notes.",
             "inputSchema": {
                 "type": "object",
                 "properties": {
-                    "hub_limit": { "type": "integer", "default": 15 }
+                    "hub_limit": { "type": "integer", "default": 15 },
+                    "full_intel": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "If true, return RepoIntelReport (entrypoints, layering, hotspots, contracts)"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "name": "entrypoints",
+            "description": "Heuristic entrypoints (main/cli/handlers) for orientation.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "limit": { "type": "integer", "default": 40 }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "name": "detect_changes",
+            "description": "Worktree impact: reverse-dep dirty set for changed paths + change hotspots.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "changed_paths": {
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "description": "Repo-relative paths that changed"
+                    }
                 },
                 "additionalProperties": false
             }
@@ -223,6 +256,8 @@ pub fn call_tool(ctx: &ToolContext, name: &str, arguments: Value) -> ToolOutcome
         "neighbors" => tool_neighbors(ctx, arguments),
         "impact" => tool_impact(ctx, arguments),
         "repo_map" => tool_repo_map(ctx, arguments),
+        "entrypoints" => tool_entrypoints(ctx, arguments),
+        "detect_changes" => tool_detect_changes(ctx, arguments),
         _ => ToolOutcome::Err {
             error: ToolError::invalid_args(format!("unknown tool {name}")),
         },
@@ -588,10 +623,34 @@ fn tool_repo_map(ctx: &ToolContext, args: Value) -> ToolOutcome {
         .get("hub_limit")
         .and_then(|v| v.as_u64())
         .unwrap_or(15) as usize;
+    let full = args
+        .get("full_intel")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false);
     let kg = match ctx.kg() {
         Ok(k) => k,
         Err(e) => return ToolOutcome::Err { error: e },
     };
+    if full {
+        let report = match kg.repo_intel(Some(&ctx.workspace), hub_limit) {
+            Ok(r) => r,
+            Err(e) => {
+                return ToolOutcome::Err {
+                    error: ToolError::index_unavailable(e.to_string()),
+                }
+            }
+        };
+        let hits = (report.repo_map.communities.len()
+            + report.repo_map.hubs.len()
+            + report.entrypoints.len()) as u64;
+        return ok(
+            "repo_map",
+            "Full repo intel (communities, hubs, entrypoints, layering, hotspots); heuristic.",
+            json!(report),
+            started,
+            hits,
+        );
+    }
     let map: RepoMap = match kg.repo_map(hub_limit) {
         Ok(m) => m,
         Err(e) => {
@@ -605,6 +664,64 @@ fn tool_repo_map(ctx: &ToolContext, args: Value) -> ToolOutcome {
         "repo_map",
         "Path-prefix communities + degree hubs; orientation only.",
         json!(map),
+        started,
+        hits,
+    )
+}
+
+fn tool_entrypoints(ctx: &ToolContext, args: Value) -> ToolOutcome {
+    let started = Instant::now();
+    let limit = args.get("limit").and_then(|v| v.as_u64()).unwrap_or(40) as usize;
+    let kg = match ctx.kg() {
+        Ok(k) => k,
+        Err(e) => return ToolOutcome::Err { error: e },
+    };
+    let eps = match kg.detect_entrypoints(limit) {
+        Ok(v) => v,
+        Err(e) => {
+            return ToolOutcome::Err {
+                error: ToolError::index_unavailable(e.to_string()),
+            }
+        }
+    };
+    let n = eps.len() as u64;
+    ok(
+        "entrypoints",
+        "Heuristic entrypoints (main/cli/handlers); not precise CFG reachability.",
+        json!({ "entrypoints": eps, "method": "name_path_heuristics", "confidence": "heuristic" }),
+        started,
+        n,
+    )
+}
+
+fn tool_detect_changes(ctx: &ToolContext, args: Value) -> ToolOutcome {
+    let started = Instant::now();
+    let changed: Vec<String> = args
+        .get("changed_paths")
+        .and_then(|v| v.as_array())
+        .map(|a| {
+            a.iter()
+                .filter_map(|v| v.as_str().map(str::to_string))
+                .collect()
+        })
+        .unwrap_or_default();
+    let kg = match ctx.kg() {
+        Ok(k) => k,
+        Err(e) => return ToolOutcome::Err { error: e },
+    };
+    let report = match kg.detect_changes(Some(&ctx.workspace), &changed) {
+        Ok(r) => r,
+        Err(e) => {
+            return ToolOutcome::Err {
+                error: ToolError::index_unavailable(e.to_string()),
+            }
+        }
+    };
+    let hits = (report.dirty_files.len() + report.hotspots.len()) as u64;
+    ok(
+        "detect_changes",
+        "Dirty reverse-deps + hotspots; see notes for confidence.",
+        json!(report),
         started,
         hits,
     )

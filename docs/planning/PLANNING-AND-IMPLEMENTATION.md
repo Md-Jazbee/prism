@@ -1085,8 +1085,8 @@ Expose compact, high-signal repo orientation used as tiny context: subsystem map
 
 #### Exit / acceptance
 
-- [ ] Each derived product has method + confidence notes  
-- [ ] LLM naming of communities optional and memoized if used — not required  
+- [x] Each derived product has method + confidence notes  
+- [x] LLM naming of communities optional and memoized if used — not required  
 
 ---
 

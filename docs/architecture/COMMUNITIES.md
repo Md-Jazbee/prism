@@ -22,5 +22,6 @@ Future: Leiden/Louvain on import+call graph (refresh on dirty-set threshold). No
 
 ## Exposure
 
-- MCP: `repo_map`
-- CLI: `prism query repo-map`
+- MCP: `repo_map` (+ `full_intel`), `entrypoints`, `detect_changes`
+- CLI: `prism query repo-map [--full]`, `entrypoints`, `detect-changes`, `intel`
+- Catalog: [REPO-INTELLIGENCE.md](./REPO-INTELLIGENCE.md) · refresh: [INTEL-REFRESH.md](./INTEL-REFRESH.md)

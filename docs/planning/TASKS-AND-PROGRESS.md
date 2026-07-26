@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P4 gate passed** · P5 Stage A open · LLM quality / dual-review labels still pending  
+**Current phase:** **P5 Stage B open** · Stage A (repo intel) exited · LLM quality / dual-review labels still pending  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)
 
@@ -18,7 +18,7 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P2** | Context Compiler | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 (proxies) |
 | **P3** | Precise Tier (T2) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P4** | Semantic Slicing | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
-| **P5** | Repo Intelligence + Hardening | ░░░░░░░░░░ **0%** | 🟡 Stage A open |
+| **P5** | Repo Intelligence + Hardening | ▓▓▓░░░░░░░ **33%** | 🟡 Stage B open |
 | **P6** | Team / Distributed (optional) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
 
 **How to read progress:** P5 % ≈ stages done ÷ 3 (A/B/C). Later phases stay at 0% until their entry gate passes.
@@ -29,7 +29,7 @@ flowchart LR
     P1 --> P2[P2 Context Compiler<br/>✅ done]
     P2 --> P3[P3 Precise Tier<br/>✅ done]
     P3 --> P4[P4 Semantic Slicing<br/>✅ done]
-    P4 --> P5[P5 Intelligence + Eval<br/>🟡 Stage A]
+    P4 --> P5[P5 Intelligence + Eval<br/>🟡 Stage B]
     P5 --> P6[P6 Distributed / Team<br/>optional]
 
     style P0 fill:#b8e994,stroke:#78e08f,color:#000
@@ -63,7 +63,7 @@ flowchart LR
 | Query plan + Evidence Pack | ○ | ○ | ● | ● | ● | ● | ● | ✅ plan + pack + EXPLAIN + MCP `compile_context` |
 | Precise symbol (T2) | ○ | ○ | ○ | ● | ● | ● | ● | ✅ gated product path |
 | Semantic slice (T3/T4) | ○ | ○ | ○ | ○ | ● | ● | ● | ✅ debug packs slice-minimal (gate proxies) |
-| Architecture intelligence | ○ | ◐ | ◐ | ◐ | ◐ | ● | ● | ◐ path-prefix communities + hubs |
+| Architecture intelligence | ○ | ◐ | ◐ | ◐ | ◐ | ● | ● | 🟡 communities+hubs+entrypoints+hotspots |
 | Team/shared index | ○ | ○ | ○ | ○ | ○ | ○ | ● | ⬜ |
 
 ● required · ◐ partial · ○ not yet

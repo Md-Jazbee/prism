@@ -29,6 +29,18 @@ Empty graph → all zeros, `require_t2=false`.
 1. **Planner / compile:** impact recipes carry `UpgradePrecision` with `policy=optional_on_ambiguity`; executor skips when `require_t2` is false.
 2. **Agents:** high unresolved rate ⇒ attach PreciseIndex (`prism precise import`) before refactor claims.
 3. **Eval:** track rates before/after overlay on oracle fixtures.
+4. **Repo intel (P5):** `repo_intel.require_t2_hint` mirrors this flag for architecture packs — orientation still works at T1; accuracy claims should upgrade.
+
+---
+
+## Auto-require T2 (product policy)
+
+| Surface | When `require_t2` |
+|---|---|
+| Impact `UpgradePrecision` | Execute hybrid resolve |
+| Refactor | Already mandatory regardless |
+| Architecture / `repo_map` | Emit note only; do not block |
+| Safe rename | Stage C gating (`PRECISION_REQUIRED`) |
 
 ---
 
