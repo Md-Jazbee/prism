@@ -1,0 +1,27 @@
+{
+  "version": "0.0.1",
+  "description": "Repository intelligence CLI + MCP (compile_context Evidence Packs)",
+  "homepage": "https://github.com/example/prism",
+  "license": "MIT",
+  "architecture": {
+    "64bit": {
+      "url": "https://github.com/example/prism/releases/download/v0.0.1/prism-0.0.1-x86_64-pc-windows-msvc.zip",
+      "hash": "REPLACE_WITH_RELEASE_SHA256"
+    }
+  },
+  "bin": "prism.exe",
+  "checkver": {
+    "github": "https://github.com/example/prism"
+  },
+  "autoupdate": {
+    "architecture": {
+      "64bit": {
+        "url": "https://github.com/example/prism/releases/download/v$version/prism-$version-x86_64-pc-windows-msvc.zip"
+      }
+    }
+  },
+  "notes": [
+    "P11 draft Scoop manifest — replace hash after the first GitHub Release.",
+    "Then run: prism setup . ; prism doctor --ready"
+  ]
+}

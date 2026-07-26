@@ -33,3 +33,6 @@ prism-view = { workspace = true }
 prism-lsp = { workspace = true }
 prism-agent = { workspace = true }
 tokio = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

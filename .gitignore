@@ -43,3 +43,4 @@ credentials.json
 # Extension build artifacts (legacy; tree removed — ADR-0007)
 *.vsix
 .cursor/mcp.json
+.mcp.prism.json

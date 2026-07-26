@@ -2,8 +2,8 @@
 
 **Project working name:** Prism — Repository Intelligence Platform  
 **Document type:** Detailed Planning & Implementation Guide (phase → stage)  
-**Status:** Active — P0–P5 delivered; interaction track (P6–P9) planned; P10 optional  
-**Date:** 2026-07-19 · **Revised:** 2026-07-26 (post-P5 re-analysis; interaction & visualization phases added)  
+**Status:** Active — P0–P7 + P9 delivered; P8 cut (CLI+MCP); P10 deferred; **P11 Install & Distribution planned**  
+**Date:** 2026-07-19 · **Revised:** 2026-07-26 (P11 install/distribution phase added; P10 remains skipped/deferred)  
 **Governs:** Execution of the [Architecture Design Document](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)  
 **Audience:** Project leads, architects, implementers, evaluators, open-source contributors  
 
@@ -44,12 +44,15 @@ This document turns the ADD’s high-level roadmap into an executable plan. It d
 15. [Phase 8 — IDE Extension (VS Code / Cursor)](#15-phase-8--ide-extension-vs-code--cursor)
 16. [Phase 9 — Agent Experience & Workflows](#16-phase-9--agent-experience--workflows)
 17. [Phase 10 — Team / Distributed (optional)](#17-phase-10--team--distributed-optional)
-18. [Evaluation program (runs across phases)](#18-evaluation-program-runs-across-phases)
-19. [Risk register & guardrails](#19-risk-register--guardrails)
-20. [Definition of Done (program-level)](#20-definition-of-done-program-level)
-21. [Appendix — Checklists & templates](#21-appendix--checklists--templates)
+18. [Phase 11 — Install & Distribution (any system)](#18-phase-11--install--distribution-any-system)
+19. [Evaluation program (runs across phases)](#19-evaluation-program-runs-across-phases)
+20. [Risk register & guardrails](#20-risk-register--guardrails)
+21. [Definition of Done (program-level)](#21-definition-of-done-program-level)
+22. [Appendix — Checklists & templates](#22-appendix--checklists--templates)
 
-> **Phase renumbering note (2026-07-26).** The former *Phase 6 — Team / Distributed* is now **Phase 10** and stays optional/deferred. Phases 6–9 are new and cover the *interaction* half of the product: service surfaces, graph rendering, IDE extension, and agent experience. Historical references to “P6 Stage C certified caches” now mean **P10 Stage C**.
+> **Phase renumbering note (2026-07-26).** The former *Phase 6 — Team / Distributed* is now **Phase 10** and stays optional/deferred. Phases 6–9 cover the *interaction* half: service surfaces, graph rendering, IDE extension (later cut), and agent experience. Historical references to “P6 Stage C certified caches” now mean **P10 Stage C**.
+>
+> **P11 note (2026-07-26).** **Phase 11 — Install & Distribution** is planned next and does **not** depend on Phase 10. P10 remains skipped. Inspiration: Graphify’s ensure-installed skill step, host adapters (`claude install` / hooks), and one-shot project bootstrap — adapted to Prism’s single Rust binary + MCP surface ([PRODUCT-SETUP.md](../architecture/PRODUCT-SETUP.md), ADR-0007).
 
 ---
 
@@ -117,7 +120,7 @@ Align with ADD Goals G1–G9:
 
 ### 3.1 Phase sequence
 
-The program has two halves. **P0–P5 (the engine half, delivered)** made repository understanding correct, budgeted, and measurable. **P6–P9 (the interaction half, planned)** makes that understanding *usable by humans and agents* — service surfaces, rendered graphs, an IDE extension, and agent workflows. P10 remains an optional scale-out.
+The program has three halves. **P0–P5 (the engine half, delivered)** made repository understanding correct, budgeted, and measurable. **P6–P9 (the interaction half, mostly delivered)** made that understanding usable — service surfaces, rendered graphs, and agent workflows (P8 IDE extension was **cut** in favor of CLI + MCP). **P11 (distribution half, planned next)** makes Prism installable on any system without a Rust toolchain. **P10** remains an optional scale-out and is **skipped for now**.
 
 ```mermaid
 flowchart LR
@@ -128,14 +131,20 @@ flowchart LR
       P3 --> P4[P4 Semantic Slicing]
       P4 --> P5[P5 Intelligence + Eval]
     end
-    subgraph Interaction["Interaction half — planned"]
+    subgraph Interaction["Interaction half — delivered / cut"]
       P6[P6 Consolidation + Interaction Substrate]
       P7[P7 Visual Repo Intelligence]
-      P8[P8 IDE Extension]
+      P8[P8 IDE Extension — cut]
       P9[P9 Agent Experience]
     end
-    P5 --> P6 --> P7 --> P8 --> P9
-    P9 -.optional.-> P10[P10 Distributed / Team]
+    subgraph Distribution["Distribution half — planned"]
+      P11[P11 Install & Distribution]
+    end
+    P5 --> P6 --> P7 --> P8
+    P7 --> P9
+    P9 --> P11
+    P9 -.skipped for now.-> P10[P10 Distributed / Team]
+    P11 -.optional later.-> P10
 ```
 
 | Phase | Intent | Duration (calendar) | Primary user-visible outcome |
@@ -148,30 +157,33 @@ flowchart LR
 | **P5** | Product hardening + published proof | ~4 weeks | Repo intelligence + public eval; plugin SDK polish |
 | **P6** | Close as-built drift; build the surfaces a UI needs | 3–5 weeks | `prismd` daemon, HTTP/SSE API, LSP, Graph View-Model contract |
 | **P7** | Make the graph *seeable* without dumping it | 4–6 weeks | Budgeted, provenance-bearing interactive graph views |
-| **P8** | A developer never needs the terminal | 4–5 weeks | Installable VS Code / Cursor extension with panels + peek |
+| **P8** | ~~A developer never needs the terminal~~ | — | **Cut** — CLI + MCP supersedes VSIX (ADR-0007) |
 | **P9** | Agents choose Prism first, and we can prove it | ~4 weeks | Agent workflows, rules/skills assets, closed-loop eval |
-| **P10** | Team/CI scale (optional) | TBD | Shared index, authz, optional certified caches |
+| **P10** | Team/CI scale (optional) | TBD | Shared index, authz, optional certified caches — **deferred / skipped for now** |
+| **P11** | Anyone can install Prism on any common OS | 3–5 weeks | One-shot installers + Graphify-like agent bootstrap; cold machine → MCP-ready |
 
 ### 3.2 Capability maturity ladder
 
-| Capability | P0 | P1 | P2 | P3 | P4 | P5 | P6 | P7 | P8 | P9 | P10 |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| Content-hash incremental store | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
-| Syntactic facts (T1) | ○ | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
-| MCP graph tools | ○ | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
-| Query plan + Evidence Pack | ○ | ○ | ● | ● | ● | ● | ● | ● | ● | ● | ● |
-| Precise symbol (T2) | ○ | ○ | ○ | ● | ● | ● | ● | ● | ● | ● | ● |
-| Semantic slice (T3/T4) | ○ | ○ | ○ | ○ | ● | ● | ● | ● | ● | ● | ● |
-| Architecture intelligence | ○ | ◐ | ◐ | ◐ | ◐ | ● | ● | ● | ● | ● | ● |
-| Long-lived daemon + HTTP/SSE API | ○ | ○ | ○ | ○ | ○ | ○ | ● | ● | ● | ● | ● |
-| LSP surface | ○ | ○ | ○ | ○ | ○ | ○ | ● | ● | ● | ● | ● |
-| Graph View-Model contract | ○ | ○ | ○ | ○ | ○ | ○ | ● | ● | ● | ● | ● |
-| Interactive graph rendering | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ● | ● | ● | ● |
-| IDE extension (VS Code / Cursor) | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ◐ | ● | ● | ● |
-| Agent workflows + rules assets | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ◐ | ● | ● |
-| Team/shared index | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ● |
+| Capability | P0 | P1 | P2 | P3 | P4 | P5 | P6 | P7 | P8 | P9 | P10 | P11 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Content-hash incremental store | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
+| Syntactic facts (T1) | ○ | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
+| MCP graph tools | ○ | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
+| Query plan + Evidence Pack | ○ | ○ | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
+| Precise symbol (T2) | ○ | ○ | ○ | ● | ● | ● | ● | ● | ● | ● | ● | ● |
+| Semantic slice (T3/T4) | ○ | ○ | ○ | ○ | ● | ● | ● | ● | ● | ● | ● | ● |
+| Architecture intelligence | ○ | ◐ | ◐ | ◐ | ◐ | ● | ● | ● | ● | ● | ● | ● |
+| Long-lived daemon + HTTP/SSE API | ○ | ○ | ○ | ○ | ○ | ○ | ● | ● | ● | ● | ● | ● |
+| LSP surface | ○ | ○ | ○ | ○ | ○ | ○ | ● | ● | ● | ● | ● | ● |
+| Graph View-Model contract | ○ | ○ | ○ | ○ | ○ | ○ | ● | ● | ● | ● | ● | ● |
+| Interactive graph rendering | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ● | ● | ● | ● | ● |
+| IDE extension (VS Code / Cursor) | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ◐ | ✂ | — | — | — |
+| Agent workflows + rules assets | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ◐ | ● | ● | ● |
+| Cross-platform binary install | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ◐ | ○ | ● |
+| Agent ensure-install + host adapters | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ◐ | ○ | ● |
+| Team/shared index | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ● | ○ |
 
-● = required deliverable · ◐ = partial / heuristic · ○ = not yet
+● = required deliverable · ◐ = partial / heuristic · ○ = not yet · ✂ = cut (ADR-0007)
 
 ### 3.3 What “implementation” means here
 
@@ -216,11 +228,18 @@ These run in every phase. Stage plans reference them by ID.
 | **W-AX** | Agent experience | Tool ergonomics, refusal-repair loops, workflow recipes, rules/skills assets, trace capture | Model hosting, prompt magic |
 | **W-DEBT** | As-built reconciliation | Drift register between docs and repo, waivers, deprecations | New features |
 
+### 4.2 Workstreams added for the distribution half (P11)
+
+| ID | Workstream | Owns | Never owns |
+|---|---|---|---|
+| **W-DIST** | Install & distribution | Release artifacts, installers, package managers, checksum/signing, PATH placement, upgrade/uninstall | Graph algorithms, pack quality, team/shared indexes (P10) |
+
 **Planning rules:**
 
 1. Every phase exit must update **W-EVAL** and **W-OBS**, even if the product surface barely changed.
 2. From P6 onward, every phase exit must also update **W-DEBT** — either close a drift item or record a written waiver.
 3. **W-VIZ never invents evidence.** A view may only render facts the KG or a pack already contains, with the same provenance and confidence labels.
+4. **W-DIST never requires a network after install** for the core index + MCP path (N5 / G8). Installers may download the binary once; day-2 usage stays local-first.
 
 ---
 
@@ -257,10 +276,13 @@ flowchart TD
     P7S3 --> P8S1[P8 Stage A: Extension skeleton]
     P8S1 --> P8S2[P8 Stage B: Commands + panels]
     P8S2 --> P8S3[P8 Stage C: Cursor + release]
-    P8S3 --> P9S1[P9 Stage A: Agent contract hardening]
+    P8S3 -->     P9S1[P9 Stage A: Agent contract hardening]
     P9S1 --> P9S2[P9 Stage B: Workflows + rules assets]
     P9S2 --> P9S3[P9 Stage C: Closed-loop eval gate]
-    P9S3 --> P10[P10 Optional team mode]
+    P9S3 --> P11S1[P11 Stage A: Binary release matrix]
+    P11S1 --> P11S2[P11 Stage B: Agent bootstrap + hosts]
+    P11S2 --> P11S3[P11 Stage C: Install gate]
+    P9S3 -.-> P10[P10 Optional team mode — skipped for now]
 ```
 
 ### 5.2 Hard dependency rules
@@ -272,9 +294,11 @@ flowchart TD
 5. **No shared index / answer cache** before P9 Stage C succeeds (was: P5 Stage C — moved because the interaction half now precedes scale-out).  
 6. **Embedding work** may appear as a tiny fallback prototype in P2+, but must be flagged `low_confidence` and excluded from success narratives.  
 7. **No pixels before contracts.** No renderer work before the Graph View-Model schema is frozen in P6 Stage C.  
-8. **No extension release** before P7 Stage C — an extension without views is a CLI with extra steps.  
+8. **No extension release** before P7 Stage C — an extension without views is a CLI with extra steps. *(P8 later cut; rule retained for history.)*  
 9. **No “agents prefer Prism” claim** before P9 Stage C measures it on real traces.  
-10. **No visualization that invents structure.** Every rendered node/edge maps to a KG node/edge or pack fragment with its original tier and confidence.
+10. **No visualization that invents structure.** Every rendered node/edge maps to a KG node/edge or pack fragment with its original tier and confidence.  
+11. **No “install anywhere” claim** before P11 Stage C proves cold-machine → MCP-ready on macOS, Linux, and Windows without a Rust toolchain.  
+12. **P11 does not wait on P10.** Distribution is a solo-developer adoption gate; team/shared index stays optional and deferred.
 
 ### 5.3 Approximate effort envelope
 
@@ -288,11 +312,12 @@ flowchart TD
 | P5 | ~4 | Proof + polish |
 | P6 | 3–5 | Plumbing + debt (unglamorous, unblocking) |
 | P7 | 4–6 | New discipline (front-end + layout determinism) |
-| P8 | 4–5 | Packaging & platform integration |
+| P8 | — | Cut (ADR-0007) |
 | P9 | ~4 | Proof of the agent thesis |
-| P10 | optional | Ops/product expansion |
+| P10 | optional / skipped for now | Ops/product expansion |
+| P11 | 3–5 | Release engineering + Graphify-like bootstrap |
 
-Total critical path (P0–P5): roughly **22–36 weeks**. Interaction half (P6–P9): roughly **15–20 weeks** on top, and it is the first block of work that needs a **TypeScript/front-end skill set** alongside Rust.
+Total critical path (P0–P5): roughly **22–36 weeks**. Interaction half (P6–P9): roughly **15–20 weeks** on top. Distribution half (P11): roughly **3–5 weeks** after P9, and it is the first block that needs **release-engineering** skill (CI matrix, signing, package taps) alongside Rust.
 
 ---
 
@@ -2017,9 +2042,198 @@ Memoize **deterministic** artifacts (slices, packs) freely; LLM answer reuse onl
 
 ---
 
-## 18. Evaluation program (runs across phases)
+## 18. Phase 11 — Install & Distribution (any system)
 
-### 18.1 Benchmark arms (always)
+> **Planning only (2026-07-26).** ~~This phase is specified here for execution later. **Do not implement until this phase is opened.**~~ **Opened 2026-07-26.** Phase 10 remains deferred/skipped; P11 follows P9 on the critical path. Stage A+B implementation in progress.
+
+**Phase goal:** Make Prism installable on any common developer machine — macOS, Linux, Windows — without requiring a Rust toolchain or cloning this monorepo. Borrow Graphify’s “ensure installed → one-shot project bootstrap → host adapters” pattern, adapted to Prism’s **single Rust binary + MCP** product surface ([PRODUCT-SETUP.md](../architecture/PRODUCT-SETUP.md), [ADR-0007](../architecture/adr/0007-extension-cut-cli-mcp.md)).
+
+**Phase duration:** 3–5 weeks  
+**Phase gate (summary):** On a clean macOS, Linux, and Windows VM with no prior Rust install: one documented install command places `prism` on PATH; `prism setup .` indexes + writes agent assets + registers MCP; `prism doctor --ready` passes; an agent can call `compile_context` without further human wiring.
+
+**Inspiration from Graphify (adopt / adapt / reject):**
+
+| Graphify pattern | Prism P11 stance |
+|---|---|
+| Skill Step 1: detect interpreter / auto-install via `uv` / pip / pipx | **Adopt:** agent skill step “ensure `prism` on PATH”; prefer official release binary over building from source |
+| Persist resolved tool path (`.graphify_python`) | **Adopt:** record resolved binary path for MCP registration (already partially done via `current_exe` in `setup`) |
+| One-shot project bootstrap | **Already have:** `prism setup` — harden for install-from-anywhere (PATH binary, not `./target/debug/prism`) |
+| Host adapter: `graphify claude install` | **Adopt:** `prism host install <cursor\|claude\|vscode\|…>` that writes the right MCP/rules/skills files |
+| Git hook: `graphify hook install` | **Adopt (optional stage):** `prism hook install` for post-commit incremental re-index |
+| Python package on PyPI | **Reject as primary:** Prism is a Rust binary; package managers (brew/scoop/cargo-binstall) + install scripts are the spine |
+| Require API keys for core path | **Reject:** core index + MCP stays local-first (G8) |
+
+```mermaid
+flowchart LR
+    A[Stage A Binary release matrix] --> B[Stage B Agent bootstrap + host adapters]
+    B --> C[Stage C Install UX gate]
+```
+
+---
+
+### Stage A — Binary release matrix & installers
+
+#### Purpose
+
+Close the gap PRODUCT-SETUP already names honestly: *“binary must be on PATH or built from this repo.”* Ship versioned, checksummed artifacts so “any system” means download + PATH, not `cargo build`.
+
+#### Entry criteria
+
+- P9 gate passed (agent workflows + catalog assets exist)  
+- Security release checklist still current ([docs/security/RELEASE-CHECKLIST.md](../security/RELEASE-CHECKLIST.md))  
+- Explicit decision: **no VSIX revival** in this phase (ADR-0007 stands)
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| W-DIST | **Target triple matrix:** `aarch64-apple-darwin`, `x86_64-apple-darwin`, `x86_64-unknown-linux-gnu`, `aarch64-unknown-linux-gnu`, `x86_64-pc-windows-msvc` (minimum). Document musl / ARM Windows as stretch. |
+| W-DIST | **GitHub Releases CI:** tag → build → attach archives + `SHA256SUMS`; optional cosign/minisign signatures |
+| W-DIST | **One-liner installers:** `install.sh` (macOS/Linux) and `install.ps1` (Windows) that detect arch, verify checksum, install to `~/.local/bin` / `%LOCALAPPDATA%\Prism\bin`, and print next step (`prism setup .`) |
+| W-DIST | **Package-manager path (tiered):** (1) `cargo binstall prism-cli` if crate published; (2) Homebrew tap formula; (3) Scoop/Winget manifests — at least one first-class path per OS family |
+| W-DIST | **Upgrade / uninstall:** `prism self-update` (or documented package upgrade) + `prism uninstall` / installer `--uninstall` that removes binary and optionally host registrations |
+| W-SEC | Supply-chain: pinned toolchain in release CI, `cargo-deny` gate on release tags, no `curl \| sh` without checksum verification |
+| W-DEBT | Replace “build from this repo” as the *primary* install story in PRODUCT-SETUP; keep “from source” as contributor path |
+
+#### Deliverables
+
+1. **Release artifact contract** — archive layout, naming, checksum file, versioning tied to semver / git tags  
+2. **Installer scripts** (`scripts/install.sh`, `scripts/install.ps1`) with dry-run and uninstall flags  
+3. **CI workflow** — release matrix job (planned under `.github/workflows/release.yml`)  
+4. **Package-manager manifests** — at least Homebrew + one Windows channel drafted  
+5. **Updated PRODUCT-SETUP.md** — cold-machine install first; `cargo build` demoted to contributor docs  
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Cross-compile / OpenSSL / tree-sitter native deps break Windows or musl | Prefer static-friendly link flags; smoke-test each triple in CI before advertising |
+| Users distrust `curl \| sh` | Checksum + optional signature; also publish brew/scoop as non-script paths |
+| Release CI flakiness blocks every ship | Cache toolchains; fail-closed on checksum mismatch only |
+
+#### Exit / acceptance
+
+- [x] Tagged release produces archives for the minimum triple matrix with `SHA256SUMS` *(workflow shipped; first public tag pending real `PRISM_GITHUB_REPO`)*  
+- [x] `install.sh` / `install.ps1` place `prism` on PATH on clean VMs (manual or CI smoke) *(scripts + dry-run verified; live download needs a release)*  
+- [x] At least one non-script package path per OS family is documented (even if tap is “unofficial” initially)  
+- [x] PRODUCT-SETUP leads with installers, not `cargo build`
+
+---
+
+### Stage B — Graphify-like agent bootstrap & host adapters
+
+#### Purpose
+
+Graphify’s power is not only the pip package — it is that an **agent skill** can detect a missing install, fix it, then wire the project. Prism already has `prism setup` for index + assets + Cursor MCP; Stage B generalizes that into a portable bootstrap contract any agent host can follow.
+
+#### Entry criteria
+
+- Stage A artifacts installable on PATH  
+- Workflow catalog + `prism-agent` generators stable (P9)
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| W-AX / W-DIST | **Ensure-installed skill step** (Graphify Step 1 analogue): detect `prism` on PATH → if missing, run platform installer (or print the one-liner) → re-resolve binary → persist path used for MCP `command` |
+| W-AX | **Host adapter catalog:** Cursor (`.cursor/mcp.json` + rules — exists), VS Code (`.vscode/mcp.json` — partial), Claude Code (`CLAUDE.md` / mcp config), and a generic “stdio MCP snippet” for other hosts |
+| W-DIST | CLI surface: `prism host install <host>`, `prism host uninstall <host>`, `prism host status` — idempotent merges, never clobber unrelated MCP servers |
+| W-DIST | Optional: `prism hook install` / `uninstall` / `status` — post-commit incremental re-index (Graphify hook analogue); append-only if a hook already exists |
+| W-AX | Ship the ensure-install + setup sequence inside generated skills / AGENTS.md so a fresh agent session can bootstrap a cold machine without a human README |
+| W-MCP | Doctor readiness expands: binary version, PATH vs absolute MCP command, index freshness, host registration targets, hook status |
+| W-OBS | Install/setup telemetry: local-only counters for install path used (brew vs script vs cargo), setup step failures — never repo content |
+
+#### Deliverables
+
+1. **Bootstrap runbook** — ordered steps an agent or human follows (install → setup → doctor → first `compile_context`)  
+2. **Host adapter matrix** — per-host files touched, merge rules, uninstall behavior  
+3. **CLI help / man-page drafts** for `host` and optional `hook` subcommands  
+4. **Skill/AGENTS fragment** — “If `prism` missing, install thus; never ask for API keys for core path”  
+5. **Doctor checklist v2** schema (JSON) covering install + host + index  
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Host config formats churn (Cursor / Claude / VS Code) | Feature-detect files; keep a generic stdio snippet as fallback |
+| Auto-writing MCP configs surprises teams | `setup --no-mcp` already exists; default stays opt-in merge with clear report |
+| Hooks fight with existing git tooling | Append-only; `hook status`; never replace a foreign hook wholesale |
+
+#### Exit / acceptance
+
+- [x] Documented ensure-install sequence works without a Rust toolchain *(documented; live path needs release)*  
+- [x] ≥3 host adapters specified; Cursor + one other implemented-in-plan with merge/uninstall rules *(cursor/vscode/claude/generic)*  
+- [ ] Generated agent assets mention install bootstrap (catalog-driven, not hand-edited forever)  
+- [x] `doctor --ready --json` reports install + host + index readiness
+
+---
+
+### Stage C — Install UX gate & Phase 11 exit
+
+#### Purpose
+
+Prove the north-star user journey: **cold machine → indexed workspace → agent `compile_context`**, on three OS families, without cloning the Prism source tree.
+
+#### Entry criteria
+
+- Stages A and B deliverables reviewed  
+- Fixture “customer repo” (small public sample) pinned for smoke tests  
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| W-EVAL | **Cold-machine matrix:** macOS arm64, Linux x86_64, Windows x86_64 — install → setup → doctor → MCP smoke (`compile_context` on fixture) |
+| W-EVAL | Time-to-ready metric: wall clock from zero to first successful pack (install + first index) |
+| W-DIST | Upgrade path smoke: install N → release N+1 → self-update or package upgrade → doctor still green |
+| W-SEC | Release checklist executed on the gate tag; SBOM or license summary attached if already required by P5 checklist |
+| Docs | Contributor vs end-user install split; troubleshooting (PATH, quarantine on macOS, execution policy on Windows) |
+| W-DEBT | Close PRODUCT-SETUP “must build from repo” as primary; record any remaining platform gaps as explicit limitations |
+
+#### Deliverables
+
+1. **P11 scorecard** — cold-machine pass/fail per OS, time-to-ready, upgrade pass  
+2. **Public INSTALL.md** (or PRODUCT-SETUP rewrite) — end-user canonical path  
+3. **Troubleshooting appendix** — top failure modes with repair actions (mirror refusal-repair style)  
+4. **Phase 11 gate evidence pack** archived under eval/docs  
+
+#### Exit / acceptance (Phase 11 gate)
+
+- [ ] Clean macOS, Linux, and Windows VMs: install without Rust → `prism setup .` → `doctor --ready` → MCP `compile_context` succeeds on the fixture repo  
+- [ ] Checksums verified by the installer path used in the gate  
+- [ ] Host registration works for Cursor and at least one additional host from the matrix  
+- [ ] Uninstall (or documented package remove) leaves no broken MCP entries claiming a missing binary  
+- [ ] PRODUCT-SETUP / INSTALL docs match the as-built path (W-DEBT clean for install claims)  
+- [ ] Limitations stated honestly (unsupported triples, unsigned builds if applicable, no team shared-index — that is P10)
+
+#### Phase 11 phase-level risks
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Native deps make “single static binary” false advertising | Medium | High | Define supported glibc/MSVC baselines; test them in CI |
+| Package-manager lag behind GitHub Releases | High | Medium | Install scripts + releases are the SLA; brew/scoop are convenience |
+| Agents auto-install into surprising locations | Medium | Medium | Prefer `~/.local/bin`; never write into system dirs without elevation; report path in setup |
+| Scope creep into P10 team distribution | Medium | High | P11 ships **solo local install only**; shared indexes explicitly out of scope |
+| Reopening a VSIX under “install” pressure | Low | Medium | ADR-0007; P11 gate is CLI+MCP only |
+
+#### Non-goals (this phase)
+
+- Team / shared index servers (P10)  
+- Marketplace VSIX / IDE extension revival  
+- Publishing to every package ecosystem on day one (Winget/AUR/Nix can be follow-ons)  
+- Changing Evidence Pack or compiler semantics  
+
+#### Handoff
+
+- End-users and agents install from releases; contributors still build from source  
+- P10 (when opened) can assume a standard binary layout and version handshake for CI workers  
+- Eval program gains a recurring “install smoke” job on every release tag  
+
+---
+
+## 19. Evaluation program (runs across phases)
+
+### 19.1 Benchmark arms (always)
 
 | Arm | Description |
 |---|---|
@@ -2030,7 +2244,7 @@ Memoize **deterministic** artifacts (slices, packs) freely; LLM answer reuse onl
 
 **Program success:** A3 approaches A1; A4 optional ceiling. The four-arm run with real models is **executed in P9 Stage C** — until then, published numbers are structural proxies and must say so.
 
-### 18.2 Task categories by phase emphasis
+### 19.2 Task categories by phase emphasis
 
 | Category | Introduce | Primary phase gate |
 |---|---|---|
@@ -2041,10 +2255,11 @@ Memoize **deterministic** artifacts (slices, packs) freely; LLM answer reuse onl
 | Refactor prep | P3 | P3 |
 | Bug localization / debug | P4 | P4 |
 | **Time-to-orient (visual vs text)** | P7 | P7 |
-| **Terminal-free task completion** | P8 | P8 |
+| **Terminal-free task completion** | P8 | P8 *(cut — CLI+MCP path)* |
 | **Agent tool-choice & refusal repair** | P9 | P9 |
+| **Cold-machine install → MCP-ready** | P11 | P11 |
 
-### 18.3 Metrics ownership
+### 19.3 Metrics ownership
 
 | Metric | Owner workstream | First measured |
 |---|---|---|
@@ -2063,8 +2278,10 @@ Memoize **deterministic** artifacts (slices, packs) freely; LLM answer reuse onl
 | **Extension activation cost** | W-IDE | P8 |
 | **First-tool-choice rate** | W-AX + W-EVAL | P9 |
 | **Refusal-repair success rate** | W-AX | P9 |
+| **Cold-machine time-to-ready** | W-DIST + W-EVAL | P11 |
+| **Install path success rate** (script / brew / scoop / …) | W-DIST | P11 |
 
-### 18.4 Labeling discipline
+### 19.4 Labeling discipline
 
 - Necessary-span labels are **versioned** with pack algorithm version.  
 - Prefer dual review on precision samples; dual review becomes **mandatory** from P9 Stage C.  
@@ -2073,9 +2290,9 @@ Memoize **deterministic** artifacts (slices, packs) freely; LLM answer reuse onl
 
 ---
 
-## 19. Risk register & guardrails
+## 20. Risk register & guardrails
 
-### 19.1 Program risks (from ADD, planning actions)
+### 20.1 Program risks (from ADD, planning actions)
 
 | Risk | Planning guardrail |
 |---|---|
@@ -2086,8 +2303,9 @@ Memoize **deterministic** artifacts (slices, packs) freely; LLM answer reuse onl
 | Plugin ecosystem stagnation | Ship 3–5 languages excellently; SDK in P5 |
 | Users bypass Prism | P2 one-shot `compile_context` is the UX bet; P9 measures whether the bet paid |
 | AOE cache bet returns | Answer cache blocked until P10 Stage C |
+| Prism only usable by Rust contributors | P11 cold-machine install gate; PRODUCT-SETUP must not lead with `cargo build` |
 
-### 19.2 Interaction-half risks (added 2026-07-26)
+### 20.2 Interaction-half risks (added 2026-07-26)
 
 | Risk | Planning guardrail |
 |---|---|
@@ -2100,7 +2318,17 @@ Memoize **deterministic** artifacts (slices, packs) freely; LLM answer reuse onl
 | Editor/agent platform churn | Feature-detect, degrade to plain MCP, pin API versions in CI |
 | The four-arm benchmark never happens (again) | It is the P9 gate; the phase cannot exit without it |
 
-### 19.3 Stage churn guardrails
+### 20.3 Distribution-half risks (added 2026-07-26 — P11)
+
+| Risk | Planning guardrail |
+|---|---|
+| “Install anywhere” claimed while still requiring `cargo build` | P11 Stage C cold-VM matrix is the gate |
+| Unsigned / unverified `curl \| sh` | Checksums mandatory; signatures preferred; package managers as alternate trust path |
+| Host adapters become a second product | One host-adapter catalog; generated snippets; generic stdio fallback |
+| P11 quietly absorbs P10 shared-index work | Explicit non-goal; shared index stays deferred |
+| VSIX revived under distribution pressure | ADR-0007; CLI + MCP only |
+
+### 20.4 Stage churn guardrails
 
 1. **No skipping phase gates** without a written waiver listing residual risk.  
 2. **No embedding-centric retrieval narrative** in release notes.  
@@ -2108,11 +2336,12 @@ Memoize **deterministic** artifacts (slices, packs) freely; LLM answer reuse onl
 4. **No abstractive code summaries** as default packing.  
 5. **Vertical first:** correctness + tokens on one large repo before distributed work.  
 6. **No unbounded rendering** — views obey budgets and refuse, exactly as packs do.  
-7. **No claim without an artifact.** If a gate says “proven”, the repository must contain the thing that proves it (this rule exists because of gap G-03).
+7. **No claim without an artifact.** If a gate says “proven”, the repository must contain the thing that proves it (this rule exists because of gap G-03).  
+8. **No “works on my machine” install story.** If a gate claims cross-platform install, evidence is cold VMs or CI matrix artifacts — not a maintainer laptop.
 
 ---
 
-## 20. Definition of Done (program-level)
+## 21. Definition of Done (program-level)
 
 Prism’s planning program (P0–P5) is done when all are true:
 
@@ -2126,25 +2355,36 @@ Prism’s planning program (P0–P5) is done when all are true:
 
 **Status:** items 1–3 and 5–7 are met as of the P5 gate. Item 4 is **interim** — the four-arm benchmark lands in P9 Stage C.
 
-### 20.1 Definition of Done — interaction half (P6–P9)
+### 21.1 Definition of Done — interaction half (P6–P9)
 
 The interaction program is done when all are true:
 
 1. **Documents match the repository.** No planning or tech-stack claim describes an artifact that does not exist; every accepted divergence has an ADR.
 2. **Surfaces are real.** A daemon, an HTTP/SSE API, an LSP host, and an MCP server expose the same capabilities with the same error model.
 3. **The graph is seeable without being dumped.** Every view is budgeted, deterministic, provenance-bearing, and refuses oversized scopes with anchors.
-4. **The editor is sufficient.** A developer completes orientation, impact, and debug tasks without a terminal.
+4. **The editor is sufficient.** ~~A developer completes orientation, impact, and debug tasks without a terminal.~~ **Restated after ADR-0007:** CLI + MCP complete orientation/impact/debug without a VSIX; terminal is an acceptable host for `prism setup`.
 5. **Agents choose Prism unprompted,** measured on traces rather than asserted in a guide.
 6. **The quality claim is settled.** The four-arm benchmark is published, and G1 is either evidenced or withdrawn.
 7. **Local-first survived.** No surface added in P6–P9 requires network access or an always-on service.
 
-Phase 10 is an **optional expansion**, not required for MVP product identity.
+Phase 10 is an **optional expansion**, not required for MVP product identity — and is **skipped for now**.
+
+### 21.2 Definition of Done — distribution half (P11)
+
+The distribution program is done when all are true:
+
+1. **Cold machine works.** macOS, Linux, and Windows users install without a Rust toolchain.
+2. **One-shot bootstrap works.** `prism setup` (or the documented agent skill sequence) yields index + agent assets + MCP registration.
+3. **Trust path exists.** Installers verify checksums; release artifacts are reproducible enough for the security checklist.
+4. **Hosts are covered.** Cursor plus at least one additional agent host have documented, uninstallable adapters.
+5. **Docs match reality.** PRODUCT-SETUP / INSTALL lead with the release path; from-source is contributor-only.
+6. **Local-first survived install.** After the one-time binary download, indexing and MCP do not require network.
 
 ---
 
-## 21. Appendix — Checklists & templates
+## 22. Appendix — Checklists & templates
 
-### 21.1 Stage kickoff checklist
+### 22.1 Stage kickoff checklist
 
 - [ ] Re-read relevant ADD sections for this stage  
 - [ ] Confirm entry criteria  
@@ -2153,7 +2393,7 @@ Phase 10 is an **optional expansion**, not required for MVP product identity.
 - [ ] Identify eval measurement (even qualitative)  
 - [ ] List non-goals for this stage (what we refuse to build now)  
 
-### 21.2 Stage exit review template
+### 22.2 Stage exit review template
 
 | Field | Content |
 |---|---|
@@ -2164,7 +2404,7 @@ Phase 10 is an **optional expansion**, not required for MVP product identity.
 | Waiver? | none / signed waiver |
 | Next stage entry | confirmed / blocked by X |
 
-### 21.3 Intent recipe card (template)
+### 22.3 Intent recipe card (template)
 
 ```text
 Intent: <name>
@@ -2177,7 +2417,7 @@ Refuse when: <SCOPE_UNRESOLVED conditions>
 Eval tasks: <IDs>
 ```
 
-### 21.4 Gold task card (template)
+### 22.4 Gold task card (template)
 
 ```text
 Task ID:
@@ -2191,7 +2431,7 @@ Labels (necessary spans):
 Scoring method:
 ```
 
-### 21.5 Phase gate evidence pack (required artifacts)
+### 22.5 Phase gate evidence pack (required artifacts)
 
 | Phase | Evidence to archive |
 |---|---|
@@ -2203,11 +2443,12 @@ Scoring method:
 | P5 | Public report, SDK docs, security checklist |
 | P6 | Drift closure report, ADR set, N1/N2 benchmark baselines, `graph-view/v1` schema + fixtures |
 | P7 | View kinds catalog, render budget report, time-to-orient scorecard, screenshot-diff suite |
-| P8 | VSIX artifact, activation budget, end-to-end test run, marketplace listing copy |
+| P8 | ~~VSIX artifact…~~ **Cut (ADR-0007)** — retain CLI+MCP setup evidence instead |
 | P9 | Four-arm benchmark report v2, dual-reviewed precision sample, agent trace metrics |
-| P10 | Authz pilot notes, SLA, cache certificate design |
+| P10 | Authz pilot notes, SLA, cache certificate design *(deferred)* |
+| P11 | Release archives + `SHA256SUMS`, installer smoke logs (3 OS), host-adapter matrix, P11 scorecard, INSTALL/PRODUCT-SETUP as-built |
 
-### 21.6 View kind card (template — P7)
+### 22.6 View kind card (template — P7)
 
 ```text
 View kind: <name>
@@ -2224,7 +2465,7 @@ Refuse when: <VIEW_TOO_LARGE conditions + suggested anchors>
 Eval tasks: <IDs>
 ```
 
-### 21.7 Glossary (planning-oriented)
+### 22.7 Glossary (planning-oriented)
 
 | Term | Meaning |
 |---|---|
@@ -2238,6 +2479,26 @@ Eval tasks: <IDs>
 | **LOD** | Level of detail: repo → subsystem → module → file → symbol |
 | **Refusal repair** | A machine-actionable next step returned with every error, so agents recover unaided |
 | **Drift register** | The W-DEBT list of divergences between documentation and the repository |
+| **Ensure-install** | Graphify-inspired agent step: detect missing `prism`, install via approved path, persist resolved binary for MCP |
+| **Host adapter** | Idempotent writer for a specific agent host’s MCP/rules/skills config (`cursor`, `claude`, `vscode`, …) |
+| **Cold-machine path** | Install + setup + doctor on a VM with no Rust toolchain and no prior Prism state |
+| **Time-to-ready** | Wall clock from zero install to first successful `compile_context` on a fixture repo |
+
+### 22.8 Install journey card (template — P11)
+
+```text
+OS / arch: <macos-arm64 | linux-x86_64 | windows-x86_64 | …>
+Install path: <install.sh | install.ps1 | brew | scoop | cargo-binstall | …>
+Binary location after install:
+Checksum verified: yes/no
+Setup command: prism setup <repo>
+Hosts registered: <cursor | claude | vscode | …>
+doctor --ready: pass/fail (JSON attached)
+First compile_context: pass/fail + latency
+Upgrade from previous tag: pass/fail / N/A
+Uninstall clean: pass/fail
+Notes / limitations:
+```
 
 ---
 
@@ -2245,10 +2506,11 @@ Eval tasks: <IDs>
 
 - [Architecture Design Document](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md) — design authority  
 - [Tech Stack & Project Structure](../architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md) — how it is built, per phase  
+- [Product setup](../architecture/PRODUCT-SETUP.md) — current CLI+MCP bootstrap (P11 expands this to any system)  
 - [Tasks & Progress](./TASKS-AND-PROGRESS.md) — living checklist and phase state  
 - [Program residual risks](../eval/PROGRAM-RESIDUAL-RISKS.md) — R1/R2/R8 are the P9 targets  
 - ADD §36 Phased Implementation Roadmap — phase durations and high-level gates (expanded here)
 
 ---
 
-*End of Planning & Implementation Document. P0–P5 are delivered; P6–P9 are planned but unimplemented; P10 is optional.*
+*End of Planning & Implementation Document. P0–P7 + P9 delivered; P8 cut; P10 optional/deferred (skipped for now); P11 Install & Distribution planned — not yet implemented.*

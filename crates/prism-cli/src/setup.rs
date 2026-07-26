@@ -1,10 +1,10 @@
 //! Graphify-like one-shot workspace setup (`prism setup`).
 
+use crate::host;
 use anyhow::{bail, Context, Result};
 use prism_core::{IncrementalIndexer, IndexOptions, WorkspaceManager};
 use serde::Serialize;
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 #[derive(Debug, Serialize)]
 pub struct SetupReport {
@@ -21,13 +21,17 @@ pub struct SetupStep {
     pub detail: String,
 }
 
+/// Doctor readiness checklist v2 (P11) — install + host + index.
 #[derive(Debug, Serialize)]
 pub struct ReadyChecklist {
     pub binary: bool,
+    pub binary_path: String,
+    pub binary_version: String,
     pub index: bool,
     pub agents_md: bool,
     pub cursor_rule: bool,
     pub mcp_registered: bool,
+    pub hosts: Vec<host::HostStatus>,
 }
 
 pub struct SetupOpts {
@@ -115,13 +119,9 @@ pub fn run_setup(path: &Path, opts: SetupOpts) -> Result<SetupReport> {
         });
     }
 
-    // 4. MCP registration (Cursor / VS Code portable)
+    // 4. MCP registration (default host adapter)
     let mcp_ok = if opts.register_mcp {
-        let prism_bin = std::env::current_exe()
-            .ok()
-            .and_then(|p| p.to_str().map(str::to_string))
-            .unwrap_or_else(|| "prism".into());
-        let target = register_mcp(&root, &prism_bin)?;
+        let target = host::register_default_mcp(&root)?;
         steps.push(SetupStep {
             id: "mcp".into(),
             ok: true,
@@ -129,21 +129,16 @@ pub fn run_setup(path: &Path, opts: SetupOpts) -> Result<SetupReport> {
         });
         true
     } else {
+        let present = host::mcp_has_prism(&root);
         steps.push(SetupStep {
             id: "mcp".into(),
-            ok: mcp_has_prism(&root),
+            ok: present,
             detail: "MCP registration skipped".into(),
         });
-        mcp_has_prism(&root)
+        present
     };
 
-    let ready = ReadyChecklist {
-        binary: true,
-        index: index_ok,
-        agents_md: agents_ok,
-        cursor_rule: rule_ok,
-        mcp_registered: mcp_ok,
-    };
+    let ready = build_ready_checklist(&root, index_ok, agents_ok, rule_ok, mcp_ok);
     let ok = ready.binary && ready.index;
     Ok(SetupReport {
         ok,
@@ -153,67 +148,46 @@ pub fn run_setup(path: &Path, opts: SetupOpts) -> Result<SetupReport> {
     })
 }
 
+fn binary_meta() -> (String, String) {
+    let path = std::env::current_exe()
+        .ok()
+        .map(|p| p.display().to_string())
+        .unwrap_or_else(|| "prism".into());
+    let version = env!("CARGO_PKG_VERSION").to_string();
+    (path, version)
+}
+
+fn build_ready_checklist(
+    root: &Path,
+    index_ok: bool,
+    agents_ok: bool,
+    rule_ok: bool,
+    mcp_ok: bool,
+) -> ReadyChecklist {
+    let (binary_path, binary_version) = binary_meta();
+    let hosts = host::host_status(root, None).unwrap_or_default();
+    ReadyChecklist {
+        binary: true,
+        binary_path,
+        binary_version,
+        index: index_ok,
+        agents_md: agents_ok,
+        cursor_rule: rule_ok,
+        mcp_registered: mcp_ok,
+        hosts,
+    }
+}
+
 pub fn doctor_ready(path: &Path) -> Result<ReadyChecklist> {
     let wm = WorkspaceManager::open(path)?;
     let root = wm.root();
-    Ok(ReadyChecklist {
-        binary: true,
-        index: root.join(".prism/graph.sqlite").exists(),
-        agents_md: root.join("AGENTS.md").exists(),
-        cursor_rule: root.join(".cursor/rules/prism-compile-first.mdc").exists(),
-        mcp_registered: mcp_has_prism(root),
-    })
-}
-
-fn mcp_has_prism(root: &Path) -> bool {
-    for rel in [".cursor/mcp.json", ".vscode/mcp.json"] {
-        let p = root.join(rel);
-        if !p.exists() {
-            continue;
-        }
-        if let Ok(raw) = fs::read_to_string(&p) {
-            if let Ok(v) = serde_json::from_str::<serde_json::Value>(&raw) {
-                if v.get("mcpServers")
-                    .and_then(|s| s.get("prism"))
-                    .is_some()
-                {
-                    return true;
-                }
-            }
-        }
-    }
-    false
-}
-
-fn register_mcp(root: &Path, prism_bin: &str) -> Result<PathBuf> {
-    let cursor_dir = root.join(".cursor");
-    let target = if cursor_dir.exists() || !root.join(".vscode").exists() {
-        fs::create_dir_all(&cursor_dir)?;
-        cursor_dir.join("mcp.json")
-    } else {
-        let vscode = root.join(".vscode");
-        fs::create_dir_all(&vscode)?;
-        vscode.join("mcp.json")
-    };
-
-    let mut root_obj: serde_json::Value = if target.exists() {
-        serde_json::from_str(&fs::read_to_string(&target)?)
-            .unwrap_or_else(|_| serde_json::json!({ "mcpServers": {} }))
-    } else {
-        serde_json::json!({ "mcpServers": {} })
-    };
-    if !root_obj.get("mcpServers").map(|v| v.is_object()).unwrap_or(false) {
-        root_obj["mcpServers"] = serde_json::json!({});
-    }
-    root_obj["mcpServers"]["prism"] = serde_json::json!({
-        "command": prism_bin,
-        "args": ["mcp", root.display().to_string()],
-    });
-    fs::write(
-        &target,
-        format!("{}\n", serde_json::to_string_pretty(&root_obj)?),
-    )?;
-    Ok(target)
+    Ok(build_ready_checklist(
+        root,
+        root.join(".prism/graph.sqlite").exists(),
+        root.join("AGENTS.md").exists(),
+        root.join(".cursor/rules/prism-compile-first.mdc").exists(),
+        host::mcp_has_prism(root),
+    ))
 }
 
 pub fn assert_ready(checklist: &ReadyChecklist) -> Result<()> {

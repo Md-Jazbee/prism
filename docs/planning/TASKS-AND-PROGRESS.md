@@ -1,12 +1,14 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P9 gate passed** · P8 **cut** (CLI+MCP) · P0–P7+P9 complete · **P10 deferred**  
+**Current phase:** **P11 Stage A+B in progress** · P8 **cut** (CLI+MCP) · P0–P7+P9 complete · **P10 deferred/skipped**  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)  
 **Source of truth for stack/layout:** [TECH-STACK-AND-PROJECT-STRUCTURE.md](../architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md)
 
 > **Renumbering (2026-07-26):** the old *Phase 6 — Team / Distributed* is now **Phase 10**. New phases **P6 Consolidation & Interaction Substrate**, **P7 Visual Repository Intelligence**, **P8 IDE Extension**, and **P9 Agent Experience** were added after a full repo re-analysis. The gap register lives in [planning §12](./PLANNING-AND-IMPLEMENTATION.md#12-post-phase-5-repository-re-analysis--gap-register).
+>
+> **P11 (2026-07-26):** **Install & Distribution** opened; does **not** wait on P10.
 
 Use this file as the living checklist. Update checkbox state and the progress snapshot when a stage exits or a blocker moves.
 
@@ -26,9 +28,10 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P7** | Visual Repository Intelligence | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P8** | IDE Extension (VS Code / Cursor) | ░░░░░░░░░░ **—** | ✂️ **Cut** 2026-07-26 — superseded by CLI + MCP ([ADR-0007](../architecture/adr/0007-extension-cut-cli-mcp.md)) |
 | **P9** | Agent Experience & Workflows | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
-| **P10** | Team / Distributed (optional, was P6) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
+| **P10** | Team / Distributed (optional, was P6) | ░░░░░░░░░░ **0%** | ⚪ Deferred / skipped for now |
+| **P11** | Install & Distribution (any system) | ▓▓▓▓▓░░░░░ **~45%** | 🟡 Stage A delivered; Stage B started |
 
-**How to read progress:** **P0–P7 and P9 are gated**. **P8 was cut** — agent/IDE needs are met by `prism setup` + MCP, not a VSIX. **P10** stays optional.
+**How to read progress:** **P0–P7 and P9 are gated**. **P8 was cut** — agent/IDE needs are met by `prism setup` + MCP, not a VSIX. **P10** stays optional/skipped. **P11** is the active distribution track.
 
 ```mermaid
 flowchart LR
@@ -42,7 +45,8 @@ flowchart LR
     P7 --> P8[P8 IDE Extension<br/>✂️ cut]
     P8 -.-> P9[P9 Agent Experience<br/>✅ done]
     P7 --> P9
-    P9 -.-> P10[P10 Distributed / Team<br/>optional]
+    P9 --> P11[P11 Install & Distribution<br/>🟡 active]
+    P9 -.-> P10[P10 Distributed / Team<br/>skipped]
 
     style P0 fill:#b8e994,stroke:#78e08f,color:#000
     style P1 fill:#b8e994,stroke:#78e08f,color:#000
@@ -55,6 +59,7 @@ flowchart LR
     style P8 fill:#dfe6e9,stroke:#b2bec3,color:#000
     style P9 fill:#b8e994,stroke:#78e08f,color:#000
     style P10 fill:#dfe6e9,stroke:#b2bec3,color:#000
+    style P11 fill:#ffeaa7,stroke:#fdcb6e,color:#000
 ```
 ### Legend
 
@@ -88,7 +93,9 @@ flowchart LR
 | IDE extension | P5 → **P8** | ✂️ **cut** — CLI + MCP ([ADR-0007](../architecture/adr/0007-extension-cut-cli-mcp.md)); design retained in IDE-INTEGRATION.md |
 | Agent workflows + rules assets | P9 | ✅ `prism-agent` + catalog → AGENTS.md (G-15 closed) |
 | Four-arm LLM benchmark | P5 → **P9** | ✅ report v2 scripted-proxy + dual-review 70% (live LLM opt-in) |
-| Team/shared index | P10 | ⬜ deferred |
+| Team/shared index | P10 | ⬜ deferred / skipped |
+| Cross-platform binary install | P11 | 🟡 installers + release.yml + packaging drafts |
+| Host adapters (`prism host`) | P11 | 🟡 cursor/vscode/claude/generic |
 | N1/N2 criterion benches | P6-A | 🟡 `crates/prism-bench` + CI smoke (hard P95 TBD) |
 | `schemas/mcp-tools/v1` | P6-A | ✅ catalog + per-tool JSON + conformance test |
 | `LICENSE` + `deny.toml` | P6-A | ✅ |
@@ -905,6 +912,54 @@ Interaction half **P6–P9 complete**. **P10** remains optional team/distributed
 
 ---
 
+## Phase 11 — Install & Distribution (detailed)
+
+**Goal:** Cold machine (macOS / Linux / Windows) → `prism` on PATH → `prism setup` → MCP `compile_context` without a Rust toolchain.  
+**Duration:** 3–5 weeks  
+**Phase gate:** Three-OS cold-VM matrix; checksummed installers; host adapters; PRODUCT-SETUP matches as-built.  
+**Depends on:** P9 · **Does not wait on:** P10
+
+```mermaid
+flowchart LR
+    A[Stage A<br/>Binary release matrix] --> B[Stage B<br/>Host adapters + ensure-install]
+    B --> C[Stage C<br/>Cold-machine gate]
+```
+
+### Stage A — Binary release matrix & installers
+
+| Task | Status | Notes |
+|---|---|---|
+| Release artifact contract | ✅ | [RELEASE-ARTIFACTS.md](../architecture/RELEASE-ARTIFACTS.md) |
+| `scripts/install.sh` (checksum, dry-run, uninstall) | ✅ | macOS/Linux |
+| `scripts/install.ps1` (checksum, dry-run, uninstall) | ✅ | Windows |
+| `.github/workflows/release.yml` triple matrix + SHA256SUMS | ✅ | tag `v*` |
+| Homebrew formula draft | ✅ | `packaging/homebrew/prism.rb` (sha256 placeholder) |
+| Scoop manifest draft | ✅ | `packaging/scoop/prism.json` (hash placeholder) |
+| PRODUCT-SETUP leads with installers | ✅ | contributor `cargo build` demoted |
+| `prism self-update` | ✅ | wraps platform installer |
+
+**Stage A exit:** deliverables in-repo; first real GitHub Release still pending a public `PRISM_GITHUB_REPO` / tag.
+
+### Stage B — Agent bootstrap & host adapters
+
+| Task | Status | Notes |
+|---|---|---|
+| `prism host install/uninstall/status` | ✅ | cursor · vscode · claude · generic |
+| Doctor checklist v2 (binary path/version + hosts) | ✅ | `prism doctor --json` |
+| Ensure-install sequence documented | ✅ | PRODUCT-SETUP agent section |
+| Generated skills mention install bootstrap | ⬜ | catalog / AGENTS fragment |
+| Optional `prism hook install` | ⬜ | post-commit reindex |
+
+### Stage C — Install UX gate
+
+| Task | Status | Notes |
+|---|---|---|
+| Cold-machine matrix (3 OS) | ⬜ | needs published release artifacts |
+| P11 scorecard | ⬜ | |
+| Time-to-ready metric | ⬜ | |
+
+---
+
 ## Cross-cutting workstreams (always on)
 
 Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
@@ -931,6 +986,7 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | **W-VIZ** | Visualization — view-model, LOD, layout determinism, render budgets | ✅ P6 Stage C + P7 gate |
 | **W-AX** | Agent experience — tool ergonomics, refusal repair, workflows, rules assets | ✅ P9 gate |
 | **W-DEBT** | As-built reconciliation — drift register, ADRs, expiring waivers | 🟡 P6 Stage A |
+| **W-DIST** | Install & distribution — release artifacts, installers, package managers, host PATH | 🟡 P11 Stage A+B |
 
 ---
 
@@ -973,3 +1029,5 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P8 Stages A–C exited / gate passed:** `extensions/vscode` (daemon HTTP→CLI transport, ADR-0006 binary delivery, evidence+graph webviews, commands, decorations off-by-default, Cursor MCP auto-reg, AGENTS.md generation, actionable refusals, extension.yml VSIX CI, p8-phase-gate). Marketplace publish + `@vscode/test-electron` deferred. **P9 opened**. |
 | 2026-07-26 | **P8 cut (ADR-0007):** removed `extensions/vscode`, extension CI/docs/ADR-0006/p8-scorecard. Product surface is CLI (`prism setup`) + MCP. Kept `@prism/graph-view`, daemon token file, setup/doctor. Planning board updated. |
 | 2026-07-26 | **P9 Stages A–C exited / gate passed:** `prism-agent` (refusal repair, budget negotiation, progressive packs, traces); workflow catalog + CLI/HTTP; generated AGENTS.md/rules/skills; four-arm report v2 (scripted proxy + dual-review 70%); R1 restated, R2/R8/R15 closed. **P0–P9 program complete**; P10 remains optional. |
+| 2026-07-26 | **P11 planned** in PLANNING-AND-IMPLEMENTATION (§18): Install & Distribution; P10 skipped. |
+| 2026-07-26 | **P11 Stage A + Stage B start:** `scripts/install.sh` / `install.ps1`, `release.yml`, Homebrew/Scoop drafts, RELEASE-ARTIFACTS + PRODUCT-SETUP rewrite, `prism host` + `self-update`, doctor checklist v2. Cold-VM gate (Stage C) blocked on first public release tag. |

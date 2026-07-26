@@ -1,5 +1,6 @@
 //! `prism` CLI — Phase 4 (`index` + query + plan + compile + precise + semantic).
 
+mod host;
 mod setup;
 
 use anyhow::{bail, Context, Result};
@@ -18,6 +19,7 @@ use prism_semantic::{
 };
 use prism_store::{parse_edge_kinds, EdgeDirection, SqliteKgStore, SqliteMetaStore};
 use std::path::PathBuf;
+use std::process::Command;
 use std::str::FromStr;
 use std::time::Instant;
 use tracing_subscriber::EnvFilter;
@@ -176,6 +178,21 @@ enum Commands {
         #[command(subcommand)]
         cmd: AgentCmd,
     },
+    /// Register / remove agent-host adapters (P11).
+    Host {
+        #[command(subcommand)]
+        cmd: HostCmd,
+    },
+    /// Re-run the platform installer to upgrade the binary (P11).
+    #[command(name = "self-update")]
+    SelfUpdate {
+        /// Semver without leading v (default: latest release).
+        #[arg(long)]
+        version: Option<String>,
+        /// Print installer actions without writing files.
+        #[arg(long)]
+        dry_run: bool,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -213,6 +230,37 @@ enum AgentCmd {
         code: String,
         #[arg(long)]
         message: Option<String>,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+enum HostCmd {
+    /// Merge Prism into a host's MCP / guidance files.
+    Install {
+        /// cursor | vscode | claude | generic
+        host: String,
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long)]
+        json: bool,
+    },
+    /// Remove Prism registration from a host (leaves other MCP servers intact).
+    Uninstall {
+        host: String,
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long)]
+        json: bool,
+    },
+    /// Show which hosts currently have Prism registered.
+    Status {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        /// Optional single host filter.
+        #[arg(long)]
+        host: Option<String>,
+        #[arg(long)]
+        json: bool,
     },
 }
 
@@ -441,6 +489,85 @@ fn open_kg(workspace: &PathBuf) -> Result<(WorkspaceManager, SqliteKgStore)> {
     Ok((wm, kg))
 }
 
+fn run_self_update(version: Option<&str>, dry_run: bool) -> Result<()> {
+    // Prefer a checkout-local installer when developing; else download the raw script.
+    let repo = std::env::var("PRISM_GITHUB_REPO").unwrap_or_else(|_| "example/prism".into());
+    let local_sh = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../scripts/install.sh");
+    let local_ps1 = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../scripts/install.ps1");
+
+    #[cfg(windows)]
+    {
+        let _ = local_sh;
+        let script = if local_ps1.exists() {
+            local_ps1
+        } else {
+            bail!(
+                "Windows self-update expects scripts/install.ps1 nearby, or run:\n  irm https://raw.githubusercontent.com/{repo}/main/scripts/install.ps1 | iex"
+            );
+        };
+        let mut cmd = Command::new("powershell");
+        cmd.arg("-NoProfile").arg("-File").arg(&script);
+        if let Some(v) = version {
+            cmd.arg("-Version").arg(v);
+        }
+        if dry_run {
+            cmd.arg("-DryRun");
+        }
+        let status = cmd.status().context("run install.ps1")?;
+        if !status.success() {
+            bail!("installer exited with {status}");
+        }
+        return Ok(());
+    }
+
+    #[cfg(not(windows))]
+    {
+        let _ = local_ps1;
+        let script = if local_sh.exists() {
+            local_sh
+        } else {
+            // Fall back: curl the published installer into a temp file.
+            let url = format!(
+                "https://raw.githubusercontent.com/{repo}/main/scripts/install.sh"
+            );
+            let tmp = std::env::temp_dir().join("prism-install.sh");
+            let body = {
+                // Avoid adding a HTTP crate for this thin helper — shell out to curl.
+                let out = Command::new("curl")
+                    .args(["-fsSL", &url])
+                    .output()
+                    .with_context(|| format!("download installer from {url}"))?;
+                if !out.status.success() {
+                    bail!("curl failed downloading {url}");
+                }
+                out.stdout
+            };
+            std::fs::write(&tmp, body)?;
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                let mut perms = std::fs::metadata(&tmp)?.permissions();
+                perms.set_mode(0o755);
+                std::fs::set_permissions(&tmp, perms)?;
+            }
+            tmp
+        };
+        let mut cmd = Command::new("bash");
+        cmd.arg(&script);
+        if let Some(v) = version {
+            cmd.arg("--version").arg(v);
+        }
+        if dry_run {
+            cmd.arg("--dry-run");
+        }
+        let status = cmd.status().context("run install.sh")?;
+        if !status.success() {
+            bail!("installer exited with {status}");
+        }
+        Ok(())
+    }
+}
+
 fn main() -> Result<()> {
     let cli = Cli::parse();
     // MCP reserves stdout for JSON-RPC — log to stderr always for mcp; others ok on stderr too.
@@ -574,17 +701,75 @@ fn main() -> Result<()> {
                     prism_ir::PRECISE_INDEX_SCHEMA_VERSION
                 );
                 println!(
-                    "ready: binary={} index={} agents_md={} cursor_rule={} mcp={}",
+                    "ready: binary={} ({}) index={} agents_md={} cursor_rule={} mcp={}",
                     checklist.binary,
+                    checklist.binary_version,
                     checklist.index,
                     checklist.agents_md,
                     checklist.cursor_rule,
                     checklist.mcp_registered
                 );
+                println!("binary_path: {}", checklist.binary_path);
+                for h in &checklist.hosts {
+                    println!(
+                        "host {}: registered={} ({})",
+                        h.host, h.registered, h.detail
+                    );
+                }
             }
             if ready {
                 setup::assert_ready(&checklist)?;
             }
+        }
+        Commands::Host { cmd } => match cmd {
+            HostCmd::Install { host, path, json } => {
+                let kind = host::HostKind::parse(&host)?;
+                let report = host::host_install(&path, kind)?;
+                if json {
+                    println!("{}", serde_json::to_string_pretty(&report)?);
+                } else {
+                    println!(
+                        "host {} install: {} — {}",
+                        report.host,
+                        if report.ok { "ok" } else { "!!" },
+                        report.detail
+                    );
+                }
+            }
+            HostCmd::Uninstall { host, path, json } => {
+                let kind = host::HostKind::parse(&host)?;
+                let report = host::host_uninstall(&path, kind)?;
+                if json {
+                    println!("{}", serde_json::to_string_pretty(&report)?);
+                } else {
+                    println!(
+                        "host {} uninstall: {} — {}",
+                        report.host,
+                        if report.ok { "ok" } else { "!!" },
+                        report.detail
+                    );
+                }
+            }
+            HostCmd::Status { path, host, json } => {
+                let filter = host
+                    .as_deref()
+                    .map(host::HostKind::parse)
+                    .transpose()?;
+                let statuses = host::host_status(&path, filter)?;
+                if json {
+                    println!("{}", serde_json::to_string_pretty(&statuses)?);
+                } else {
+                    for s in statuses {
+                        println!(
+                            "{}: registered={} — {}",
+                            s.host, s.registered, s.detail
+                        );
+                    }
+                }
+            }
+        },
+        Commands::SelfUpdate { version, dry_run } => {
+            run_self_update(version.as_deref(), dry_run)?;
         }
         Commands::IndexStatus { path, json } => {
             let wm = WorkspaceManager::open(&path)?;

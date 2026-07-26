@@ -1,0 +1,140 @@
+name: release
+
+# P11 Stage A — build release archives for the minimum triple matrix.
+# Trigger: push tag v*  OR  workflow_dispatch with version input.
+# Contract: docs/architecture/RELEASE-ARTIFACTS.md
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Semver without leading v (used only when not tagging)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  cargo-deny:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: EmbarkStudios/cargo-deny-action@v2
+
+  build:
+    needs: cargo-deny
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            os: macos-latest
+          - target: x86_64-apple-darwin
+            os: macos-13
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-24.04-arm
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            V="${GITHUB_REF_NAME#v}"
+          elif [[ -n "${{ github.event.inputs.version }}" ]]; then
+            V="${{ github.event.inputs.version }}"
+            V="${V#v}"
+          else
+            V="$(grep -m1 '^version' Cargo.toml | sed 's/.*"\(.*\)"/\1/')"
+          fi
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "Resolved version=$V"
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release-${{ matrix.target }}
+
+      - name: Build release binary
+        shell: bash
+        run: cargo build -p prism-cli --release --target ${{ matrix.target }}
+
+      - name: Package (unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          V="${{ steps.ver.outputs.version }}"
+          T="${{ matrix.target }}"
+          BIN="target/${T}/release/prism"
+          test -x "$BIN"
+          STAGE="$(mktemp -d)"
+          cp "$BIN" "${STAGE}/prism"
+          ARCHIVE="prism-${V}-${T}.tar.gz"
+          tar -C "$STAGE" -czf "$ARCHIVE" prism
+          echo "archive=$ARCHIVE" >> "$GITHUB_ENV"
+
+      - name: Package (windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          V="${{ steps.ver.outputs.version }}"
+          T="${{ matrix.target }}"
+          BIN="target/${T}/release/prism.exe"
+          test -f "$BIN"
+          STAGE="$(mktemp -d)"
+          cp "$BIN" "${STAGE}/prism.exe"
+          ARCHIVE="prism-${V}-${T}.zip"
+          (cd "$STAGE" && zip -q "$GITHUB_WORKSPACE/$ARCHIVE" prism.exe)
+          echo "archive=$ARCHIVE" >> "$GITHUB_ENV"
+
+      - name: Upload archive artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.target }}
+          path: ${{ env.archive }}
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all archives
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: dist-*
+          merge-multiple: true
+
+      - name: Build SHA256SUMS
+        working-directory: dist
+        run: |
+          ls -la
+          sha256sum prism-*.tar.gz prism-*.zip > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Create / update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/prism-*.tar.gz
+            dist/prism-*.zip
+            dist/SHA256SUMS
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
