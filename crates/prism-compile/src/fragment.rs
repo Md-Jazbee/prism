@@ -60,11 +60,19 @@ impl Provenance {
     }
 
     pub fn from_node(node_id: impl Into<String>, confidence_analyzer: &str) -> Self {
+        Self::from_node_tier(node_id, confidence_analyzer, "T1")
+    }
+
+    pub fn from_node_tier(
+        node_id: impl Into<String>,
+        confidence_analyzer: &str,
+        tier: &str,
+    ) -> Self {
         Self {
             node_ids: vec![node_id.into()],
             edge_ids: vec![],
             analyzer: confidence_analyzer.into(),
-            tier: "T1".into(),
+            tier: tier.into(),
         }
     }
 }

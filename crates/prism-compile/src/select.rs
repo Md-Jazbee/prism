@@ -4,7 +4,12 @@ use crate::fragment::{
     estimate_tokens, CandidateFragment, FragmentKind, PackLayer, Provenance,
 };
 use anyhow::Result;
+use prism_obs::{emit_index_event, IndexEvent};
 use prism_plan::{Intent, Operator, Plan};
+use prism_precise::{
+    ambiguity_index, hybrid_resolve, HybridResolveOptions, HybridResolveReport,
+    DEFAULT_MAX_LATENCY_MS, DEFAULT_MAX_UPGRADES,
+};
 use prism_store::{EdgeDirection, SqliteKgStore};
 use std::path::PathBuf;
 
@@ -81,17 +86,20 @@ pub fn select_candidates(plan: &Plan) -> Vec<CandidateFragment> {
     out
 }
 
-/// Select candidates by executing cheap T1 plan steps against the KG.
+/// Select candidates by executing cheap T1 (+ bounded T2 upgrade) plan steps against the KG.
 pub fn select_from_kg(
     kg: &SqliteKgStore,
     plan: &Plan,
     opts: &CompileOptions,
 ) -> Result<Vec<CandidateFragment>> {
     let mut out = Vec::new();
+    let mut gaps_extra: Vec<String> = Vec::new();
     let anchors = anchors_from_plan(plan);
 
     // Always materialize must-include role stubs first (may be enriched below)
     out.extend(select_candidates(plan));
+
+    let mut seed_ids: Vec<String> = Vec::new();
 
     // Enrich / replace with live KG hits where possible
     for step in &plan.steps {
@@ -104,6 +112,9 @@ pub fn select_from_kg(
                     let name = strip_qual(a);
                     let hits = kg.resolve_symbol(name, None, 5)?;
                     for (i, hit) in hits.iter().enumerate() {
+                        if !seed_ids.iter().any(|s| s == &hit.id) {
+                            seed_ids.push(hit.id.clone());
+                        }
                         let text = format_symbol_signature(hit);
                         let slice = maybe_read_slice(opts, hit);
                         if let Some((slice_text, tokens)) = slice {
@@ -113,7 +124,11 @@ pub fn select_from_kg(
                                 layer: PackLayer::Core,
                                 text: slice_text,
                                 token_estimate: tokens,
-                                provenance: Provenance::from_node(&hit.id, "prism-store"),
+                                provenance: Provenance::from_node_tier(
+                                    &hit.id,
+                                    "prism-store",
+                                    tier_for_confidence(&hit.confidence),
+                                ),
                                 confidence: hit.confidence.clone(),
                                 why_included: "primary_symbol_definition".into(),
                                 drop_priority: 0,
@@ -133,7 +148,11 @@ pub fn select_from_kg(
                             layer: PackLayer::Mod,
                             text,
                             token_estimate: estimate_tokens(&format_symbol_signature(hit)),
-                            provenance: Provenance::from_node(&hit.id, "prism-store"),
+                            provenance: Provenance::from_node_tier(
+                                &hit.id,
+                                "prism-store",
+                                tier_for_confidence(&hit.confidence),
+                            ),
                             confidence: hit.confidence.clone(),
                             why_included: "primary_symbol_signature".into(),
                             drop_priority: 0,
@@ -145,13 +164,18 @@ pub fn select_from_kg(
                             must_include: true,
                         });
 
-                        // 1-hop neighbors as optional signatures
-                        let nbrs = kg.neighbors(
+                        // 1-hop neighbors as optional signatures (prefer precise)
+                        let mut nbrs = kg.neighbors(
                             &hit.id,
-                            Some(&["CALLS".into(), "IMPORTS".into(), "DEFINES".into()]),
+                            Some(&["CALLS".into(), "IMPORTS".into(), "DEFINES".into(), "REFERENCES".into()]),
                             EdgeDirection::Both,
                             15,
                         )?;
+                        nbrs.sort_by(|a, b| {
+                            confidence_rank(&b.edge.confidence)
+                                .cmp(&confidence_rank(&a.edge.confidence))
+                                .then_with(|| a.edge.id.cmp(&b.edge.id))
+                        });
                         for (j, n) in nbrs.iter().enumerate() {
                             let t = format!(
                                 "neighbor {} via {} → {}",
@@ -169,16 +193,84 @@ pub fn select_from_kg(
                                     node_ids: vec![n.node.id.clone()],
                                     edge_ids: vec![n.edge.id.clone()],
                                     analyzer: "prism-store".into(),
-                                    tier: "T1".into(),
+                                    tier: tier_for_confidence(&n.edge.confidence).into(),
                                 },
                                 confidence: n.edge.confidence.clone(),
                                 why_included: "neighbor_signature".into(),
-                                drop_priority: 40,
+                                drop_priority: if n.edge.confidence == "precise" {
+                                    20
+                                } else {
+                                    40
+                                },
                                 roles: vec!["neighbor_bodies".into()],
                                 must_include: false,
                             });
                         }
                     }
+                }
+            }
+            Operator::UpgradePrecision => {
+                let policy = step
+                    .inputs
+                    .get("policy")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("mandatory");
+                let critical = step
+                    .inputs
+                    .get("critical_path_only")
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(false);
+                let max_upgrades = step
+                    .inputs
+                    .get("max_upgrades")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(DEFAULT_MAX_UPGRADES as u64) as usize;
+                let max_latency_ms = step
+                    .inputs
+                    .get("max_latency_ms")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(DEFAULT_MAX_LATENCY_MS);
+
+                let should_run = match policy {
+                    "optional_on_ambiguity" => ambiguity_index(kg)?.require_t2,
+                    _ => true,
+                };
+
+                if should_run && !seed_ids.is_empty() {
+                    let report = hybrid_resolve(
+                        kg,
+                        &seed_ids,
+                        &HybridResolveOptions {
+                            critical_path_only: critical,
+                            max_upgrades,
+                            max_latency_ms,
+                        },
+                    )?;
+                    emit_upgrade_event(&report);
+                    out.extend(fragments_from_upgrade(&report));
+                    for d in &report.dual_candidates {
+                        gaps_extra.push(format!(
+                            "uncertainty: dual callee for {} heuristic={} precise={}",
+                            d.site_src, d.heuristic_dst, d.precise_dst
+                        ));
+                    }
+                    if report.deferred > 0 {
+                        gaps_extra.push(format!(
+                            "UpgradePrecision deferred {} edges (latency/count budget)",
+                            report.deferred
+                        ));
+                    }
+                    if !report.overlay_used {
+                        gaps_extra.push(
+                            "UpgradePrecision ran but no precise overlay edges matched — heuristic remains labeled"
+                                .into(),
+                        );
+                    }
+                } else if policy == "optional_on_ambiguity" {
+                    gaps_extra.push(
+                        "UpgradePrecision skipped: ambiguity index below require_t2 threshold"
+                            .into(),
+                    );
                 }
             }
             Operator::Impact => {
@@ -195,6 +287,11 @@ pub fn select_from_kg(
                                 h.via
                             );
                             let must = h.depth <= 1;
+                            let conf = if h.node.confidence == "precise" {
+                                "precise"
+                            } else {
+                                "heuristic"
+                            };
                             out.push(CandidateFragment {
                                 id: format!("frag:kg:impact:{}:{i}", h.node.id),
                                 kind: FragmentKind::Signature,
@@ -205,8 +302,12 @@ pub fn select_from_kg(
                                 },
                                 text: t.clone(),
                                 token_estimate: estimate_tokens(&t),
-                                provenance: Provenance::from_node(&h.node.id, "prism-store"),
-                                confidence: "heuristic".into(),
+                                provenance: Provenance::from_node_tier(
+                                    &h.node.id,
+                                    "prism-store",
+                                    tier_for_confidence(conf),
+                                ),
+                                confidence: conf.into(),
                                 why_included: if must {
                                     "impact_cone_depth_1".into()
                                 } else {
@@ -302,8 +403,12 @@ pub fn select_from_kg(
         }
     }
 
-    // Dedup by id (last wins — prefer KG-enriched)
-    out.sort_by(|a, b| a.id.cmp(&b.id));
+    // Prefer precise over heuristic when same fragment id stem / neighbor target
+    out.sort_by(|a, b| {
+        a.id.cmp(&b.id).then_with(|| {
+            confidence_rank(&b.confidence).cmp(&confidence_rank(&a.confidence))
+        })
+    });
     out.dedup_by(|a, b| a.id == b.id);
 
     // Re-apply must_include from plan roles
@@ -314,7 +419,85 @@ pub fn select_from_kg(
         }
     }
 
+    // Stash upgrade uncertainty as synthetic gap fragments (visible in pack text roles)
+    for (i, g) in gaps_extra.iter().enumerate() {
+        out.push(CandidateFragment {
+            id: format!("frag:gap:upgrade:{i}"),
+            kind: FragmentKind::Signature,
+            layer: PackLayer::Nbr,
+            text: g.clone(),
+            token_estimate: estimate_tokens(g),
+            provenance: Provenance::synthetic("upgrade_gap"),
+            confidence: "heuristic".into(),
+            why_included: "precision_uncertainty".into(),
+            drop_priority: 5,
+            roles: vec!["precision_uncertainty".into()],
+            must_include: false,
+        });
+    }
+
+    let _ = gaps_extra;
     Ok(out)
+}
+
+fn emit_upgrade_event(report: &HybridResolveReport) {
+    emit_index_event(&IndexEvent::PrecisionUpgrade {
+        confirmed: report.confirmed.len() as u64,
+        still_heuristic: report.still_heuristic as u64,
+        dual_candidates: report.dual_candidates.len() as u64,
+        deferred: report.deferred as u64,
+        latency_ms: report.latency_ms,
+        overlay_used: report.overlay_used,
+    });
+}
+
+fn fragments_from_upgrade(report: &HybridResolveReport) -> Vec<CandidateFragment> {
+    let mut out = Vec::new();
+    for (i, c) in report.confirmed.iter().enumerate() {
+        let t = format!(
+            "precise confirmed {} → {} ({})",
+            c.src,
+            c.dst,
+            c.file_path.as_deref().unwrap_or("?")
+        );
+        out.push(CandidateFragment {
+            id: format!("frag:kg:precise:{}:{i}", c.edge_id),
+            kind: FragmentKind::Signature,
+            layer: PackLayer::Core,
+            text: t.clone(),
+            token_estimate: estimate_tokens(&t),
+            provenance: Provenance {
+                node_ids: vec![c.src.clone(), c.dst.clone()],
+                edge_ids: vec![c.edge_id.clone()],
+                analyzer: "prism-precise".into(),
+                tier: "T2".into(),
+            },
+            confidence: "precise".into(),
+            why_included: "upgrade_precision_confirmed".into(),
+            drop_priority: 10,
+            roles: vec!["reference_list".into(), "neighbor_bodies".into()],
+            must_include: false,
+        });
+    }
+    out
+}
+
+fn confidence_rank(c: &str) -> u8 {
+    match c {
+        "precise" => 3,
+        "extracted" => 2,
+        "observed" => 2,
+        "heuristic" => 1,
+        _ => 0,
+    }
+}
+
+fn tier_for_confidence(c: &str) -> &'static str {
+    if c == "precise" {
+        "T2"
+    } else {
+        "T1"
+    }
 }
 
 fn role_template(

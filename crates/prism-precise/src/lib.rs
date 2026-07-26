@@ -1,17 +1,26 @@
-//! Precise tier (T2) — PreciseIndex ingest + edge refinement (P3 Stage A).
+//! Precise tier (T2) — PreciseIndex ingest + edge refinement + hybrid resolve (P3).
 //!
-//! See `docs/architecture/PRECISE-TIER.md` and `schemas/precise-index/v0`.
+//! See `docs/architecture/PRECISE-TIER.md` and `docs/architecture/HYBRID-RESOLVE.md`.
 
+mod ambiguity;
+mod hybrid;
 mod index;
 mod refine;
 mod require;
 mod score;
 
+pub use ambiguity::AmbiguityIndex;
+pub use hybrid::{
+    hybrid_resolve, ConfirmedEdge, DualCandidate, HybridResolveOptions, HybridResolveReport,
+    DEFAULT_MAX_LATENCY_MS, DEFAULT_MAX_UPGRADES,
+};
 pub use index::{
     load_precise_index, PreciseEdge, PreciseIndex, PreciseSnapshot, PreciseSpan, PreciseSymbol,
     PRECISE_INDEX_SCHEMA_VERSION,
 };
-pub use refine::{apply_overlay_to_store, refine_edges, OverlayApplyStats, RefineStats};
+pub use refine::{
+    apply_overlay_to_store, edges_join_views, refine_edges, OverlayApplyStats, RefineStats,
+};
 pub use require::{precision_required, PrecisionGate, PrecisionRequired};
 pub use score::{score_call_resolution, CallEdge, ScoreReport};
 
@@ -20,7 +29,16 @@ use prism_ir::{
     edge_id, file_node_id, Confidence, EdgeKind, FactBundle, FactEdge, FactNode, NodeKind, Span,
     Tier,
 };
+use prism_store::SqliteKgStore;
 use std::path::{Path, PathBuf};
+
+/// Build [`AmbiguityIndex`] from live KG CALLS edges.
+pub fn ambiguity_index(kg: &SqliteKgStore) -> Result<AmbiguityIndex> {
+    let (total, precise, heuristic, unresolved) = kg.calls_confidence_counts()?;
+    Ok(AmbiguityIndex::from_counts(
+        total, precise, heuristic, unresolved,
+    ))
+}
 
 /// Manifest written under `.prism/scip/manifest.json` after a successful import.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]

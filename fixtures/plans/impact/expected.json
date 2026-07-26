@@ -23,30 +23,48 @@
       },
       {
         "id": "s2",
+        "op": "upgrade_precision",
+        "inputs": {
+          "critical_path_only": true,
+          "max_latency_ms": 200,
+          "max_upgrades": 32,
+          "nodes_from": "s1",
+          "policy": "optional_on_ambiguity",
+          "tier": "T2"
+        },
+        "depends_on": [
+          "s1"
+        ],
+        "est_cost_ms": 200,
+        "executable": true,
+        "why": "optional T2 refine when ambiguity index require_t2"
+      },
+      {
+        "id": "s3",
         "op": "impact",
         "inputs": {
           "depth": 2,
           "limit": 100
         },
         "depends_on": [
-          "s1"
+          "s2"
         ],
         "est_cost_ms": 25,
         "executable": true,
-        "why": "forward heuristic impact cone"
+        "why": "forward impact cone (prefer precise edges when upgraded)"
       },
       {
-        "id": "s3",
+        "id": "s4",
         "op": "budget_pack",
         "inputs": {
           "recipe": "impact"
         },
         "depends_on": [
-          "s2"
+          "s3"
         ],
         "est_cost_ms": 10,
         "executable": true,
-        "why": "assemble impact Evidence Pack (Stage B)"
+        "why": "assemble impact Evidence Pack"
       }
     ],
     "must_include": [
@@ -62,8 +80,9 @@
     ],
     "gaps": [],
     "notes": [
-      "Impact edges are heuristic at T1 — not precise refactor safety",
-      "expand: forward IMPACTS depth 1–3 (heuristic T1)",
+      "Impact edges are heuristic at T1 unless UpgradePrecision confirms",
+      "UpgradePrecision runs only when ambiguity index require_t2",
+      "expand: forward IMPACTS depth 1–3 (heuristic T1; optional T2 upgrade)",
       "seeds: changed symbols or named target"
     ]
   }

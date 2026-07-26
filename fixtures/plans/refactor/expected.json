@@ -26,15 +26,18 @@
         "id": "s2",
         "op": "upgrade_precision",
         "inputs": {
+          "max_latency_ms": 200,
+          "max_upgrades": 32,
           "nodes_from": "s1",
+          "policy": "mandatory",
           "tier": "T2"
         },
         "depends_on": [
           "s1"
         ],
         "est_cost_ms": 200,
-        "executable": false,
-        "why": "placeholder until P3 — required for safe rename claims"
+        "executable": true,
+        "why": "mandatory T2 refine before reference expand (≤200ms)"
       },
       {
         "id": "s3",
@@ -52,7 +55,7 @@
         ],
         "est_cost_ms": 15,
         "executable": true,
-        "why": "heuristic references / callers (T1 stand-in for T2 refs)"
+        "why": "references / callers — prefer precise confidence"
       },
       {
         "id": "s4",
@@ -65,7 +68,7 @@
         ],
         "est_cost_ms": 10,
         "executable": true,
-        "why": "assemble refactor Evidence Pack (Stage B)"
+        "why": "assemble refactor Evidence Pack"
       }
     ],
     "must_include": [
@@ -80,14 +83,13 @@
       "secondary_exemplars"
     ],
     "gaps": [
-      "operator `upgrade_precision` not executable in v1 (placeholder until P3 — required for safe rename claims)",
-      "precise REFERENCES require T2 (P3); heuristic only"
+      "safe-rename claims need T2 overlay when available; heuristic refs stay labeled"
     ],
     "notes": [
-      "PRECISION_REQUIRED when claiming safe rename — T2 arrives in P3",
+      "PRECISION_REQUIRED for safe-rename product claims without overlay (Stage C)",
+      "UpgradePrecision mandatory before reference expand",
       "expand: all REFERENCES (T2+ preferred)",
-      "seeds: target symbol",
-      "v1 expands heuristic REFERENCES / callers only"
+      "seeds: target symbol"
     ]
   }
 }

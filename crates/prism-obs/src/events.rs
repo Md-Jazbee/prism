@@ -50,6 +50,15 @@ pub enum IndexEvent {
         latency_ms: u64,
         hit_count: u64,
     },
+    /// Precise-tier hybrid upgrade (P3 Stage B).
+    PrecisionUpgrade {
+        confirmed: u64,
+        still_heuristic: u64,
+        dual_candidates: u64,
+        deferred: u64,
+        latency_ms: u64,
+        overlay_used: bool,
+    },
 }
 
 /// Emit an index event via `tracing` (JSON-friendly fields).
@@ -121,6 +130,25 @@ pub fn emit_index_event(event: &IndexEvent) {
                 latency_ms = latency_ms,
                 hit_count = hit_count,
                 "query finished"
+            );
+        }
+        IndexEvent::PrecisionUpgrade {
+            confirmed,
+            still_heuristic,
+            dual_candidates,
+            deferred,
+            latency_ms,
+            overlay_used,
+        } => {
+            info!(
+                event = "precision_upgrade",
+                confirmed = confirmed,
+                still_heuristic = still_heuristic,
+                dual_candidates = dual_candidates,
+                deferred = deferred,
+                latency_ms = latency_ms,
+                overlay_used = overlay_used,
+                "precision upgrade"
             );
         }
     }

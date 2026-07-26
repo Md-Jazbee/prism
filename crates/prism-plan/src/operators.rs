@@ -15,7 +15,7 @@ pub enum Operator {
     DiffIntersect,
     FindTests,
     CommunityOf,
-    /// Placeholder until P3 precise tier.
+    /// Precise-tier refinement (P3 Stage B — executable, latency-bounded).
     UpgradePrecision,
     /// Low-confidence fallback; flagged, not a success path.
     KeywordEmbedFallback,
@@ -39,7 +39,7 @@ impl Operator {
         }
     }
 
-    /// Whether this operator is executable against the live P1 KG today.
+    /// Whether this operator is executable against the live KG / precise overlay today.
     pub fn executable_in_v1(self) -> bool {
         matches!(
             self,
@@ -50,7 +50,18 @@ impl Operator {
                 | Operator::DiffIntersect
                 | Operator::FindTests
                 | Operator::BudgetPack
+                | Operator::UpgradePrecision
         )
+    }
+
+    /// High-stakes intents that prefer T2 on the critical path (see UPGRADE-POLICY.md).
+    pub fn upgrade_policy_for_intent(intent: crate::intent::Intent) -> Option<&'static str> {
+        use crate::intent::Intent;
+        match intent {
+            Intent::Refactor | Intent::Debug => Some("mandatory"),
+            Intent::Impact => Some("optional_on_ambiguity"),
+            _ => None,
+        }
     }
 }
 

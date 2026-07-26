@@ -1,7 +1,7 @@
 //! Edge refinement: upgrade heuristic CALLS/REFERENCES when PreciseIndex matches.
 
 use anyhow::Result;
-use prism_ir::{Confidence, EdgeKind, FactBundle, FactEdge, Span, Tier};
+use prism_ir::{Confidence, EdgeKind, FactBundle, FactEdge, Tier};
 use prism_store::SqliteKgStore;
 use serde_json::json;
 
@@ -66,38 +66,72 @@ pub fn refine_edges(heuristic: &[FactEdge], precise: &[FactEdge]) -> (Vec<FactEd
 }
 
 fn edges_join(heuristic: &FactEdge, precise: &FactEdge) -> bool {
-    // 1. Exact src+dst
-    if heuristic.src == precise.src && heuristic.dst == precise.dst {
+    edges_join_ids(
+        &heuristic.src,
+        &heuristic.dst,
+        heuristic.file_path.as_deref(),
+        heuristic.span.as_ref().map(|s| (s.start_byte, s.end_byte)),
+        heuristic.attrs.get("callee").and_then(|v| v.as_str()),
+        &precise.src,
+        &precise.dst,
+        precise.file_path.as_deref(),
+        precise.span.as_ref().map(|s| (s.start_byte, s.end_byte)),
+    )
+}
+
+/// Join heuristic vs precise edge *views* (store rows) using the same Stage A rules.
+pub fn edges_join_views(
+    heuristic: &prism_store::GraphEdgeView,
+    precise: &prism_store::GraphEdgeView,
+) -> bool {
+    edges_join_ids(
+        &heuristic.src,
+        &heuristic.dst,
+        heuristic.file_path.as_deref(),
+        None,
+        None,
+        &precise.src,
+        &precise.dst,
+        precise.file_path.as_deref(),
+        None,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn edges_join_ids(
+    h_src: &str,
+    h_dst: &str,
+    h_file: Option<&str>,
+    h_span: Option<(u32, u32)>,
+    h_callee: Option<&str>,
+    p_src: &str,
+    p_dst: &str,
+    p_file: Option<&str>,
+    p_span: Option<(u32, u32)>,
+) -> bool {
+    if h_src == p_src && h_dst == p_dst {
         return true;
     }
-    // 2. Same file + overlapping span
-    let same_file = heuristic.file_path.as_deref() == precise.file_path.as_deref()
-        || (heuristic.file_path.is_some()
-            && heuristic.file_path == precise.file_path);
+    let same_file = h_file == p_file;
     if same_file {
-        if let (Some(a), Some(b)) = (&heuristic.span, &precise.span) {
-            if spans_overlap(a, b) && heuristic.src == precise.src {
+        if let (Some((asb, aeb)), Some((bsb, beb))) = (h_span, p_span) {
+            if asb < beb && bsb < aeb && h_src == p_src {
                 return true;
             }
         }
     }
-    // 3. Same file + same src + callee name (upgrade unresolved)
-    if same_file && heuristic.src == precise.src {
-        let h_name = callee_name(heuristic);
-        let p_name = precise
-            .dst
-            .rsplit(':')
-            .nth(1)
+    if same_file && h_src == p_src {
+        let hn = h_callee
             .map(|s| s.to_string())
-            .or_else(|| name_from_id(&precise.dst));
-        if let (Some(hn), Some(pn)) = (h_name, p_name) {
-            if hn == pn {
+            .or_else(|| name_from_id(h_dst));
+        let pn = name_from_id(p_dst);
+        if let (Some(a), Some(b)) = (hn, pn) {
+            if a == b {
                 return true;
             }
         }
-        // unresolved:foo ↔ dst ending with :foo: or name foo
-        if let Some(un) = heuristic.dst.strip_prefix("unresolved:") {
-            if precise.dst.contains(&format!(":{un}:")) || precise.dst.ends_with(un) {
+        if let Some(un) = h_dst.strip_prefix("unresolved:") {
+            if p_dst.contains(&format!(":{un}:")) || p_dst.ends_with(un) {
                 return true;
             }
         }
@@ -105,26 +139,12 @@ fn edges_join(heuristic: &FactEdge, precise: &FactEdge) -> bool {
     false
 }
 
-fn spans_overlap(a: &Span, b: &Span) -> bool {
-    a.start_byte < b.end_byte && b.start_byte < a.end_byte
-}
-
-fn callee_name(edge: &FactEdge) -> Option<String> {
-    edge.attrs
-        .get("callee")
-        .and_then(|v| v.as_str())
-        .map(|s| s.to_string())
-        .or_else(|| name_from_id(&edge.dst))
-}
-
 fn name_from_id(id: &str) -> Option<String> {
     if let Some(rest) = id.strip_prefix("unresolved:") {
         return Some(rest.to_string());
     }
-    // sym:path:kind:name:byte
     let parts: Vec<&str> = id.split(':').collect();
     if parts.len() >= 5 && parts[0] == "sym" {
-        // name is second-to-last when path has no colons; path may contain none.
         return Some(parts[parts.len() - 2].to_string());
     }
     None

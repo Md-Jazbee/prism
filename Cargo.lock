@@ -406,7 +406,9 @@ version = "0.0.1"
 dependencies = [
  "anyhow",
  "prism-ir",
+ "prism-obs",
  "prism-plan",
+ "prism-precise",
  "prism-store",
  "serde",
  "serde_json",

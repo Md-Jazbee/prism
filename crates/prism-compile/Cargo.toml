@@ -14,6 +14,8 @@ serde_json = { workspace = true }
 prism-ir = { workspace = true }
 prism-plan = { workspace = true }
 prism-store = { workspace = true }
+prism-precise = { workspace = true }
+prism-obs = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }

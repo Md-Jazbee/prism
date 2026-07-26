@@ -28,15 +28,18 @@
         "op": "upgrade_precision",
         "inputs": {
           "critical_path_only": true,
+          "max_latency_ms": 200,
+          "max_upgrades": 32,
           "nodes_from": "s1",
+          "policy": "mandatory",
           "tier": "T2"
         },
         "depends_on": [
           "s1"
         ],
         "est_cost_ms": 200,
-        "executable": false,
-        "why": "placeholder until P3 — refine ambiguous CALLS on frame0"
+        "executable": true,
+        "why": "refine ambiguous CALLS on critical path (≤200ms / 32 edges)"
       },
       {
         "id": "s3",
@@ -111,11 +114,10 @@
     ],
     "gaps": [
       "operator `slice` not executable in v1 (placeholder until P4 — best-effort local neighborhood instead)",
-      "operator `upgrade_precision` not executable in v1 (placeholder until P3 — refine ambiguous CALLS on frame0)",
       "semantic Slice requires P4; debug pack is best-effort"
     ],
     "notes": [
-      "UpgradePrecision is a placeholder until P3",
+      "UpgradePrecision: mandatory, critical_path_only, ≤200ms",
       "best-effort until P4 slicer",
       "expand: backward slice (placeholder) + recent diff + callee signatures",
       "never drop error/stack under budget pressure",

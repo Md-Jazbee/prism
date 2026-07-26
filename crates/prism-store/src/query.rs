@@ -246,6 +246,36 @@ impl SqliteKgStore {
         })
     }
 
+    /// CALLS confidence histogram for the ambiguity index (P3 Stage B).
+    ///
+    /// Returns `(total, precise, heuristic_resolved, unresolved)`.
+    pub fn calls_confidence_counts(&self) -> Result<(u64, u64, u64, u64)> {
+        let total: u64 = self.conn.query_row(
+            "SELECT COUNT(*) FROM edges WHERE kind = 'CALLS'",
+            [],
+            |r| r.get(0),
+        )?;
+        let precise: u64 = self.conn.query_row(
+            "SELECT COUNT(*) FROM edges WHERE kind = 'CALLS' AND confidence = 'precise'",
+            [],
+            |r| r.get(0),
+        )?;
+        let unresolved: u64 = self.conn.query_row(
+            "SELECT COUNT(*) FROM edges WHERE kind = 'CALLS' AND dst LIKE 'unresolved:%'",
+            [],
+            |r| r.get(0),
+        )?;
+        let heuristic: u64 = self.conn.query_row(
+            "SELECT COUNT(*) FROM edges
+             WHERE kind = 'CALLS'
+               AND confidence = 'heuristic'
+               AND dst NOT LIKE 'unresolved:%'",
+            [],
+            |r| r.get(0),
+        )?;
+        Ok((total, precise, heuristic, unresolved))
+    }
+
     fn edges_touching(
         &self,
         node_id: &str,

@@ -26,12 +26,12 @@ question + hints → classify intent → recipe → Plan IR
 | `community_of` | ✅ | `repo_map` |
 | `budget_pack` | 🟡 | declared; Evidence Pack in Stage B |
 | `slice` | ❌ placeholder | P4 |
-| `upgrade_precision` | ❌ placeholder | P3 |
+| `upgrade_precision` | ✅ | P3 Stage B — bounded hybrid resolve (≤200ms / 32 edges) |
 | `keyword_embed_fallback` | ❌ | low-confidence only; not in default recipes |
 
 ## Cost model (sketch)
 
-Each operator carries a constant `est_cost_ms`. Recipes prefer cheap T1 ops; `UpgradePrecision` / `Slice` appear only where ADD recipes require them and are marked `executable: false`.
+Recipes prefer cheap T1 ops; `UpgradePrecision` is inserted per [UPGRADE-POLICY.md](./UPGRADE-POLICY.md) (mandatory for refactor/debug; optional for impact on ambiguity). Latency is bounded (sync ≤200ms, excess deferred). See [HYBRID-RESOLVE.md](./HYBRID-RESOLVE.md).
 
 ## Plan IR (summary)
 
@@ -80,13 +80,17 @@ Stderr: `# plan status=… intent=… steps=…`
 
 See [INTENT-RECIPES.md](./INTENT-RECIPES.md) and `fixtures/plans/{debug,impact,repo_qa}/`.
 
-### Debug (ADD §19.4 shape)
-
-`ResolveSymbol → UpgradePrecision (placeholder) → Slice (placeholder) → DiffIntersect → Expand → BudgetPack`
-
 ### Impact
 
-`ResolveSymbol → Impact → BudgetPack`
+`ResolveSymbol → UpgradePrecision (optional_on_ambiguity) → Impact → BudgetPack`
+
+### Debug (ADD §19.4 shape)
+
+`ResolveSymbol → UpgradePrecision (mandatory, critical_path) → Slice (placeholder) → DiffIntersect → Expand → BudgetPack`
+
+### Refactor
+
+`ResolveSymbol → UpgradePrecision (mandatory) → Expand → BudgetPack`
 
 ### Repo-QA
 

@@ -7,7 +7,7 @@ use prism_core::{IncrementalIndexer, IndexOptions, WorkspaceManager};
 use prism_obs::{emit_index_event, IndexEvent};
 use prism_plan::{plan_query, Intent, PlanHints, PlanOutcome};
 use prism_precise::{
-    import_precise_index, load_precise_index, precision_required, read_manifest,
+    ambiguity_index, import_precise_index, load_precise_index, precision_required, read_manifest,
     score_call_resolution, CallEdge, PrecisionGate,
 };
 use prism_store::{parse_edge_kinds, EdgeDirection, SqliteKgStore, SqliteMetaStore};
@@ -118,6 +118,11 @@ enum PreciseCmd {
         oracle: PathBuf,
         #[arg(long)]
         t2: PathBuf,
+    },
+    /// Ambiguity index over CALLS (feeds optional UpgradePrecision).
+    Ambiguity {
+        #[arg(default_value = ".")]
+        path: PathBuf,
     },
 }
 
@@ -599,6 +604,15 @@ fn main() -> Result<()> {
                     t1_score.precision,
                     t2_score.precision,
                     t2_score.precision - t1_score.precision
+                );
+            }
+            PreciseCmd::Ambiguity { path } => {
+                let (_wm, kg) = open_kg(&path)?;
+                let idx = ambiguity_index(&kg)?;
+                println!("{}", serde_json::to_string_pretty(&idx)?);
+                eprintln!(
+                    "# ambiguity require_t2={} unresolved_rate={:.2} heuristic_rate={:.2}",
+                    idx.require_t2, idx.unresolved_rate, idx.heuristic_rate
                 );
             }
         },

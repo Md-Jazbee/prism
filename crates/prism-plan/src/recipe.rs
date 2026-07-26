@@ -50,14 +50,14 @@ pub fn recipe_for(intent: Intent) -> IntentRecipe {
             ],
             notes: &[
                 "best-effort until P4 slicer",
-                "UpgradePrecision is a placeholder until P3",
+                "UpgradePrecision: mandatory, critical_path_only, ≤200ms",
                 "never drop error/stack under budget pressure",
             ],
         },
         Intent::Impact => IntentRecipe {
             intent,
             seed_description: "changed symbols or named target",
-            expand_description: "forward IMPACTS depth 1–3 (heuristic T1)",
+            expand_description: "forward IMPACTS depth 1–3 (heuristic T1; optional T2 upgrade)",
             must_include: &["seed_symbols", "impact_cone_depth_1"],
             drop_order: &[
                 "embedding_fallback_seeds",
@@ -66,7 +66,10 @@ pub fn recipe_for(intent: Intent) -> IntentRecipe {
                 "secondary_exemplars",
                 "architecture_prose",
             ],
-            notes: &["Impact edges are heuristic at T1 — not precise refactor safety"],
+            notes: &[
+                "Impact edges are heuristic at T1 unless UpgradePrecision confirms",
+                "UpgradePrecision runs only when ambiguity index require_t2",
+            ],
         },
         Intent::Refactor => IntentRecipe {
             intent,
@@ -81,8 +84,8 @@ pub fn recipe_for(intent: Intent) -> IntentRecipe {
                 "architecture_prose",
             ],
             notes: &[
-                "PRECISION_REQUIRED when claiming safe rename — T2 arrives in P3",
-                "v1 expands heuristic REFERENCES / callers only",
+                "UpgradePrecision mandatory before reference expand",
+                "PRECISION_REQUIRED for safe-rename product claims without overlay (Stage C)",
             ],
         },
         Intent::Generate => IntentRecipe {
@@ -159,8 +162,10 @@ impl IntentRecipe {
             }
         }
         if matches!(self.intent, Intent::Refactor) {
-            plan.gaps
-                .push("precise REFERENCES require T2 (P3); heuristic only".into());
+            plan.gaps.push(
+                "safe-rename claims need T2 overlay when available; heuristic refs stay labeled"
+                    .into(),
+            );
         }
         if matches!(self.intent, Intent::Debug) {
             plan.gaps
@@ -228,9 +233,16 @@ fn debug_steps(anchors: &[String]) -> Vec<PlanStep> {
         step(
             "s2",
             Operator::UpgradePrecision,
-            json!({ "nodes_from": "s1", "tier": "T2", "critical_path_only": true }),
+            json!({
+                "nodes_from": "s1",
+                "tier": "T2",
+                "critical_path_only": true,
+                "policy": "mandatory",
+                "max_upgrades": 32,
+                "max_latency_ms": 200
+            }),
             &["s1"],
-            "placeholder until P3 — refine ambiguous CALLS on frame0",
+            "refine ambiguous CALLS on critical path (≤200ms / 32 edges)",
         ),
         step(
             "s3",
@@ -274,17 +286,31 @@ fn impact_steps(anchors: &[String]) -> Vec<PlanStep> {
         ),
         step(
             "s2",
-            Operator::Impact,
-            json!({ "depth": 2, "limit": 100 }),
+            Operator::UpgradePrecision,
+            json!({
+                "nodes_from": "s1",
+                "tier": "T2",
+                "critical_path_only": true,
+                "policy": "optional_on_ambiguity",
+                "max_upgrades": 32,
+                "max_latency_ms": 200
+            }),
             &["s1"],
-            "forward heuristic impact cone",
+            "optional T2 refine when ambiguity index require_t2",
         ),
         step(
             "s3",
+            Operator::Impact,
+            json!({ "depth": 2, "limit": 100 }),
+            &["s2"],
+            "forward impact cone (prefer precise edges when upgraded)",
+        ),
+        step(
+            "s4",
             Operator::BudgetPack,
             json!({ "recipe": "impact" }),
-            &["s2"],
-            "assemble impact Evidence Pack (Stage B)",
+            &["s3"],
+            "assemble impact Evidence Pack",
         ),
     ]
 }
@@ -301,23 +327,29 @@ fn refactor_steps(anchors: &[String]) -> Vec<PlanStep> {
         step(
             "s2",
             Operator::UpgradePrecision,
-            json!({ "nodes_from": "s1", "tier": "T2" }),
+            json!({
+                "nodes_from": "s1",
+                "tier": "T2",
+                "policy": "mandatory",
+                "max_upgrades": 32,
+                "max_latency_ms": 200
+            }),
             &["s1"],
-            "placeholder until P3 — required for safe rename claims",
+            "mandatory T2 refine before reference expand (≤200ms)",
         ),
         step(
             "s3",
             Operator::Expand,
             json!({ "edge_kinds": ["REFERENCES", "CALLS"], "depth": 2, "mode": "all_refs" }),
             &["s2"],
-            "heuristic references / callers (T1 stand-in for T2 refs)",
+            "references / callers — prefer precise confidence",
         ),
         step(
             "s4",
             Operator::BudgetPack,
             json!({ "recipe": "refactor" }),
             &["s3"],
-            "assemble refactor Evidence Pack (Stage B)",
+            "assemble refactor Evidence Pack",
         ),
     ]
 }
