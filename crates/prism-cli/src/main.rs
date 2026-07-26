@@ -8,7 +8,7 @@ use prism_obs::{emit_index_event, IndexEvent};
 use prism_plan::{plan_query, Intent, PlanHints, PlanOutcome};
 use prism_precise::{
     ambiguity_index, import_precise_index, load_precise_index, precision_required, read_manifest,
-    score_call_resolution, CallEdge, PrecisionGate,
+    rename_dry_run, score_call_resolution, CallEdge, PrecisionGate,
 };
 use prism_store::{parse_edge_kinds, EdgeDirection, SqliteKgStore, SqliteMetaStore};
 use std::path::PathBuf;
@@ -124,6 +124,19 @@ enum PreciseCmd {
         #[arg(default_value = ".")]
         path: PathBuf,
     },
+    /// Safe rename dry-run (read-only; T2 required unless --allow-heuristic).
+    #[command(name = "rename-dry-run")]
+    RenameDryRun {
+        #[arg(long)]
+        symbol: String,
+        #[arg(long)]
+        new_name: String,
+        #[arg(long, default_value = ".")]
+        workspace: PathBuf,
+        /// Bypass PRECISION_REQUIRED; results stay labeled heuristic.
+        #[arg(long)]
+        allow_heuristic: bool,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -161,6 +174,9 @@ enum QueryCmd {
         depth: u32,
         #[arg(long, default_value_t = 100)]
         limit: usize,
+        /// Require T2 overlay for accuracy claims.
+        #[arg(long)]
+        require_precise: bool,
     },
     /// Files that should be rechecked when a path changes (reverse-dep dirty list).
     Dirty {
@@ -361,8 +377,18 @@ fn main() -> Result<()> {
                 path,
                 depth,
                 limit,
+                require_precise,
             } => {
-                let (_wm, kg) = open_kg(&path)?;
+                let (wm, kg) = open_kg(&path)?;
+                if require_precise {
+                    if let Err(e) =
+                        prism_precise::require_precise_claim(wm.root(), &kg, Some(&id))
+                    {
+                        println!("{}", serde_json::to_string_pretty(&e)?);
+                        eprintln!("# impact status=PRECISION_REQUIRED");
+                        return Ok(());
+                    }
+                }
                 let started = Instant::now();
                 let hits = kg.impact(&id, depth, limit)?;
                 let ms = started.elapsed().as_millis() as u64;
@@ -373,8 +399,13 @@ fn main() -> Result<()> {
                 });
                 println!("{}", serde_json::to_string_pretty(&hits)?);
                 eprintln!(
-                    "# impact hits={} depth={depth} latency_ms={ms} (heuristic T1)",
-                    hits.len()
+                    "# impact hits={} depth={depth} latency_ms={ms} require_precise={require_precise} ({})",
+                    hits.len(),
+                    if require_precise {
+                        "T2 gated"
+                    } else {
+                        "heuristic T1"
+                    }
                 );
             }
             QueryCmd::Dirty { changed, path } => {
@@ -614,6 +645,27 @@ fn main() -> Result<()> {
                     "# ambiguity require_t2={} unresolved_rate={:.2} heuristic_rate={:.2}",
                     idx.require_t2, idx.unresolved_rate, idx.heuristic_rate
                 );
+            }
+            PreciseCmd::RenameDryRun {
+                symbol,
+                new_name,
+                workspace,
+                allow_heuristic,
+            } => {
+                let (wm, kg) = open_kg(&workspace)?;
+                match rename_dry_run(wm.root(), &kg, &symbol, &new_name, allow_heuristic)? {
+                    Ok(report) => {
+                        println!("{}", serde_json::to_string_pretty(&report)?);
+                        eprintln!(
+                            "# rename-dry-run writes=false sites={} tier={}",
+                            report.site_count, report.tier
+                        );
+                    }
+                    Err(e) => {
+                        println!("{}", serde_json::to_string_pretty(&e)?);
+                        eprintln!("# rename-dry-run status=PRECISION_REQUIRED");
+                    }
+                }
             }
         },
     }

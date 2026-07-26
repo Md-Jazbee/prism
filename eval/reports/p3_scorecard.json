@@ -1,0 +1,29 @@
+{
+  "summary": {
+    "phase": "P3",
+    "t1": {
+      "true_positives": 1,
+      "false_positives": 1,
+      "false_negatives": 1,
+      "precision": 0.5,
+      "recall": 0.5
+    },
+    "t2": {
+      "true_positives": 2,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "precision_delta": 0.5,
+    "recall_delta": 0.5,
+    "min_precision_delta": 0.2,
+    "gate_call_resolution_uplift": true,
+    "gating_matrix_documented": true,
+    "safe_rename_dry_run_documented": true,
+    "safe_rename_dry_run_script": true,
+    "precision_required_in_error_model": true,
+    "heuristic_never_silently_upgraded": true,
+    "notes": "Oracle fixture fixtures/precise/oracle/python; threshold +20pp precision vs T1."
+  }
+}

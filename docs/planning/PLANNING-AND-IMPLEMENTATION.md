@@ -885,10 +885,10 @@ Make precision *matter* in UX: refactor/impact claims and any rename dry-run req
 
 #### Exit / acceptance (Phase 3 gate)
 
-- [ ] Call resolution precision **materially improves** vs T1-only on fixtures (define threshold in eval pack, e.g., +X pp precision)  
-- [ ] Refactor/impact paths document T2 requirement when available  
-- [ ] Dry-run rename demo exists with precise references  
-- [ ] Heuristic answers remain labeled; never silently upgraded  
+- [x] Call resolution precision **materially improves** vs T1-only on fixtures (define threshold in eval pack, e.g., +X pp precision)  
+- [x] Refactor/impact paths document T2 requirement when available  
+- [x] Dry-run rename demo exists with precise references  
+- [x] Heuristic answers remain labeled; never silently upgraded  
 
 #### Phase 3 phase-level risks
 

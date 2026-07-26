@@ -103,7 +103,13 @@ pub fn list_tools_schema() -> Value {
                     "error_text": { "type": "string" },
                     "changed_paths": {
                         "type": "array",
-                        "items": { "type": "string" }
+                        "items": { "type": "string" },
+                        "description": "Changed paths for review/impact"
+                    },
+                    "require_precise": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "For impact/refactor accuracy claims: require T2 overlay or PRECISION_REQUIRED"
                     }
                 },
                 "required": ["question"],
@@ -168,13 +174,18 @@ pub fn list_tools_schema() -> Value {
         },
         {
             "name": "impact",
-            "description": "Depth-limited HEURISTIC blast-radius from a seed node id. Not precise refactor safety — T1 only.",
+            "description": "Depth-limited blast-radius from a seed node id. Default is HEURISTIC T1. Set require_precise=true for accuracy claims (PRECISION_REQUIRED without T2 overlay).",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "id": { "type": "string" },
                     "depth": { "type": "integer", "default": 2, "maximum": 8 },
-                    "limit": { "type": "integer", "default": 100 }
+                    "limit": { "type": "integer", "default": 100 },
+                    "require_precise": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "If true, require T2 overlay + precise edges on seed"
+                    }
                 },
                 "required": ["id"],
                 "additionalProperties": false
@@ -280,6 +291,32 @@ fn tool_compile_context(ctx: &ToolContext, args: Value) -> ToolOutcome {
         Ok(h) => h,
         Err(e) => return ToolOutcome::Err { error: e },
     };
+    let require_precise = args
+        .get("require_precise")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false);
+    if require_precise {
+        let intent = hints.intent_override;
+        let high_stakes = matches!(
+            intent,
+            Some(prism_plan::Intent::Impact) | Some(prism_plan::Intent::Refactor)
+        ) || question.to_lowercase().contains("rename")
+            || question.to_lowercase().contains("refactor")
+            || question.to_lowercase().contains("impact");
+        if high_stakes {
+            if let Err(e) = prism_precise::require_precise_claim(&ctx.workspace, &{
+                match ctx.kg() {
+                    Ok(k) => k,
+                    Err(e) => return ToolOutcome::Err { error: e },
+                }
+            }, None)
+            {
+                return ToolOutcome::Err {
+                    error: ToolError::precision_required(e.message),
+                };
+            }
+        }
+    }
     let outcome = match compile_context(&ctx.workspace, question, &hints) {
         Ok(o) => o,
         Err(e) => {
@@ -305,13 +342,12 @@ fn tool_compile_context(ctx: &ToolContext, args: Value) -> ToolOutcome {
             }
             let n = pack.fragments.len() as u64;
             let result = serde_json::to_value(&pack).unwrap_or(json!({}));
-            ok(
-                "compile_context",
-                "Evidence Pack with provenance + EXPLAIN; T1 heuristic edges may appear in gaps.",
-                result,
-                started,
-                n,
-            )
+            let note = if require_precise {
+                "Evidence Pack under require_precise; fragments keep labeled confidence (never silent upgrade)."
+            } else {
+                "Evidence Pack with provenance + EXPLAIN; T1 heuristic edges may appear in gaps."
+            };
+            ok("compile_context", note, result, started, n)
         }
         CompileOutcome::ScopeUnresolved(u) => ToolOutcome::Err {
             error: ToolError {
@@ -508,10 +544,21 @@ fn tool_impact(ctx: &ToolContext, args: Value) -> ToolOutcome {
     };
     let depth = args.get("depth").and_then(|v| v.as_u64()).unwrap_or(2) as u32;
     let limit = args.get("limit").and_then(|v| v.as_u64()).unwrap_or(100) as usize;
+    let require_precise = args
+        .get("require_precise")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false);
     let kg = match ctx.kg() {
         Ok(k) => k,
         Err(e) => return ToolOutcome::Err { error: e },
     };
+    if require_precise {
+        if let Err(e) = prism_precise::require_precise_claim(&ctx.workspace, &kg, Some(id)) {
+            return ToolOutcome::Err {
+                error: ToolError::precision_required(e.message),
+            };
+        }
+    }
     let hits = match kg.impact(id, depth, limit) {
         Ok(h) => h,
         Err(e) => {
@@ -521,10 +568,15 @@ fn tool_impact(ctx: &ToolContext, args: Value) -> ToolOutcome {
         }
     };
     let n = hits.len() as u64;
+    let note = if require_precise {
+        "Accuracy-gated impact: T2 overlay verified; individual edges still carry confidence labels."
+    } else {
+        "HEURISTIC T1 blast radius — wrong callees possible; not safe-rename. Set require_precise=true for accuracy claims."
+    };
     ok(
         "impact",
-        "HEURISTIC T1 blast radius — wrong callees possible; not safe-rename.",
-        json!({ "seed": id, "depth": depth, "candidates": hits }),
+        note,
+        json!({ "seed": id, "depth": depth, "require_precise": require_precise, "candidates": hits }),
         started,
         n,
     )

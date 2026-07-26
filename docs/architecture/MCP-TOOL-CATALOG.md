@@ -1,40 +1,42 @@
-# MCP tool catalog (P2 Stage C)
+# MCP tool catalog (P3 Stage C)
 
 **Server:** `prism mcp <workspace>` (stdio JSON-RPC 2.0, protocol `2024-11-05`)  
-**Allowlist only** — no write / rename tools until P3.  
-**Primary tool:** `compile_context`
+**Allowlist only** — no write / apply-rename tools (dry-run is CLI-only).  
+**Primary tool:** `compile_context`  
+**Gating:** [PRECISION-GATING.md](./PRECISION-GATING.md)
 
 | Tool | Inputs | Returns | Confidence |
 |---|---|---|---|
-| **`compile_context`** | `question`, optional budget/intent/anchors/stack/error/changed_paths | Evidence Pack + EXPLAIN | per-fragment provenance |
+| **`compile_context`** | `question`, optional budget/intent/anchors/…, `require_precise` | Evidence Pack + EXPLAIN | per-fragment; accuracy claims need T2 when `require_precise` |
 | `query_plan` | same hints as compile | Plan IR (operator DAG) | recipe notes / gaps |
 | `index_status` | — | freshness, node/edge counts, sqlite bytes | N/A (metadata) |
 | `resolve_symbol` | `name`, optional `file`, `limit` | symbol ids + paths | per-node |
-| `neighbors` | `id`, optional `kind`, `dir`, `limit` | edge+node pairs | per-edge (`CALLS` = heuristic) |
-| `impact` | `id`, `depth`≤8, `limit` | depth-grouped candidates | **always heuristic at T1** |
+| `neighbors` | `id`, optional `kind`, `dir`, `limit` | edge+node pairs | per-edge (`CALLS` may be heuristic or precise) |
+| `impact` | `id`, `depth`≤8, `limit`, optional `require_precise` | depth-grouped candidates | default **heuristic**; gated when `require_precise` |
 | `repo_map` | optional `hub_limit` | path-prefix communities + hubs | orientation only |
 
-Every successful tool response includes `confidence_note` and `latency_ms`. Failures use the [error model](./MCP-ERROR-MODEL.md).
+Every successful tool response includes `confidence_note` and `latency_ms`. Failures use the [error model](./MCP-ERROR-MODEL.md) (`PRECISION_REQUIRED` for gated accuracy claims).
 
 ## Safety
 
 - Tools are read-only against `.prism/`.
-- Every Evidence Pack fragment carries provenance (`node_ids`, analyzer, tier).
+- Safe rename dry-run is **CLI/script only** — never applies edits ([SAFE-RENAME-DRY-RUN.md](./SAFE-RENAME-DRY-RUN.md)).
+- Heuristic answers stay labeled; never silently upgraded to precise.
 - Agents must prefer `compile_context` over grep/read loops ([AGENT-USAGE.md](./AGENT-USAGE.md)).
 
 ## ADD §25 mapping
 
 | ADD tool | Status |
 |---|---|
-| `compile_context` | ✅ primary (P2 Stage C) |
-| `query_plan` | ✅ MCP + CLI |
+| `compile_context` | ✅ primary |
+| `query_plan` | ✅ |
 | `index_status` | ✅ |
 | `resolve_symbol` | ✅ |
 | `neighbors` | ✅ |
-| `impact` | ✅ heuristic |
-| `repo_map` | ✅ path-prefix + hubs |
+| `impact` | ✅ + `require_precise` gate |
+| `repo_map` | ✅ |
 | `slice` | placeholder until P4 |
-| `detect_changes` / `find_tests` | later |
+| rename apply | ❌ dry-run only (CLI) |
 
 ## Client config example
 
@@ -49,4 +51,4 @@ Every successful tool response includes `confidence_note` and `latency_ms`. Fail
 }
 ```
 
-Index the repo first: `prism index /absolute/path/to/repo`.
+Index the repo first: `prism index /absolute/path/to/repo`. For accuracy claims: `prism precise import …`.

@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P3 Stage B exited** · Stage C open · LLM quality / dual-review labels still pending  
+**Current phase:** **P3 gate passed** · P4 open · LLM quality / dual-review labels still pending  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)
 
@@ -16,8 +16,8 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P0** | Foundations (identity, hash, schemas, eval) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-25 |
 | **P1** | Syntactic KG + MCP | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-25 (proxies) |
 | **P2** | Context Compiler | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 (proxies) |
-| **P3** | Precise Tier (T2) | ▓▓▓▓▓▓░░░░ **67%** | 🟡 Stage C open |
-| **P4** | Semantic Slicing | ░░░░░░░░░░ **0%** | ⚪ Not started |
+| **P3** | Precise Tier (T2) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
+| **P4** | Semantic Slicing | ░░░░░░░░░░ **0%** | 🟡 Stage A open |
 | **P5** | Repo Intelligence + Hardening | ░░░░░░░░░░ **0%** | ⚪ Not started |
 | **P6** | Team / Distributed (optional) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
 
@@ -27,16 +27,16 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 flowchart LR
     P0[P0 Foundations<br/>✅ done] --> P1[P1 Syntactic KG + MCP<br/>✅ done]
     P1 --> P2[P2 Context Compiler<br/>✅ done]
-    P2 --> P3[P3 Precise Tier<br/>🟡 Stage C]
-    P3 --> P4[P4 Semantic Slicing]
+    P2 --> P3[P3 Precise Tier<br/>✅ done]
+    P3 --> P4[P4 Semantic Slicing<br/>🟡 Stage A]
     P4 --> P5[P5 Intelligence + Eval]
     P5 --> P6[P6 Distributed / Team<br/>optional]
 
     style P0 fill:#b8e994,stroke:#78e08f,color:#000
     style P1 fill:#b8e994,stroke:#78e08f,color:#000
     style P2 fill:#b8e994,stroke:#78e08f,color:#000
-    style P3 fill:#f6e58d,stroke:#f9ca24,color:#000
-    style P4 fill:#dfe6e9,stroke:#b2bec3,color:#000
+    style P3 fill:#b8e994,stroke:#78e08f,color:#000
+    style P4 fill:#f6e58d,stroke:#f9ca24,color:#000
     style P5 fill:#dfe6e9,stroke:#b2bec3,color:#000
     style P6 fill:#dfe6e9,stroke:#b2bec3,color:#000
 ```
@@ -61,7 +61,7 @@ flowchart LR
 | Syntactic facts (T1) | ○ | ● | ● | ● | ● | ● | ● | ✅ Python + Rust extractors + goldens |
 | MCP graph tools | ○ | ● | ● | ● | ● | ● | ● | ✅ prism-mcp stdio tools |
 | Query plan + Evidence Pack | ○ | ○ | ● | ● | ● | ● | ● | ✅ plan + pack + EXPLAIN + MCP `compile_context` |
-| Precise symbol (T2) | ○ | ○ | ○ | ● | ● | ● | ● | 🟡 hybrid resolve live |
+| Precise symbol (T2) | ○ | ○ | ○ | ● | ● | ● | ● | ✅ gated product path |
 | Semantic slice (T3/T4) | ○ | ○ | ○ | ○ | ● | ● | ● | ⬜ |
 | Architecture intelligence | ○ | ◐ | ◐ | ◐ | ◐ | ● | ● | ◐ path-prefix communities + hubs |
 | Team/shared index | ○ | ○ | ○ | ○ | ○ | ○ | ● | ⬜ |
@@ -402,15 +402,15 @@ Evidence Packs are the primary agent path. Next: precise tier (SCIP/LSP) so high
 
 ## Phase 3 — Precise Tier
 
-**State:** 🟡 Stage C open (Stage B exited 2026-07-26)  
+**State:** ✅ **Gate passed 2026-07-26** (oracle P/R uplift; dry-run rename; accuracy gating)  
 **Duration:** 4–6 weeks  
-**Gate:** Call-resolution precision improves on fixtures; safe-rename dry-run demo; tools require T2 when available for accuracy claims.
+**Gate evidence:** [eval/scorecards/p3-phase-gate.md](../../eval/scorecards/p3-phase-gate.md)
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
 | **A — Precise ingest** | SCIP/PreciseIndex import; tier-tagged edges; oracle P/R; `PRECISION_REQUIRED` | ✅ exited 2026-07-26 |
 | **B — Hybrid resolve** | Prefer T2 over heuristic CALLS; on-demand upgrade | ✅ exited 2026-07-26 |
-| **C — Product behaviors** | Precision-gated impact/rename; Phase 3 scorecard | 🟡 open |
+| **C — Product behaviors** | Precision-gated impact/rename; Phase 3 scorecard | ✅ exited 2026-07-26 |
 
 ### Stage A — Precise index ingest ✅
 
@@ -456,11 +456,32 @@ Precise overlays attach optionally under `.prism/scip/`. Next: hybrid resolver +
 
 Hybrid resolve runs on the compile path. Next: precision-gated product behaviors (safe-rename dry-run, gating matrix, Phase 3 scorecard) so accuracy claims require T2 when available.
 
+### Stage C — Precision-gated product behaviors + Phase 3 gate ✅
+
+#### Deliverables
+
+- [x] Gating matrix — [PRECISION-GATING.md](../architecture/PRECISION-GATING.md)
+- [x] Safe rename dry-run — [SAFE-RENAME-DRY-RUN.md](../architecture/SAFE-RENAME-DRY-RUN.md) + `scripts/precise/safe-rename-dry-run.sh` + CLI
+- [x] Phase 3 scorecard — [p3-phase-gate.md](../../eval/scorecards/p3-phase-gate.md) + `prism-eval p3-scorecard`
+- [x] `require_precise` on MCP/CLI impact + compile_context accuracy claims
+- [x] Heuristic answers remain labeled (never silent upgrade)
+
+#### Exit / acceptance (Phase 3 gate)
+
+- [x] Call resolution precision↑ ≥20pp vs T1 on oracle (Δ=+50pp; T1 0.50 → T2 1.00)
+- [x] Refactor/impact paths document T2 requirement when available
+- [x] Dry-run rename demo exists (read-only)
+- [x] Heuristic answers remain labeled; never silently upgraded
+
+#### Handoff to Phase 4
+
+Precise IDs and gated claims are live. Next: semantic slicing (T3 CFG/DFG) for debug minimum-sufficient slices.
+
 ---
 
 ## Phase 4 — Semantic Slicing (outline)
 
-**State:** ⚪ Not started (entry: P3 gate)  
+**State:** 🟡 Stage A open (entry: P3 gate passed)  
 **Duration:** 5–8 weeks  
 **Gate:** Debug tasks token↓ ≥5× with quality within ~5 pts of frontier-explore.
 
@@ -503,18 +524,18 @@ Hybrid resolve runs on the compile path. Next: precision-gated product behaviors
 
 Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 
-| ID | Workstream | P3 Stage B exit status |
+| ID | Workstream | P3 gate exit status |
 |---|---|---|
 | **W-STORE** | Storage & identity | ✅ + `.prism/scip/` overlay |
 | **W-PLUGIN** | Plugin ABI | ✅ + PreciseImporter card |
 | **W-KG** | Knowledge graph | ✅ + hybrid resolve |
 | **W-PLAN** | Query planning | ✅ + executable `UpgradePrecision` |
 | **W-CC** | Context compiler | ✅ prefer precise + uncertainty notes |
-| **W-MCP** | Agent surface | ✅ + `PRECISION_REQUIRED` |
+| **W-MCP** | Agent surface | ✅ + `require_precise` gating |
 | **W-IDE** | IDE/LSP | 🟡 evidence-peek stub; LSP hybrid later |
-| **W-EVAL** | Evaluation | ✅ oracle P/R + ambiguity index |
+| **W-EVAL** | Evaluation | ✅ P3 scorecard (oracle uplift) |
 | **W-OBS** | Observability | ✅ `precision_upgrade` |
-| **W-SEC** | Security & privacy | 🟡 allowlisted read-only MCP tools |
+| **W-SEC** | Security & privacy | ✅ no write/rename apply; dry-run only |
 
 ---
 
@@ -540,3 +561,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P2 Stage C exited / gate passed (proxies):** MCP `compile_context` + `query_plan`, AGENT-USAGE primary path, precision ≥60% proxy labels, refuse-dump fixture, p2-scorecard. **P3 Stage A opened** |
 | 2026-07-26 | **P3 Stage A exited:** PreciseIndex ingest (`prism-precise`), ID mapping + SCIP runbook, oracle P/R fixtures (Python), `PRECISION_REQUIRED`, CLI `prism precise`. **Stage B opened** (hybrid resolve) |
 | 2026-07-26 | **P3 Stage B exited:** hybrid resolve + ambiguity index, executable `UpgradePrecision` (mandatory refactor/debug; optional impact), prefer-precise packs, `precision_upgrade` obs. **Stage C opened** |
+| 2026-07-26 | **P3 Stage C exited / gate passed:** gating matrix, safe-rename dry-run, `require_precise`, p3-scorecard (+50pp call precision). **P4 Stage A opened** |

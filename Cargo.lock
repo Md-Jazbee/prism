@@ -489,6 +489,7 @@ dependencies = [
  "prism-ir",
  "prism-obs",
  "prism-plan",
+ "prism-precise",
  "prism-store",
  "serde",
  "serde_json",

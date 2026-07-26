@@ -6,6 +6,7 @@ mod ambiguity;
 mod hybrid;
 mod index;
 mod refine;
+mod rename;
 mod require;
 mod score;
 
@@ -21,6 +22,7 @@ pub use index::{
 pub use refine::{
     apply_overlay_to_store, edges_join_views, refine_edges, OverlayApplyStats, RefineStats,
 };
+pub use rename::{rename_dry_run, require_precise_claim, RenameDryRunReport, RenameSite};
 pub use require::{precision_required, PrecisionGate, PrecisionRequired};
 pub use score::{score_call_resolution, CallEdge, ScoreReport};
 
