@@ -270,10 +270,11 @@ fn build_dfg(body: Node, src: &[u8], _body_start: u32) -> DfgGraph {
     for u in &uses {
         let mut best: Option<&DfgDef> = None;
         for d in &defs {
-            if d.name == u.name && d.line <= u.line {
-                if best.map(|b| d.line >= b.line).unwrap_or(true) {
-                    best = Some(d);
-                }
+            if d.name == u.name
+                && d.line <= u.line
+                && best.map(|b| d.line >= b.line).unwrap_or(true)
+            {
+                best = Some(d);
             }
         }
         if let Some(d) = best {

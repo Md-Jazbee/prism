@@ -1,0 +1,34 @@
+[package]
+name = "prism-api"
+description = "HTTP/SSE /v1 surface + warm AppState for prismd (P6 Stage B)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+anyhow = { workspace = true }
+axum = { workspace = true }
+futures-util = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+tokio-stream = { workspace = true }
+tower-http = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+prism-compile = { workspace = true }
+prism-core = { workspace = true }
+prism-mcp = { workspace = true }
+prism-obs = { workspace = true }
+prism-plan = { workspace = true }
+prism-precise = { workspace = true }
+prism-semantic = { workspace = true }
+prism-store = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+tower = { workspace = true, features = ["util"] }
+http-body-util = "0.1"
+http = "1"

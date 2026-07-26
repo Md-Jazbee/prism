@@ -15,7 +15,7 @@ Known failure modes that remain **accepted** or **tracked** after the P5 gate.
 | R9 | Multi-tenant / shared index | Deferred | Phase 10 optional (renumbered from Phase 6) |
 | R10 | Narrative overlap Graphify/GitNexus | Mitigated | Emphasize packs + slice + eval |
 | **R11** | P5 tech-view claimed a *proven* WASM plugin host; none was built | **Waived** | [ADR-0001](../architecture/adr/0001-wasm-plugin-host-deferred.md) — claim amended; revisit by **P8** |
-| **R12** | No non-CLI/non-MCP surface: no HTTP API, no LSP, no daemon | **Open** | P6 Stages B–C (gaps G-01, G-02, G-10) |
+| **R12** | No non-CLI/non-MCP surface: no HTTP API, no LSP, no daemon | **Partial** | HTTP/SSE + `prismd` shipped (P6-B); **LSP remains P6-C** |
 | **R13** | Structural query P95 (NFR N2) has never been measured; no perf regression gate exists | **Mitigated** | `crates/prism-bench` + CI `bench` job; baselines in `eval/scorecards/p6-stage-a-baselines.md` (hard P95 fail thresholds still TBD) |
 | **R14** | No visual surface; orientation output is JSON only | **Open** | P7 (gap G-13) |
 | **R15** | No agent-side assets (rules, `AGENTS.md`, workflows); adoption depends on an agent reading a doc | **Open** | P9 Stage B (gap G-15) |

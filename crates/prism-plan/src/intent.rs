@@ -210,11 +210,10 @@ pub fn extract_anchors(question: &str) -> Vec<String> {
                 ',' | '.' | ';' | ':' | ')' | '(' | '"' | '\'' | '?' | '!'
             )
         });
-        if cleaned.contains('/')
-            && (cleaned.contains('.') || cleaned.ends_with(".py") || cleaned.ends_with(".rs"))
+        if (cleaned.contains('/')
+            && (cleaned.contains('.') || cleaned.ends_with(".py") || cleaned.ends_with(".rs")))
+            || looks_like_symbol(cleaned)
         {
-            push_unique(&mut out, cleaned.to_string());
-        } else if looks_like_symbol(cleaned) {
             push_unique(&mut out, cleaned.to_string());
         }
     }

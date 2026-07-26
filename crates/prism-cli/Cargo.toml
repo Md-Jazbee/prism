@@ -26,3 +26,6 @@ prism-plan = { workspace = true }
 prism-compile = { workspace = true }
 prism-precise = { workspace = true }
 prism-semantic = { workspace = true }
+prism-api = { workspace = true }
+prism-daemon = { workspace = true }
+tokio = { workspace = true }

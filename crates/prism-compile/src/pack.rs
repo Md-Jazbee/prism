@@ -83,7 +83,7 @@ impl EvidencePack {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "status", content = "data", rename_all = "snake_case")]
 pub enum CompileOutcome {
-    Ok(EvidencePack),
+    Ok(Box<EvidencePack>),
     ScopeUnresolved(ScopeUnresolved),
     BudgetExceeded(BudgetExceeded),
 }

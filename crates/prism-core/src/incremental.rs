@@ -1,15 +1,16 @@
-//! Incremental re-index path (P1 Stage A):
-//! discover → hash → extract (T1) → txn → invalidate.
+//! Incremental re-index path (P1 Stage A / P6 Stage B Rayon fan-out):
+//! discover → parallel hash+extract (T1) → sequential txn → invalidate.
 
 use crate::fingerprint::file_content_hash;
 use crate::workspace::WorkspaceManager;
 use anyhow::Result;
 use prism_extract::extract_file;
-use prism_ir::FileId;
+use prism_ir::{FactBundle, FileId};
 use prism_obs::{emit_index_event, IndexEvent, IndexStats};
 use prism_store::{KgStore, SqliteKgStore, SqliteMetaStore};
+use rayon::prelude::*;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::time::Instant;
 use tracing::info;
 
@@ -24,6 +25,23 @@ pub struct IndexResult {
     pub stats: IndexStats,
     pub tree_fingerprint: String,
     pub files: Vec<FileId>,
+}
+
+enum Prepared {
+    Secret {
+        rel: String,
+    },
+    Unchanged {
+        file: FileId,
+    },
+    Extracted {
+        file: FileId,
+        bundle: Option<FactBundle>,
+    },
+    ReadError {
+        rel: String,
+        error: String,
+    },
 }
 
 /// Orchestrates incremental indexing with T1 extractors.
@@ -64,79 +82,118 @@ impl IncrementalIndexer {
             ..Default::default()
         };
 
-        let mut file_ids = Vec::new();
+        // Snapshot prior hashes for parallel skip decisions (SQLite stays single-threaded).
+        let prior_hashes: std::collections::HashMap<String, String> = self
+            .meta
+            .list_file_paths()?
+            .into_iter()
+            .filter_map(|p| self.meta.get_file_hash(&p).ok().flatten().map(|h| (p, h)))
+            .collect();
 
-        for abs in &discovered {
-            let rel = abs
-                .strip_prefix(self.workspace.root())
-                .unwrap_or(abs)
-                .to_string_lossy()
-                .replace('\\', "/");
+        let root_path: PathBuf = self.workspace.root().to_path_buf();
+        let prepared: Vec<Prepared> = discovered
+            .par_iter()
+            .map(|abs| {
+                let rel = abs
+                    .strip_prefix(&root_path)
+                    .unwrap_or(abs)
+                    .to_string_lossy()
+                    .replace('\\', "/");
 
-            if crate::ignore_policy::is_secret_sensitive(abs) {
-                stats.files_secret_skipped += 1;
-                emit_index_event(&IndexEvent::FileSkippedSecret { path: rel.clone() });
-                continue;
-            }
-
-            let bytes = fs::read(abs)?;
-            let content_hash = file_content_hash(&bytes);
-            stats.files_hashed += 1;
-
-            let unchanged = self
-                .meta
-                .get_file_hash(&rel)?
-                .map(|h| h == content_hash)
-                .unwrap_or(false);
-
-            if unchanged {
-                stats.files_skipped_unchanged += 1;
-                file_ids.push(FileId {
-                    path: rel,
-                    content_hash,
-                });
-                continue;
-            }
-
-            file_ids.push(FileId {
-                path: rel.clone(),
-                content_hash: content_hash.clone(),
-            });
-
-            let extracted = extract_file(&rel, &bytes)?;
-            match &extracted {
-                Some(bundle) => {
-                    let unresolved = bundle.unresolved_call_count() as u64;
-                    emit_index_event(&IndexEvent::FileExtracted {
-                        path: rel.clone(),
-                        language: bundle.language.clone(),
-                        nodes: bundle.nodes.len() as u64,
-                        edges: bundle.edges.len() as u64,
-                        unresolved_calls: unresolved,
-                    });
-                    stats.files_extracted += 1;
-                    stats.nodes_written += bundle.nodes.len() as u64;
-                    stats.edges_written += bundle.edges.len() as u64;
-                    stats.unresolved_calls += unresolved;
-
-                    if !opts.dry_run {
-                        self.kg.begin_replace_file_subgraph(&rel)?;
-                        self.kg.insert_facts(&rel, bundle)?;
-                        self.kg.commit_replace_file_subgraph(&rel)?;
-                        self.meta.upsert_file_hash(&rel, &content_hash)?;
-                    }
+                if crate::ignore_policy::is_secret_sensitive(abs) {
+                    return Prepared::Secret { rel };
                 }
-                None => {
-                    emit_index_event(&IndexEvent::FileExtractSkipped {
-                        path: rel.clone(),
-                        reason: "unsupported_language".into(),
-                    });
-                    stats.files_extract_skipped += 1;
-                    if !opts.dry_run {
-                        // Still record hash so we skip unchanged non-code files.
-                        self.kg.begin_replace_file_subgraph(&rel)?;
-                        self.kg.commit_replace_file_subgraph(&rel)?;
-                        self.meta.upsert_file_hash(&rel, &content_hash)?;
+
+                let bytes = match fs::read(abs) {
+                    Ok(b) => b,
+                    Err(e) => {
+                        return Prepared::ReadError {
+                            rel,
+                            error: e.to_string(),
+                        }
+                    }
+                };
+                let content_hash = file_content_hash(&bytes);
+                let unchanged = prior_hashes
+                    .get(&rel)
+                    .map(|h| h == &content_hash)
+                    .unwrap_or(false);
+                if unchanged {
+                    return Prepared::Unchanged {
+                        file: FileId {
+                            path: rel,
+                            content_hash,
+                        },
+                    };
+                }
+                match extract_file(&rel, &bytes) {
+                    Ok(bundle) => Prepared::Extracted {
+                        file: FileId {
+                            path: rel,
+                            content_hash,
+                        },
+                        bundle,
+                    },
+                    Err(e) => Prepared::ReadError {
+                        rel,
+                        error: e.to_string(),
+                    },
+                }
+            })
+            .collect();
+
+        let mut file_ids = Vec::new();
+        for item in prepared {
+            match item {
+                Prepared::Secret { rel } => {
+                    stats.files_secret_skipped += 1;
+                    emit_index_event(&IndexEvent::FileSkippedSecret { path: rel });
+                }
+                Prepared::Unchanged { file } => {
+                    stats.files_hashed += 1;
+                    stats.files_skipped_unchanged += 1;
+                    file_ids.push(file);
+                }
+                Prepared::ReadError { rel, error } => {
+                    anyhow::bail!("index read/extract failed for {rel}: {error}");
+                }
+                Prepared::Extracted { file, bundle } => {
+                    stats.files_hashed += 1;
+                    file_ids.push(file.clone());
+                    match &bundle {
+                        Some(bundle) => {
+                            let unresolved = bundle.unresolved_call_count() as u64;
+                            emit_index_event(&IndexEvent::FileExtracted {
+                                path: file.path.clone(),
+                                language: bundle.language.clone(),
+                                nodes: bundle.nodes.len() as u64,
+                                edges: bundle.edges.len() as u64,
+                                unresolved_calls: unresolved,
+                            });
+                            stats.files_extracted += 1;
+                            stats.nodes_written += bundle.nodes.len() as u64;
+                            stats.edges_written += bundle.edges.len() as u64;
+                            stats.unresolved_calls += unresolved;
+
+                            if !opts.dry_run {
+                                self.kg.begin_replace_file_subgraph(&file.path)?;
+                                self.kg.insert_facts(&file.path, bundle)?;
+                                self.kg.commit_replace_file_subgraph(&file.path)?;
+                                self.meta.upsert_file_hash(&file.path, &file.content_hash)?;
+                            }
+                        }
+                        None => {
+                            emit_index_event(&IndexEvent::FileExtractSkipped {
+                                path: file.path.clone(),
+                                reason: "unsupported_language".into(),
+                            });
+                            stats.files_extract_skipped += 1;
+                            if !opts.dry_run {
+                                self.kg.begin_replace_file_subgraph(&file.path)?;
+                                self.kg.commit_replace_file_subgraph(&file.path)?;
+                                self.meta.upsert_file_hash(&file.path, &file.content_hash)?;
+                            }
+                        }
                     }
                 }
             }
@@ -177,7 +234,6 @@ impl IncrementalIndexer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::workspace::WorkspaceManager;
     use tempfile::tempdir;
 
     #[test]

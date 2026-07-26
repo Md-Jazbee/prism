@@ -77,13 +77,13 @@ fn needs_anchors(intent: Intent) -> bool {
 mod tests {
     use super::*;
     use std::fs;
-    use std::path::PathBuf;
+    use std::path::{Path, PathBuf};
 
     fn fixture_dir(name: &str) -> PathBuf {
         PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(format!("../../fixtures/plans/{name}"))
     }
 
-    fn load_hints(dir: &PathBuf) -> (String, PlanHints) {
+    fn load_hints(dir: &Path) -> (String, PlanHints) {
         let input: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(dir.join("input.json")).unwrap()).unwrap();
         let question = input["question"].as_str().unwrap().to_string();

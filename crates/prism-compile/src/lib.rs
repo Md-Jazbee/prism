@@ -25,7 +25,7 @@ use std::path::Path;
 /// Compile an Evidence Pack from an existing plan + pre-built candidates (fixtures / tests).
 pub fn compile_from_candidates(plan: &Plan, candidates: Vec<CandidateFragment>) -> CompileOutcome {
     match pack_under_budget(plan, candidates) {
-        Ok(pack) => CompileOutcome::Ok(pack),
+        Ok(pack) => CompileOutcome::Ok(Box::new(pack)),
         Err(e) => CompileOutcome::BudgetExceeded(e),
     }
 }
@@ -320,7 +320,7 @@ mod tests {
         let v = serde_json::to_value(&pack).unwrap();
         let back: EvidencePack = serde_json::from_value(v).unwrap();
         assert_eq!(back.meta.plan_id, pack.meta.plan_id);
-        assert_eq!(back.explain.must_include_ok, true);
+        assert!(back.explain.must_include_ok);
     }
 
     #[test]

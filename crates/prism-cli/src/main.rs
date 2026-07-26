@@ -103,6 +103,19 @@ enum Commands {
         #[command(subcommand)]
         cmd: SemanticCmd,
     },
+    /// Optional local HTTP/SSE daemon (`prismd`) — accelerator, not required.
+    Daemon {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long, default_value = "127.0.0.1:7420")]
+        bind: String,
+        #[arg(long)]
+        token: Option<String>,
+        #[arg(long, default_value_t = 0)]
+        idle_shutdown_secs: u64,
+        #[arg(long, default_value_t = 250)]
+        debounce_ms: u64,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -949,6 +962,28 @@ fn main() -> Result<()> {
                 }
             }
         },
+        Commands::Daemon {
+            path,
+            bind,
+            token,
+            idle_shutdown_secs,
+            debounce_ms,
+        } => {
+            let workspace = prism_daemon::resolve_workspace(path)?;
+            let token = token
+                .or_else(|| std::env::var("PRISM_TOKEN").ok())
+                .unwrap_or_else(prism_daemon::generate_token);
+            eprintln!("prismd token (Authorization: Bearer …): {token}");
+            let cfg = prism_api::DaemonConfig {
+                workspace,
+                token,
+                bind,
+                idle_shutdown_secs,
+                debounce_ms,
+            };
+            let rt = tokio::runtime::Runtime::new()?;
+            rt.block_on(prism_daemon::run(cfg))?;
+        }
     }
     Ok(())
 }

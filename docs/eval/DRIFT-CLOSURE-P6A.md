@@ -8,7 +8,7 @@ Standing rule: no claim without an artifact. Each row is `built`, `waived` (date
 
 | Gap | Summary | Resolution | Artifact | Expiry |
 |---|---|---|---|---|
-| **G-01** | No HTTP/SSE API | deferred | Stage B (`prismd` / axum) | P6-B |
+| **G-01** | No HTTP/SSE API | **built** | `prism-api` + [HTTP-API-V1.md](../architecture/HTTP-API-V1.md) | — |
 | **G-02** | No LSP server | deferred | Stage C (`prism-lsp`) | P6-C |
 | **G-03** | WASM host claimed “proven”, not built | **waived** | [ADR-0001](../architecture/adr/0001-wasm-plugin-host-deferred.md) — claim amended | P8 |
 | **G-04** | Language re-baseline undocumented | **waived** | [ADR-0002](../architecture/adr/0002-language-rebaseline-python-rust.md) | P9 |
@@ -16,8 +16,8 @@ Standing rule: no claim without an artifact. Each row is `built`, `waived` (date
 | **G-06** | N2 P95 never measured | **built** | criterion `n2_structural_query` + [baselines](../../eval/scorecards/p6-stage-a-baselines.md) | — |
 | **G-07** | `benches/` README-only; no CI gate | **built** | `crates/prism-bench` + CI `bench` job | — |
 | **G-08** | No `LICENSE` / `deny.toml` | **built** | root `LICENSE`, `deny.toml`, CI `cargo-deny` | — |
-| **G-09** | No OTLP exporter | deferred | Stage B (opt-in OTLP) | P6-B |
-| **G-10** | No Tokio/Rayon | deferred | Stage B (daemon + Rayon fan-out) | P6-B |
+| **G-09** | No OTLP exporter | **waived (partial)** | Env `PRISM_OTLP_ENDPOINT` opt-in hook in `prismd`; full OTLP SDK exporter deferred | P7 |
+| **G-10** | No Tokio/Rayon | **built** | Tokio in `prismd`; Rayon fan-out in `IncrementalIndexer` | — |
 | **G-11** | `schemas/mcp-tools/v1` missing | **built** | `schemas/mcp-tools/v1/` + conformance test | — |
 | **G-12** | Four-arm LLM / precision ≥70% | deferred | P9 Stage C (out of P6 Stage A scope) | P9-C |
 | **G-13** | No visual surface | deferred | P6-C view-model → P7 renderer | P7 |

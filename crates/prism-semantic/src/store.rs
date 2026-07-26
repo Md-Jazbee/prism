@@ -28,7 +28,7 @@ pub fn semantic_dir(workspace: &Path) -> PathBuf {
 pub fn path_key(rel: &str) -> String {
     let h = xxh3_128(rel.as_bytes());
     let hex = hex::encode(h.to_be_bytes());
-    let safe = rel.replace('/', "__").replace('\\', "__");
+    let safe = rel.replace(['/', '\\'], "__");
     format!("{}__{}", &hex[..16.min(hex.len())], safe)
 }
 

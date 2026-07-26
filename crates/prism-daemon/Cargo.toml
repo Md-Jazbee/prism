@@ -1,0 +1,26 @@
+[package]
+name = "prism-daemon"
+description = "prismd lifecycle, file watcher, idle policy (P6 Stage B)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[[bin]]
+name = "prismd"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+notify = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+prism-api = { workspace = true }
+prism-core = { workspace = true }
+prism-obs = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
