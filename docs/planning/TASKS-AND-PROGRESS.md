@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P11 Stage B complete · Stage C partial** · P8 **cut** (CLI+MCP) · P0–P7+P9 complete · **P10 deferred/skipped**  
+**Current phase:** **P12 Stages A–C code landed · Stage D scaffolded (live ACC gate open)** · P11 Stage C partial · P8 **cut** (CLI+MCP) · P0–P7+P9 complete · **P10 deferred/skipped**  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)  
 **Source of truth for stack/layout:** [TECH-STACK-AND-PROJECT-STRUCTURE.md](../architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md)
@@ -9,6 +9,8 @@
 > **Renumbering (2026-07-26):** the old *Phase 6 — Team / Distributed* is now **Phase 10**. New phases **P6 Consolidation & Interaction Substrate**, **P7 Visual Repository Intelligence**, **P8 IDE Extension**, and **P9 Agent Experience** were added after a full repo re-analysis. The gap register lives in [planning §12](./PLANNING-AND-IMPLEMENTATION.md#12-post-phase-5-repository-re-analysis--gap-register).
 >
 > **P11 (2026-07-26):** **Install & Distribution** opened; does **not** wait on P10.
+>
+> **P12 (2026-07-26):** **Accuracy & Grounding** opened in parallel with P11 Stage C after a doc-aware-graph (Graphify) head-to-head showed token-cheap but narrative-poor packs. Plan: [§19](./PLANNING-AND-IMPLEMENTATION.md#19-phase-12--accuracy--grounding-doc-aware-evidence).
 
 Use this file as the living checklist. Update checkbox state and the progress snapshot when a stage exits or a blocker moves.
 
@@ -30,8 +32,9 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P9** | Agent Experience & Workflows | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P10** | Team / Distributed (optional, was P6) | ░░░░░░░░░░ **0%** | ⚪ Deferred / skipped for now |
 | **P11** | Install & Distribution (any system) | ▓▓▓▓▓▓▓▓▓░ **~90%** | 🟡 Stage A+B done; Stage C proven on simulated release — cold-VM pending public tag |
+| **P12** | Accuracy & Grounding (doc-aware evidence) | ▓▓▓▓▓▓▓▓░░ **~80%** | 🟡 Stages A–B complete; C interim hubs; D scaffold — live ACC gate + Leiden open |
 
-**How to read progress:** **P0–P7 and P9 are gated**. **P8 was cut** — agent/IDE needs are met by `prism setup` + MCP, not a VSIX. **P10** stays optional/skipped. **P11** is the active distribution track.
+**How to read progress:** **P0–P7 and P9 are gated**. **P8 was cut** — agent/IDE needs are met by `prism setup` + MCP, not a VSIX. **P10** stays optional/skipped. **P11** remains the distribution track (cold-VM pending). **P12** is the active accuracy track (parallel to P11-C).
 
 ```mermaid
 flowchart LR
@@ -45,8 +48,9 @@ flowchart LR
     P7 --> P8[P8 IDE Extension<br/>✂️ cut]
     P8 -.-> P9[P9 Agent Experience<br/>✅ done]
     P7 --> P9
-    P9 --> P11[P11 Install & Distribution<br/>🟡 active]
+    P9 --> P11[P11 Install & Distribution<br/>🟡 ~90%]
     P9 -.-> P10[P10 Distributed / Team<br/>skipped]
+    P9 --> P12[P12 Accuracy & Grounding<br/>🟡 active]
 
     style P0 fill:#b8e994,stroke:#78e08f,color:#000
     style P1 fill:#b8e994,stroke:#78e08f,color:#000
@@ -60,6 +64,7 @@ flowchart LR
     style P9 fill:#b8e994,stroke:#78e08f,color:#000
     style P10 fill:#dfe6e9,stroke:#b2bec3,color:#000
     style P11 fill:#ffeaa7,stroke:#fdcb6e,color:#000
+    style P12 fill:#ffeaa7,stroke:#fdcb6e,color:#000
 ```
 ### Legend
 
@@ -80,11 +85,15 @@ flowchart LR
 |---|---|---|
 | Content-hash incremental store | P0 | ✅ live; measured on pilots |
 | Syntactic facts (T1) | P1 | ✅ Python + Rust extractors + goldens |
+| Documentation facts (Doc/Section) | P12-A | ✅ `prism-extract-markdown` + `asserted`; planted-secret docs skip verified |
 | MCP graph tools | P1 | ✅ `prism-mcp` stdio, 9 tools |
 | Query plan + Evidence Pack | P2 | ✅ plan + pack + EXPLAIN + MCP `compile_context` |
+| Honest gaps (no placeholders) | P12-B | ✅ live packs strip `synthetic:*` → `gaps[]` + repair (ACC-2) |
+| Seed grounding (ACC-3) | P12-B | ✅ lexical score + ranked refusal candidates; Stage D precision sample open |
+| Path-class / first-party scoping | P12-B | ✅ fixtures/vendored excluded unless anchored (ACC-6) |
 | Precise symbol (T2) | P3 | ✅ gated product path |
 | Semantic slice (T3/T4) | P4 | ✅ debug packs slice-minimal (gate proxies) |
-| Architecture intelligence | P5 | 🟡 communities + hubs + entrypoints + hotspots (path-prefix, not Leiden) |
+| Architecture intelligence | P5→P12-C | 🟡 path-prefix communities + **hub ranking v2** (resolved/denylist); Leiden deferred |
 | WASM plugin host | P5 → **P6** | ⚪ **deferred** — [ADR-0001](../architecture/adr/0001-wasm-plugin-host-deferred.md) (gap G-03 waived) |
 | Daemon + HTTP/SSE API | P6 | ✅ `prismd` + `prism-api` `/v1/*` + SSE (gaps G-01/G-10) |
 | LSP surface | P6 | ✅ `prism-lsp` |
@@ -97,6 +106,8 @@ flowchart LR
 | Cross-platform binary install | P11 | ✅ installers + release.yml + packaging drafts |
 | Host adapters (`prism host`) | P11 | ✅ cursor/vscode/claude/generic |
 | Ensure-install assets + hooks | P11 | ✅ generated skills + `prism hook` |
+| Doc-QA + five-arm accuracy | P12-D | 🟡 DQ001–DQ025 + `five_arm.py` + adjudication protocol; live-judged ACC gate open |
+| Analyzer-pipeline re-extract | P12-B | ✅ `ANALYZER_PIPELINE_VERSION=p12-doc-v1` invalidates content-hash-only skips |
 | N1/N2 criterion benches | P6-A | 🟡 `crates/prism-bench` + CI smoke (hard P95 TBD) |
 | `schemas/mcp-tools/v1` | P6-A | ✅ catalog + per-tool JSON + conformance test |
 | `LICENSE` + `deny.toml` | P6-A | ✅ |
@@ -967,6 +978,95 @@ flowchart LR
 
 ---
 
+## Phase 12 — Accuracy & Grounding (detailed)
+
+**Goal:** Doc-aware evidence in the KG; honest packs (no placeholder fragments); better hubs/orientation; settle narrative accuracy vs a doc-aware baseline (Graphify arm E) under ACC-1…ACC-7.  
+**Duration:** parallel to P11-C  
+**Phase gate:** Live-judged five-arm report; ACC targets met or waived with residual risk.  
+**Depends on:** P9 · **Runs parallel to:** P11 Stage C  
+**Plan:** [§19](./PLANNING-AND-IMPLEMENTATION.md#19-phase-12--accuracy--grounding-doc-aware-evidence) · **Scorecard:** [p12-phase-gate.md](../../eval/scorecards/p12-phase-gate.md)
+
+```mermaid
+flowchart LR
+    A[Stage A<br/>Documentation layer] --> B[Stage B<br/>Honest gaps + path-class]
+    B --> C[Stage C<br/>Hubs v2 / communities]
+    C --> D[Stage D<br/>Five-arm ACC gate]
+```
+
+| Stage | Focus | Progress | State |
+|---|---|---:|---|
+| **A** | Documentation & narrative layer | ~95% | ✅ Code exited 2026-07-26 (`f1dfcdc`); planted-secret fixture done; G4 measure open |
+| **B** | Grounded selection & honest gaps | ~95% | ✅ ACC-3 lexical seed grounding + ranked refusals landed |
+| **C** | Semantic communities & orientation | ~55% | 🟡 Hub denylist + path filter landed; Leiden / label dual-review open |
+| **D** | Accuracy gate (five-arm + adjudication) | ~40% | 🟡 Harness + DQ001–025 + protocol scaffolded; live judge open |
+
+### Stage A — Documentation & narrative layer
+
+| Task | Status | Notes |
+|---|---|---|
+| IR: `Doc` / `Section` / `DESCRIBES` / `MENTIONS` / `asserted` | ✅ | `prism-ir` + fact schema notes |
+| `prism-extract-markdown` (ATX, links, fence-aware mentions) | ✅ | golden `fixtures/languages/markdown/` |
+| Dispatch `.md/.markdown/.mdx` in `prism-extract` | ✅ | `detect_language` |
+| End-to-end Doc/Section index (temp workspace) | ✅ | |
+| Secret-redaction planted-secret doc fixture | ✅ | `fixtures/security/planted-docs/` + unit test |
+| Doc-edit incremental re-measure (G4) | ⬜ | inherits content-hash path |
+
+**Stage A exit:** extractive docs in KG with `asserted` confidence. Commit: `f1dfcdc`.
+
+### Stage B — Grounded selection & honest gaps
+
+| Task | Status | Notes |
+|---|---|---|
+| Structured `EvidenceGap` / `WhyAbsent` + repair | ✅ | `prism-compile` `gap.rs` |
+| Live selection strips synthetic placeholders (ACC-2) | ✅ | `assert_no_placeholder_fragments` on `compile_context` |
+| Path-class first-party vs fixture/vendored (ACC-6) | ✅ | `path_class.rs` |
+| Doc-backed recipe roles (`product_thesis`, …) | ✅ | `prism-plan` recipes + goldens |
+| Analyzer pipeline version force re-extract | ✅ | `ANALYZER_PIPELINE_VERSION=p12-doc-v1` |
+| Lexical/BM25 seed index + ACC-3 ≥90% | ✅ | `prism-store` lexical + `ground_plan_seeds` (score≥70); Stage D precision sample still open |
+| Wrong-seed → ranked candidates + second-call recover | ✅ | unit-tested; MCP passes `candidates` |
+
+**Stage B exit (code):** honest gaps + path filter + analyzer invalidation. ACC-3 measurement still open. Commit: `0e8893b`.
+
+### Stage C — Semantic communities & orientation
+
+| Task | Status | Notes |
+|---|---|---|
+| Hub ranking v2 (resolved-only + builtin/unresolved denylist) | ✅ | ACC-4 hub half; unit-tested |
+| Exclude `fixtures/repos/` from community rollup | ✅ | |
+| Extractive leaf labels + honesty notes | ✅ | algorithm id `path_prefix_v1+resolved_degree_hubs` |
+| Seeded Leiden / Louvain clustering | ⬜ | deferred; still path-prefix |
+| Dual-review label acceptance ≥70% (ACC-4) | ⬜ | Stage D measurement |
+| Bridge report (cross-community) | ⬜ | |
+| Views and packs share community ids | ⬜ | |
+
+**Stage C exit (interim):** hubs cleaned; clustering still path-prefix until Leiden lands.
+
+### Stage D — Accuracy gate
+
+| Task | Status | Notes |
+|---|---|---|
+| Doc-QA gold suite (≥25) | ✅ | `eval/tasks/doc-qa/DQ001`–`DQ025` |
+| Five-arm harness (arm E = Graphify) | ✅ | `eval/baselines/five_arm.py` (scripted proxy) |
+| Adjudication protocol | ✅ | [P12-ADJUDICATION-PROTOCOL.md](../eval/P12-ADJUDICATION-PROTOCOL.md) |
+| P12 scorecard scaffold | ✅ | [p12-phase-gate.md](../../eval/scorecards/p12-phase-gate.md) |
+| Live-judged ACC-1…ACC-7 | ⬜ | gate; proxies must not satisfy exit |
+| Ablations (docs / communities / lexical) | ⬜ | planned in five_arm output |
+| Published five-arm accuracy report | ⬜ | |
+
+**Stage D / P12 gate:** open until live-judged ACC targets pass or are waived.
+
+### Open P12 follow-ups
+
+| # | Item | Blocks |
+|---|---|---|
+| 1 | Seeded Leiden communities + label dual-review | ACC-4 full |
+| 2 | Live five-arm adjudication vs Graphify | ACC-1, ACC-5, ACC-7 |
+| 3 | Doc-edit G4 incremental re-measure | Stage A residual |
+| 4 | Reindex workspaces after `p12-doc-v1` | Doc nodes in existing `.prism` indexes |
+| 5 | ACC-3 precision sample on gold anchor set (n≥20) | Stage D measurement |
+
+---
+
 ## Cross-cutting workstreams (always on)
 
 Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
@@ -975,12 +1075,12 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 |---|---|---|
 | **W-STORE** | Storage & identity | ✅ + intel catalog |
 | **W-PLUGIN** | Plugin ABI | ✅ + contributor guide + conformance CI |
-| **W-KG** | Knowledge graph | ✅ + overlay DATA_FLOW/CONTROL_DEP |
+| **W-KG** | Knowledge graph | ✅ overlays + **P12 hub v2 denylist**; Leiden still deferred |
 | **W-PLAN** | Query planning | ✅ executable `Slice` on debug |
-| **W-CC** | Context compiler | ✅ debug pack gates (never drop error/slice) |
+| **W-CC** | Context compiler | ✅ debug pack gates + **P12 honest `gaps[]`** (ACC-2) |
 | **W-MCP** | Agent surface | ✅ AGENT-USAGE + intel tools |
 | **W-IDE** | IDE/LSP | ✅ LSP + design; **extension cut** (ADR-0007) — CLI/MCP product path |
-| **W-EVAL** | Evaluation | ✅ P5 public report + p5-scorecard (interim) |
+| **W-EVAL** | Evaluation | ✅ P5/P9 reports; **P12** Doc-QA + five-arm scaffold (live ACC open) |
 | **W-OBS** | Observability | ✅ `pack_bound_for_llm` + OTel span design (**exporter still unbuilt** → P6-B); **N1/N2 benches live** |
 | **W-SEC** | Security & privacy | ✅ release checklist + audit/redaction; **LICENSE + cargo-deny** |
 | **W-DEBT** | As-built reconciliation | 🟡 P6-A drift report + ADRs |
@@ -995,6 +1095,13 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | **W-DEBT** | As-built reconciliation — drift register, ADRs, expiring waivers | 🟡 P6 Stage A |
 | **W-DIST** | Install & distribution — release artifacts, installers, package managers, host PATH | 🟡 P11 Stage A+B |
 
+### Added for accuracy & grounding (P12)
+
+| ID | Workstream | Opens in |
+|---|---|---|
+| **W-DOC** | Documentation intelligence — Doc/Section extract, links/mentions, `asserted`, doc goldens | ✅ P12 Stage A (residuals: secret fixture, G4) |
+| **W-ACC** | Accuracy program — Doc-QA gold, adjudication, citation validity, five-arm / ablations | 🟡 P12 Stage D scaffolded; live gate open |
+
 ---
 
 ## Definition of Done reminders
@@ -1003,7 +1110,8 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 **Phase exit:** phase gate metrics measured (or design-validated for P0), risks waived in writing if skipped. **From P6 on, every phase exit must also close or re-waive W-DEBT drift items.**  
 **Program (P0–P5):** north-star claims G1–G9 evidenced; see planning doc §20.  
 **Program (P6–P9):** interaction Definition of Done in planning doc §20.1 — docs match the repo, surfaces are real, views are budgeted, the editor is sufficient, agents choose Prism unprompted, and the four-arm claim is settled.  
-**Standing rule:** no claim without an artifact. If a gate says “proven”, the repository must contain the proof (this rule exists because of gap G-03).
+**Program (P12):** ACC-1…ACC-7 evidenced with archived artifacts; fluent answers with invalid citations score zero; scripted proxies do not close the gate.  
+**Standing rule:** no claim without an artifact. If a gate says “proven”, the repository must contain the proof (this rule exists because of gap G-03). From P12 on, no fragment may reach a live pack without a citation to a real node or edge.
 
 ---
 
@@ -1040,3 +1148,7 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P11 Stage A + Stage B start:** `scripts/install.sh` / `install.ps1`, `release.yml`, Homebrew/Scoop drafts, RELEASE-ARTIFACTS + PRODUCT-SETUP rewrite, `prism host` + `self-update`, doctor checklist v2. Cold-VM gate (Stage C) blocked on first public release tag. |
 | 2026-07-26 | **P11 Stage B complete + Stage C partial:** ensure-install in generated AGENTS/skills, `prism hook`, HOST-ADAPTERS/BOOTSTRAP docs, `install-smoke.sh`, p11-phase-gate PARTIAL. Cold-VM matrix still blocked on public release. |
 | 2026-07-26 | **P11 Stage C hardened:** `PRISM_DOWNLOAD_BASE` mirror override in both installers; smoke now does simulated-release e2e (download → checksum verify → install → run) + tamper fail-closed test; `install-smoke` job added to CI. Only cold-VM matrix + real tag remain. |
+| 2026-07-26 | **P12 planned** in PLANNING-AND-IMPLEMENTATION (§19) after Graphify head-to-head ([REPO-FEATURE-SUMMARY-AND-TOKEN-COMPARISON.md](../REPO-FEATURE-SUMMARY-AND-TOKEN-COMPARISON.md)): docs layer, honest gaps, semantic communities, five-arm ACC gate. Workstreams **W-DOC** / **W-ACC**. |
+| 2026-07-26 | **P12 Stage A exited (code):** `Doc`/`Section`/`DESCRIBES`/`MENTIONS`/`asserted`, `prism-extract-markdown`, markdown dispatch + goldens. Commit `f1dfcdc`. Residuals: secret-doc fixture, G4 re-measure. |
+| 2026-07-26 | **P12 Stages B–D landed (code + scaffold):** honest `gaps[]` + ACC-2 invariant, path-class ACC-6, analyzer `p12-doc-v1` re-extract, hub ranking v2 denylist, DQ001–025, `five_arm.py`, adjudication protocol, p12-phase-gate. Commit `0e8893b`. **Live ACC-1…ACC-7 gate still open**; Leiden + ACC-3 lexical seeds deferred. |
+| 2026-07-26 | **P12 follow-up:** ACC-3 lexical seed grounding (`score_anchor` / `lexical_seed_search` / `ground_plan_seeds`) + ranked `SCOPE_UNRESOLVED.candidates`; planted-secret docs fixture; board/plan checkboxes updated. Leiden + live five-arm remain open. |

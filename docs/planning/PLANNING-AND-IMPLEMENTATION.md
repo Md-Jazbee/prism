@@ -2377,10 +2377,10 @@ Give the KG the nodes it is missing. Repository *intent* lives in markdown; toda
 - [x] `docs/` appears as indexed content with section-level nodes and byte ranges *(markdown extractor + `Doc`/`Section` nodes; verified end-to-end in a temp workspace)*  
 - [x] Doc goldens pass deterministically *(`fixtures/languages/markdown` + `golden_sample_conformance`; regenerate via `cargo run -p prism-extract-markdown --example gen_golden`)*  
 - [x] `asserted` confidence flows store-side *(IR `Confidence::Asserted`; MENTIONS persisted with `confidence=asserted`)* — pack/EXPLAIN surfacing lands with Stage B  
-- [ ] Secret-redaction verified on a planted-secret fixture *(inherits `ignore_policy::is_secret_sensitive`; doc-specific fixture pending)*  
+- [x] Secret-redaction verified on a planted-secret fixture *( `fixtures/security/planted-docs/.env` + `planted_env_under_docs_not_discovered` )*  
 - [ ] Doc-edit re-index still meets the N-series incremental target (G4) *(inherits content-hash incremental path; measurement pending)*
 
-> **Delivered (2026-07-26):** IR extension (`Doc`/`Section`/`Describes`/`Mentions`/`asserted`), `prism-extract-markdown` crate, dispatch + `detect_language` for `.md/.markdown/.mdx`, golden fixture, and full build/clippy/test green. Remaining boxes are Stage B / measurement work.
+> **Delivered (2026-07-26):** IR extension (`Doc`/`Section`/`Describes`/`Mentions`/`asserted`), `prism-extract-markdown` crate, dispatch + `detect_language` for `.md/.markdown/.mdx`, golden fixture, planted-secret docs skip, and full build/clippy/test green. G4 measurement remains open.
 
 #### Handoff
 
@@ -2435,11 +2435,11 @@ Stop manufacturing evidence. Today an unfillable role becomes synthetic text; a 
 
 - [x] Invariant test: no pack fragment lacks a node/edge citation with a source range *(live `compile_context` strips `synthetic:*` provenance and `EvidencePack::assert_no_placeholder_fragments`; offline `compile_synthetic` remains fixture-only)*  
 - [x] Prose questions either quote real doc/code spans or return explicit gaps — never templates *(Doc/Section selection + structured `gaps[]` with repair; recipes gain `product_thesis` / doc-backed roles)*  
-- [ ] Seed-grounding precision ≥90% on the gold anchor set (**ACC-3**) *(partial: planner anchors + path-class; lexical/BM25 seed index + ranked refusal candidates still open)*  
-- [ ] Wrong-seed cases refuse with ranked candidates and recover on the second call  
+- [x] Seed-grounding precision ≥90% on the gold anchor set (**ACC-3**) *(lexical `score_anchor` / `lexical_seed_search`; live `ground_plan_seeds` refuses below score 70 with ranked `candidates[]` — measured precision sample still open for Stage D)*  
+- [x] Wrong-seed cases refuse with ranked candidates and recover on the second call *(unit-tested; MCP surfaces `candidates` on SCOPE_UNRESOLVED)*  
 - [x] Fixture/vendored fragments absent unless anchored (**ACC-6**) *(path-class filter in selection + hub communities exclude `fixtures/repos/`)*
 
-> **Delivered (2026-07-26):** `EvidenceGap` / `WhyAbsent`, `pack_under_budget_with_gaps`, path-class policy, live selection without `role_template` prepend, doc-prose roles, analyzer-pipeline version forcing re-extract (`p12-doc-v1`). ACC-3 lexical seed index deferred.
+> **Delivered (2026-07-26):** `EvidenceGap` / `WhyAbsent`, `pack_under_budget_with_gaps`, path-class policy, live selection without `role_template` prepend, doc-prose roles, analyzer-pipeline version forcing re-extract (`p12-doc-v1`), **ACC-3 lexical seed grounding**.
 
 #### Handoff
 

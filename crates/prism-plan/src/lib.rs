@@ -59,6 +59,7 @@ pub fn plan_query(question: &str, hints: &PlanHints) -> Result<PlanOutcome> {
             ],
             intent: Some(intent),
             question: question.to_string(),
+            candidates: Vec::new(),
         }));
     }
 

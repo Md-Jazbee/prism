@@ -73,6 +73,9 @@ pub struct ScopeUnresolved {
     pub ask_for: Vec<String>,
     pub intent: Option<Intent>,
     pub question: String,
+    /// Ranked repair candidates (P12 ACC-3). Prefer these on the next call.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub candidates: Vec<String>,
 }
 
 /// Result of plan-only API (`POST /v1/query/plan` contract).

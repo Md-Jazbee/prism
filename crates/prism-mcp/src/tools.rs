@@ -428,9 +428,17 @@ fn tool_compile_context(ctx: &ToolContext, args: Value) -> ToolOutcome {
             };
             ok("compile_context", note, result, started, n)
         }
-        CompileOutcome::ScopeUnresolved(u) => ToolOutcome::Err {
-            error: ToolError::scope_unresolved(u.reason).with_candidates(u.ask_for),
-        },
+        CompileOutcome::ScopeUnresolved(u) => {
+            let mut cands = u.candidates.clone();
+            for a in &u.ask_for {
+                if !cands.iter().any(|x| x == a) {
+                    cands.push(a.clone());
+                }
+            }
+            ToolOutcome::Err {
+                error: ToolError::scope_unresolved(u.reason).with_candidates(cands),
+            }
+        }
         CompileOutcome::BudgetExceeded(e) => ToolOutcome::Err {
             error: ToolError::budget_exceeded(e.reason),
         },
@@ -462,9 +470,17 @@ fn tool_query_plan(args: Value) -> ToolOutcome {
                 n,
             )
         }
-        Ok(PlanOutcome::ScopeUnresolved(u)) => ToolOutcome::Err {
-            error: ToolError::scope_unresolved(u.reason).with_candidates(u.ask_for),
-        },
+        Ok(PlanOutcome::ScopeUnresolved(u)) => {
+            let mut cands = u.candidates.clone();
+            for a in &u.ask_for {
+                if !cands.iter().any(|x| x == a) {
+                    cands.push(a.clone());
+                }
+            }
+            ToolOutcome::Err {
+                error: ToolError::scope_unresolved(u.reason).with_candidates(cands),
+            }
+        }
         Err(e) => ToolOutcome::Err {
             error: ToolError {
                 code: ToolErrorCode::Internal,

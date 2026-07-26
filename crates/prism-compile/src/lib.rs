@@ -9,6 +9,7 @@ mod fragment;
 mod gap;
 mod pack;
 mod path_class;
+mod seed;
 mod select;
 
 pub use budget::{pack_under_budget, pack_under_budget_with_gaps, BudgetExceeded};
@@ -19,6 +20,7 @@ pub use fragment::{
 pub use gap::{EvidenceGap, WhyAbsent};
 pub use pack::{Citation, CompileOutcome, EvidencePack, PackHierarchy, PackMeta};
 pub use path_class::{classify_path, is_noise_path, path_allowed, PathClass};
+pub use seed::{ground_plan_seeds, GroundingOutcome};
 pub use select::{select_candidates, select_from_kg, CompileOptions, SelectionOutcome};
 
 use anyhow::{Context, Result};
@@ -34,10 +36,10 @@ pub fn compile_from_candidates(plan: &Plan, candidates: Vec<CandidateFragment>) 
     }
 }
 
-/// End-to-end: plan question → select from KG → budget pack.
+/// End-to-end: plan question → ground seeds → select from KG → budget pack.
 ///
-/// Returns `ScopeUnresolved` when the planner refuses; `BudgetExceeded` when
-/// must-include cannot fit the budget.
+/// Returns `ScopeUnresolved` when the planner refuses or ACC-3 seed grounding
+/// fails (with ranked candidates); `BudgetExceeded` when must-include cannot fit.
 pub fn compile_context(
     workspace: &Path,
     question: &str,
@@ -45,7 +47,7 @@ pub fn compile_context(
 ) -> Result<CompileOutcome> {
     match plan_query(question, hints)? {
         PlanOutcome::ScopeUnresolved(u) => Ok(CompileOutcome::ScopeUnresolved(u)),
-        PlanOutcome::Ok(plan) => {
+        PlanOutcome::Ok(mut plan) => {
             let kg_path = workspace.join(".prism/graph.sqlite");
             if !kg_path.exists() {
                 anyhow::bail!(
@@ -55,6 +57,18 @@ pub fn compile_context(
             }
             let kg = SqliteKgStore::open(&kg_path)
                 .with_context(|| format!("open kg {}", kg_path.display()))?;
+            match ground_plan_seeds(&kg, &plan)? {
+                GroundingOutcome::Unresolved(u) => {
+                    return Ok(CompileOutcome::ScopeUnresolved(u));
+                }
+                GroundingOutcome::Ok { notes } => {
+                    for n in notes {
+                        if !plan.notes.iter().any(|x| x == &n) {
+                            plan.notes.push(n);
+                        }
+                    }
+                }
+            }
             let opts = CompileOptions {
                 workspace: Some(workspace.to_path_buf()),
             };

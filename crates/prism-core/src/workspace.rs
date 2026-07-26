@@ -148,4 +148,27 @@ mod tests {
         assert_eq!(files.len(), 1);
         assert!(files[0].ends_with("ok.rs"));
     }
+
+    #[test]
+    fn planted_env_under_docs_not_discovered() {
+        // P12 Stage A residual: secrets under docs/ must still be skipped.
+        let dir = tempdir().unwrap();
+        let docs = dir.path().join("docs");
+        fs::create_dir_all(&docs).unwrap();
+        fs::write(docs.join(".env"), b"API_KEY=planted-secret\n").unwrap();
+        fs::write(docs.join("ok.md"), b"# Ok\n\nSafe.\n").unwrap();
+        let wm = WorkspaceManager::open(dir.path()).unwrap();
+        let files = wm.discover_files().unwrap();
+        assert!(
+            files.iter().any(|p| p.ends_with("ok.md")),
+            "expected ok.md discovered: {files:?}"
+        );
+        assert!(
+            !files.iter().any(|p| p
+                .file_name()
+                .and_then(|n| n.to_str())
+                .is_some_and(|n| n == ".env")),
+            ".env under docs must not be discovered: {files:?}"
+        );
+    }
 }

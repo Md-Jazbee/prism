@@ -388,7 +388,7 @@ pub struct IndexSizeStats {
     pub files_indexed: u64,
 }
 
-fn row_to_node(r: &rusqlite::Row<'_>) -> rusqlite::Result<GraphNodeView> {
+pub(crate) fn row_to_node(r: &rusqlite::Row<'_>) -> rusqlite::Result<GraphNodeView> {
     let id: String = r.get(0)?;
     let kind: String = r.get(1)?;
     let name: Option<String> = r.get(2)?;

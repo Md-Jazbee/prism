@@ -38,7 +38,8 @@
       "data": {
         "code": "SCOPE_UNRESOLVED",
         "reason": "string",
-        "ask_for": "string[]"
+        "ask_for": "string[]",
+        "candidates": "string[] (optional, P12 ACC-3 ranked repair anchors)"
       }
     }
   },
