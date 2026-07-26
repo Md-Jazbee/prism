@@ -7,7 +7,11 @@ use std::path::PathBuf;
 use tracing_subscriber::EnvFilter;
 
 #[derive(Parser, Debug)]
-#[command(name = "prism-lsp", version, about = "Prism LSP — evidence hover / codelens / symbols")]
+#[command(
+    name = "prism-lsp",
+    version,
+    about = "Prism LSP — evidence hover / codelens / symbols"
+)]
 struct Args {
     /// Workspace root (must contain `.prism/` index for full features).
     #[arg(long, default_value = ".")]

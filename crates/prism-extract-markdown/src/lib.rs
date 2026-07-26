@@ -70,7 +70,11 @@ pub fn extract(path: &str, bytes: &[u8]) -> Result<FactBundle> {
         }
         if let Some((level, title)) = heading(content) {
             let base = slugify(title);
-            let base = if base.is_empty() { "section".into() } else { base };
+            let base = if base.is_empty() {
+                "section".into()
+            } else {
+                base
+            };
             let n = slug_counts.entry(base.clone()).or_insert(0);
             let slug = if *n == 0 {
                 base.clone()
@@ -131,7 +135,10 @@ pub fn extract(path: &str, bytes: &[u8]) -> Result<FactBundle> {
             .get(i + 1)
             .map(|next| next.start_byte as u32)
             .unwrap_or(total_len);
-        let end_line = headings.get(i + 1).map(|n| n.start_line as u32).unwrap_or(last_line);
+        let end_line = headings
+            .get(i + 1)
+            .map(|n| n.start_line as u32)
+            .unwrap_or(last_line);
         let mut attrs = serde_json::Map::new();
         attrs.insert("level".into(), serde_json::Value::from(h.level));
         attrs.insert("slug".into(), serde_json::Value::String(h.slug.clone()));
@@ -156,7 +163,11 @@ pub fn extract(path: &str, bytes: &[u8]) -> Result<FactBundle> {
             attrs,
         });
 
-        while stack.last().map(|(lvl, _)| *lvl >= h.level).unwrap_or(false) {
+        while stack
+            .last()
+            .map(|(lvl, _)| *lvl >= h.level)
+            .unwrap_or(false)
+        {
             stack.pop();
         }
         let parent = stack
@@ -198,7 +209,9 @@ pub fn extract(path: &str, bytes: &[u8]) -> Result<FactBundle> {
         if in_fence || heading(content).is_some() {
             continue;
         }
-        let src_section = current_section(&headings, start_byte).unwrap_or(&doc_id).clone();
+        let src_section = current_section(&headings, start_byte)
+            .unwrap_or(&doc_id)
+            .clone();
 
         for link in find_links(content) {
             let abs = start_byte as u32 + link.offset as u32;
@@ -257,7 +270,9 @@ fn ensure_mention_nodes(bundle: &mut FactBundle) {
     let mut seen = existing.clone();
     let mut to_add = Vec::new();
     for e in &bundle.edges {
-        if e.kind == EdgeKind::Mentions && e.dst.starts_with("unresolved:") && !existing.contains(&e.dst)
+        if e.kind == EdgeKind::Mentions
+            && e.dst.starts_with("unresolved:")
+            && !existing.contains(&e.dst)
         {
             let name = e.dst.trim_start_matches("unresolved:").to_string();
             if seen.insert(e.dst.clone()) {
@@ -387,7 +402,9 @@ fn mention_token(raw: &str) -> Option<String> {
     if token.len() < 2 || token.len() > 100 {
         return None;
     }
-    if !token.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | ':' | '.' | '/' | '-'))
+    if !token
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | ':' | '.' | '/' | '-'))
     {
         return None;
     }
@@ -555,7 +572,8 @@ mod tests {
 
     #[test]
     fn inline_code_becomes_asserted_mentions() {
-        let md = b"# API\n\nCall `compile_context` on `crates/prism-ir`; run `prism setup .` too.\n";
+        let md =
+            b"# API\n\nCall `compile_context` on `crates/prism-ir`; run `prism setup .` too.\n";
         let b = extract("r.md", md).unwrap();
         let mentions: Vec<_> = b
             .edges
@@ -565,14 +583,14 @@ mod tests {
         assert!(mentions
             .iter()
             .all(|e| e.confidence == Confidence::Asserted));
-        assert!(mentions.iter().any(|e| e.dst == unresolved_node_id("compile_context")));
+        assert!(mentions
+            .iter()
+            .any(|e| e.dst == unresolved_node_id("compile_context")));
         assert!(mentions
             .iter()
             .any(|e| e.dst == unresolved_node_id("crates/prism-ir")));
         // "prism setup ." has spaces → not a single identifier → skipped
-        assert!(!mentions
-            .iter()
-            .any(|e| e.dst.contains("prism setup")));
+        assert!(!mentions.iter().any(|e| e.dst.contains("prism setup")));
         // placeholder nodes exist for every mention
         for e in &mentions {
             assert!(b.nodes.iter().any(|n| n.id == e.dst));
@@ -583,8 +601,14 @@ mod tests {
     fn duplicate_headings_get_unique_slugs() {
         let md = b"# Notes\n\n## Setup\n\n## Setup\n";
         let b = extract("d.md", md).unwrap();
-        assert!(b.nodes.iter().any(|n| n.id == section_node_id("d.md", "setup")));
-        assert!(b.nodes.iter().any(|n| n.id == section_node_id("d.md", "setup-1")));
+        assert!(b
+            .nodes
+            .iter()
+            .any(|n| n.id == section_node_id("d.md", "setup")));
+        assert!(b
+            .nodes
+            .iter()
+            .any(|n| n.id == section_node_id("d.md", "setup-1")));
     }
 
     #[test]

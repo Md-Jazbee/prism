@@ -284,7 +284,11 @@ mod tests {
         let mut indexer = IncrementalIndexer::open(wm, &prism).unwrap();
         let first = indexer.run(&IndexOptions::default()).unwrap();
         assert!(first.stats.files_extracted >= 2);
-        assert!(first.stats.wall_time_ms < 30_000, "cold index too slow: {}ms", first.stats.wall_time_ms);
+        assert!(
+            first.stats.wall_time_ms < 30_000,
+            "cold index too slow: {}ms",
+            first.stats.wall_time_ms
+        );
 
         // Edit only one doc.
         fs::write(root.join("docs/a.md"), b"# A\n\nAlpha edited.\n").unwrap();

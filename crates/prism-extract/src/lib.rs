@@ -104,6 +104,9 @@ mod tests {
             .unwrap();
         assert_eq!(b.language, "markdown");
         assert!(b.nodes.iter().any(|n| n.kind == prism_ir::NodeKind::Doc));
-        assert!(b.nodes.iter().any(|n| n.kind == prism_ir::NodeKind::Section));
+        assert!(b
+            .nodes
+            .iter()
+            .any(|n| n.kind == prism_ir::NodeKind::Section));
     }
 }

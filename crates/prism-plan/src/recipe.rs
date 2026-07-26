@@ -26,10 +26,7 @@ pub fn recipe_for(intent: Intent) -> IntentRecipe {
             intent,
             seed_description: "named symbols / paths / doc headings in the question",
             expand_description: "def + 1-hop callee/caller signatures + doc prose when present",
-            must_include: &[
-                "primary_symbol_definition",
-                "primary_symbol_signature",
-            ],
+            must_include: &["primary_symbol_definition", "primary_symbol_signature"],
             drop_order: &[
                 "embedding_fallback_seeds",
                 "depth_3_plus_neighbors",

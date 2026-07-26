@@ -297,12 +297,7 @@ async fn neighbors(
         _ => EdgeDirection::Outgoing,
     };
     let hits = kg
-        .neighbors(
-            &body.id,
-            kinds.as_deref(),
-            dir,
-            body.limit,
-        )
+        .neighbors(&body.id, kinds.as_deref(), dir, body.limit)
         .map_err(|e| {
             ApiError::from_tool(
                 ToolError::index_unavailable(e.to_string()),

@@ -1,7 +1,7 @@
 //! `prism` CLI — Phase 4 (`index` + query + plan + compile + precise + semantic).
 
-mod host;
 mod hook;
+mod host;
 mod setup;
 
 use anyhow::{bail, Context, Result};
@@ -558,9 +558,7 @@ fn run_self_update(version: Option<&str>, dry_run: bool) -> Result<()> {
             local_sh
         } else {
             // Fall back: curl the published installer into a temp file.
-            let url = format!(
-                "https://raw.githubusercontent.com/{repo}/main/scripts/install.sh"
-            );
+            let url = format!("https://raw.githubusercontent.com/{repo}/main/scripts/install.sh");
             let tmp = std::env::temp_dir().join("prism-install.sh");
             let body = {
                 // Avoid adding a HTTP crate for this thin helper — shell out to curl.
@@ -613,7 +611,11 @@ fn main() -> Result<()> {
     }
 
     match cli.command {
-        Commands::Index { path, dry_run, json } => {
+        Commands::Index {
+            path,
+            dry_run,
+            json,
+        } => {
             let wm = WorkspaceManager::open(&path)
                 .with_context(|| format!("open workspace {}", path.display()))?;
             let prism_dir = wm.root().join(".prism");
@@ -783,19 +785,13 @@ fn main() -> Result<()> {
                 }
             }
             HostCmd::Status { path, host, json } => {
-                let filter = host
-                    .as_deref()
-                    .map(host::HostKind::parse)
-                    .transpose()?;
+                let filter = host.as_deref().map(host::HostKind::parse).transpose()?;
                 let statuses = host::host_status(&path, filter)?;
                 if json {
                     println!("{}", serde_json::to_string_pretty(&statuses)?);
                 } else {
                     for s in statuses {
-                        println!(
-                            "{}: registered={} — {}",
-                            s.host, s.registered, s.detail
-                        );
+                        println!("{}: registered={} — {}", s.host, s.registered, s.detail);
                     }
                 }
             }
@@ -846,7 +842,10 @@ fn main() -> Result<()> {
             let wm = WorkspaceManager::open(&path)?;
             let prism = wm.root().join(".prism");
             if !prism.join("graph.sqlite").exists() {
-                bail!("no index at {} — run `prism index` or `prism setup` first", prism.display());
+                bail!(
+                    "no index at {} — run `prism index` or `prism setup` first",
+                    prism.display()
+                );
             }
             let meta = SqliteMetaStore::open(prism.join("meta.sqlite"))?;
             let kg = SqliteKgStore::open(prism.join("graph.sqlite"))?;
@@ -1455,8 +1454,8 @@ fn main() -> Result<()> {
         } => {
             let wm = WorkspaceManager::open(&path)?;
             let kg = SqliteKgStore::open(wm.root().join(".prism/graph.sqlite"))?;
-            let view_kind = prism_view::ViewKind::from_str(&kind)
-                .map_err(|e| anyhow::anyhow!("{e}"))?;
+            let view_kind =
+                prism_view::ViewKind::from_str(&kind).map_err(|e| anyhow::anyhow!("{e}"))?;
             let outcome = prism_view::project_view(
                 &kg,
                 wm.root(),

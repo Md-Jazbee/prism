@@ -116,12 +116,8 @@ fn run_workflow_def(
                     .and_then(|v| v.as_str().map(str::to_string))
                     .unwrap_or_else(|| format!("{:?}", error.code).to_uppercase());
                 let repair = error.repair.clone().unwrap_or_else(|| {
-                    serde_json::to_value(repair_for(
-                        &code,
-                        &error.message,
-                        error.hint.clone(),
-                    ))
-                    .unwrap_or(json!({}))
+                    serde_json::to_value(repair_for(&code, &error.message, error.hint.clone()))
+                        .unwrap_or(json!({}))
                 });
                 let repair_action = repair
                     .get("action")

@@ -88,7 +88,11 @@ impl SqliteKgStore {
     }
 
     /// Lexical search over graph vocabulary for question/anchor terms.
-    pub fn lexical_seed_search(&self, terms: &[String], limit: usize) -> Result<Vec<SeedCandidate>> {
+    pub fn lexical_seed_search(
+        &self,
+        terms: &[String],
+        limit: usize,
+    ) -> Result<Vec<SeedCandidate>> {
         let limit = limit.clamp(1, 30);
         let mut scored: Vec<SeedCandidate> = Vec::new();
         for term in terms {
@@ -300,8 +304,8 @@ pub fn tokenize_seed_terms(text: &str) -> Vec<String> {
             break;
         }
     }
-    for raw in text
-        .split(|c: char| !(c.is_alphanumeric() || c == '_' || c == '/' || c == '.' || c == '-'))
+    for raw in
+        text.split(|c: char| !(c.is_alphanumeric() || c == '_' || c == '/' || c == '.' || c == '-'))
     {
         let t = raw.trim();
         if t.len() >= 3 && !is_stopword(t) {

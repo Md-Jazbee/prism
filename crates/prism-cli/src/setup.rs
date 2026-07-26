@@ -1,7 +1,7 @@
 //! Graphify-like one-shot workspace setup (`prism setup`).
 
-use crate::host;
 use crate::hook;
+use crate::host;
 use anyhow::{bail, Context, Result};
 use prism_core::{IncrementalIndexer, IndexOptions, WorkspaceManager};
 use serde::Serialize;

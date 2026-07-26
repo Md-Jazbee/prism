@@ -95,27 +95,30 @@ fn handle_request(cfg: &LspConfig, req: Request) -> Response {
     };
     match result {
         Ok(v) => Response::new_ok(id, v),
-        Err(e) => Response::new_err(id, lsp_server::ErrorCode::InternalError as i32, e.to_string()),
+        Err(e) => Response::new_err(
+            id,
+            lsp_server::ErrorCode::InternalError as i32,
+            e.to_string(),
+        ),
     }
 }
 
 fn open_kg(workspace: &Path) -> Result<SqliteKgStore> {
-    SqliteKgStore::open(workspace.join(".prism/graph.sqlite"))
-        .with_context(|| "open graph.sqlite")
+    SqliteKgStore::open(workspace.join(".prism/graph.sqlite")).with_context(|| "open graph.sqlite")
 }
 
 fn hover(cfg: &LspConfig, req: Request) -> Result<Value> {
     let params: HoverParams = serde_json::from_value(req.params)?;
     let path = uri_to_path(&params.text_document_position_params.text_document.uri);
     let line = params.text_document_position_params.position.line + 1;
-    let word = format!("{}:L{line}", path.file_name().and_then(|s| s.to_str()).unwrap_or("file"));
+    let word = format!(
+        "{}:L{line}",
+        path.file_name().and_then(|s| s.to_str()).unwrap_or("file")
+    );
 
     let kg = open_kg(&cfg.workspace)?;
     // Prefer resolving basename-ish symbols from path stem.
-    let stem = path
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .unwrap_or("main");
+    let stem = path.file_stem().and_then(|s| s.to_str()).unwrap_or("main");
     let hits = kg.resolve_symbol(stem, Some(&path_rel(&cfg.workspace, &path)), 5)?;
     let (label, note) = if let Some(h) = hits.first() {
         (
@@ -123,7 +126,10 @@ fn hover(cfg: &LspConfig, req: Request) -> Result<Value> {
             format!("Prism hover · {} · confidence={}", h.kind, h.confidence),
         )
     } else {
-        (word, "Prism hover · no KG symbol at cursor — try workspace symbol search".into())
+        (
+            word,
+            "Prism hover · no KG symbol at cursor — try workspace symbol search".into(),
+        )
     };
 
     let mut hints = PlanHints {
@@ -187,10 +193,7 @@ fn code_lens(cfg: &LspConfig, req: Request) -> Result<Value> {
     let path = uri_to_path(&params.text_document.uri);
     let rel = path_rel(&cfg.workspace, &path);
     let kg = open_kg(&cfg.workspace)?;
-    let stem = path
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .unwrap_or("main");
+    let stem = path.file_stem().and_then(|s| s.to_str()).unwrap_or("main");
     let hits = kg.resolve_symbol(stem, Some(&rel), 3)?;
     let mut lenses = Vec::new();
     if let Some(h) = hits.first() {

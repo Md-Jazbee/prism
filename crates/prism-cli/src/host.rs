@@ -168,7 +168,12 @@ fn upsert_claude_md(path: &Path, bin: &str, root: &Path) -> Result<()> {
         existing.find(CLAUDE_SECTION_END),
     ) {
         let end = e + CLAUDE_SECTION_END.len();
-        format!("{}{}{}", &existing[..s], section.trim_end(), &existing[end..])
+        format!(
+            "{}{}{}",
+            &existing[..s],
+            section.trim_end(),
+            &existing[end..]
+        )
     } else if existing.is_empty() {
         section
     } else {
@@ -238,7 +243,10 @@ pub fn host_install(root: &Path, host: HostKind) -> Result<HostActionReport> {
                 "mcpServers": { "prism": mcp_server_entry(root, &bin) }
             });
             let path = root.join(".mcp.prism.json");
-            fs::write(&path, format!("{}\n", serde_json::to_string_pretty(&snippet)?))?;
+            fs::write(
+                &path,
+                format!("{}\n", serde_json::to_string_pretty(&snippet)?),
+            )?;
             paths.push(path.display().to_string());
             format!(
                 "wrote portable stdio snippet to {} — paste into your host MCP settings",

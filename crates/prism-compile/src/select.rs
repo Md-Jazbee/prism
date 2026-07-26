@@ -613,7 +613,6 @@ pub fn select_from_kg(
     })
 }
 
-
 /// Pull extractive Doc/Section spans for prose roles (P12 Stage A+B).
 ///
 /// Caps volume aggressively: at most one `product_thesis` must-include (README
@@ -687,15 +686,15 @@ fn select_doc_prose(
 
         // Thesis is reserved for product-facing Docs (README / ADD / setup),
         // never a random lexically-grounded architecture note.
-        let is_thesis_candidate =
-            !thesis_taken && node.kind == "Doc" && is_product_thesis_path(node.file_path.as_deref());
+        let is_thesis_candidate = !thesis_taken
+            && node.kind == "Doc"
+            && is_product_thesis_path(node.file_path.as_deref());
         let role = if is_thesis_candidate {
             "product_thesis"
         } else {
             "architecture_prose"
         };
-        let must = is_thesis_candidate
-            && plan.must_include.iter().any(|r| r == "product_thesis");
+        let must = is_thesis_candidate && plan.must_include.iter().any(|r| r == "product_thesis");
 
         if is_thesis_candidate {
             thesis_taken = true;
@@ -744,7 +743,10 @@ fn doc_priority(node: &prism_store::GraphNodeView, anchors: &[String], question:
 
     // Question-topic boosts (before generic ranking).
     if is_doc {
-        if (q.contains("workflow") || q.contains("agent") || q.contains("refusal") || q.contains("scope_unresolved"))
+        if (q.contains("workflow")
+            || q.contains("agent")
+            || q.contains("refusal")
+            || q.contains("scope_unresolved"))
             && (lower == "agents.md" || lower.contains("agent-usage") || lower.contains("refusal"))
         {
             return 2;
@@ -754,18 +756,23 @@ fn doc_priority(node: &prism_store::GraphNodeView, anchors: &[String], question:
         {
             return 2;
         }
-        if (q.contains("install") || q.contains("setup") || q.contains("bootstrap") || q.contains("cold"))
+        if (q.contains("install")
+            || q.contains("setup")
+            || q.contains("bootstrap")
+            || q.contains("cold"))
             && (lower.contains("product-setup") || lower == "readme.md")
         {
             return 2;
         }
-        if (q.contains("non-goal") || q.contains("not trying") || q.contains("precision tier") || q.contains("confidence"))
+        if (q.contains("non-goal")
+            || q.contains("not trying")
+            || q.contains("precision tier")
+            || q.contains("confidence"))
             && lower.contains("architecture-design-document")
         {
             return 2;
         }
-        if q.contains("phase 12") || q.contains("graphify") || q.contains("accuracy")
-        {
+        if q.contains("phase 12") || q.contains("graphify") || q.contains("accuracy") {
             if lower.contains("planning-and-implementation")
                 || lower.contains("repo-feature-summary")
                 || lower.contains("p12")
@@ -782,8 +789,7 @@ fn doc_priority(node: &prism_store::GraphNodeView, anchors: &[String], question:
     if is_doc && lower == "agents.md" {
         return 4;
     }
-    if is_doc
-        && (lower.contains("architecture-design-document") || lower.contains("product-setup"))
+    if is_doc && (lower.contains("architecture-design-document") || lower.contains("product-setup"))
     {
         return 5;
     }
@@ -839,10 +845,7 @@ fn read_doc_excerpt(
     let title = node.name.as_deref().unwrap_or(rel);
     let raw = String::from_utf8_lossy(&bytes);
     let excerpt = if node.kind == "Section" {
-        if let Some(idx) = raw
-            .find(&format!("# {title}"))
-            .or_else(|| raw.find(title))
-        {
+        if let Some(idx) = raw.find(&format!("# {title}")).or_else(|| raw.find(title)) {
             let end = (idx + 800).min(raw.len());
             raw[idx..end].to_string()
         } else {

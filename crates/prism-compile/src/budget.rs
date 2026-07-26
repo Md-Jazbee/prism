@@ -164,7 +164,11 @@ pub fn pack_under_budget_with_gaps(
         }
     }
 
-    gaps.sort_by(|a, b| a.role.cmp(&b.role).then_with(|| a.summary().cmp(&b.summary())));
+    gaps.sort_by(|a, b| {
+        a.role
+            .cmp(&b.role)
+            .then_with(|| a.summary().cmp(&b.summary()))
+    });
 
     let explain = ExplainReport {
         plan_id: plan.plan_id.clone(),

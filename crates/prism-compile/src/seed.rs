@@ -5,9 +5,7 @@
 //! with ranked lexical candidates so the agent can recover on a second call.
 
 use prism_plan::{Intent, Plan, ScopeUnresolved};
-use prism_store::{
-    tokenize_seed_terms, SeedCandidate, SqliteKgStore, MIN_GROUND_SCORE,
-};
+use prism_store::{tokenize_seed_terms, SeedCandidate, SqliteKgStore, MIN_GROUND_SCORE};
 
 /// Result of grounding planner anchors in the live KG.
 #[derive(Debug)]
@@ -72,8 +70,7 @@ pub fn ground_plan_seeds(kg: &SqliteKgStore, plan: &Plan) -> anyhow::Result<Grou
     // (e.g. `prism setup .`). RepoQa / debug keep hard refusal (ACC-3).
     if matches!(intent, Intent::Architecture) {
         notes.push(
-            "architecture: planner anchors did not ground; continuing with docs/communities"
-                .into(),
+            "architecture: planner anchors did not ground; continuing with docs/communities".into(),
         );
         return Ok(GroundingOutcome::Ok { notes });
     }
@@ -101,10 +98,7 @@ pub fn ground_plan_seeds(kg: &SqliteKgStore, plan: &Plan) -> anyhow::Result<Grou
     )))
 }
 
-fn ranked_from_question(
-    kg: &SqliteKgStore,
-    question: &str,
-) -> anyhow::Result<Vec<SeedCandidate>> {
+fn ranked_from_question(kg: &SqliteKgStore, question: &str) -> anyhow::Result<Vec<SeedCandidate>> {
     let terms = tokenize_seed_terms(question);
     kg.lexical_seed_search(&terms, 8)
 }

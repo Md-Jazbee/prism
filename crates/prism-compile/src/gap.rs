@@ -53,11 +53,7 @@ pub struct EvidenceGap {
 }
 
 impl EvidenceGap {
-    pub fn new(
-        role: impl Into<String>,
-        why_absent: WhyAbsent,
-        repair: impl Into<String>,
-    ) -> Self {
+    pub fn new(role: impl Into<String>, why_absent: WhyAbsent, repair: impl Into<String>) -> Self {
         Self {
             role: role.into(),
             why_absent,
@@ -73,8 +69,12 @@ impl EvidenceGap {
 
     /// Convert a free-form plan gap string into a structured gap.
     pub fn from_plan_note(note: &str) -> Self {
-        Self::new("plan", WhyAbsent::PlanNote, "Inspect plan.gaps / EXPLAIN notes")
-            .with_detail(note)
+        Self::new(
+            "plan",
+            WhyAbsent::PlanNote,
+            "Inspect plan.gaps / EXPLAIN notes",
+        )
+        .with_detail(note)
     }
 
     /// Display form used in EXPLAIN / logs.

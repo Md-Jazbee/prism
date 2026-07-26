@@ -283,10 +283,7 @@ impl SqliteKgStore {
     /// Symbols that share a name across multiple files (ambiguity heat heuristic).
     ///
     /// Each entry is `(name, Vec<(symbol_id, file_path)>)`.
-    pub fn ambiguous_symbol_names(
-        &self,
-        limit_names: usize,
-    ) -> Result<Vec<AmbiguousSymbolGroup>> {
+    pub fn ambiguous_symbol_names(&self, limit_names: usize) -> Result<Vec<AmbiguousSymbolGroup>> {
         let mut by_name: std::collections::BTreeMap<String, Vec<(String, Option<String>)>> =
             std::collections::BTreeMap::new();
         let mut stmt = self.conn.prepare(

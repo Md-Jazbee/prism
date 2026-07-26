@@ -233,7 +233,10 @@ impl SqliteKgStore {
                 "CONTAINS" => 0.35,
                 _ => 0.1,
             };
-            *adj.entry(src.clone()).or_default().entry(dst.clone()).or_insert(0.0) += w;
+            *adj.entry(src.clone())
+                .or_default()
+                .entry(dst.clone())
+                .or_insert(0.0) += w;
             *adj.entry(dst).or_default().entry(src).or_insert(0.0) += w;
         }
 
@@ -241,10 +244,7 @@ impl SqliteKgStore {
         // CALLS target unresolved: builtins (common at T1).
         let mut by_prefix: HashMap<String, Vec<String>> = HashMap::new();
         for f in &files {
-            by_prefix
-                .entry(path_prefix(f))
-                .or_default()
-                .push(f.clone());
+            by_prefix.entry(path_prefix(f)).or_default().push(f.clone());
         }
         for members in by_prefix.values() {
             if members.len() < 2 {
@@ -255,8 +255,14 @@ impl SqliteKgStore {
             sorted.sort();
             for w in sorted.windows(2) {
                 let (a, b) = (&w[0], &w[1]);
-                *adj.entry(a.clone()).or_default().entry(b.clone()).or_insert(0.0) += 0.2;
-                *adj.entry(b.clone()).or_default().entry(a.clone()).or_insert(0.0) += 0.2;
+                *adj.entry(a.clone())
+                    .or_default()
+                    .entry(b.clone())
+                    .or_insert(0.0) += 0.2;
+                *adj.entry(b.clone())
+                    .or_default()
+                    .entry(a.clone())
+                    .or_insert(0.0) += 0.2;
             }
         }
 
@@ -447,11 +453,7 @@ impl SqliteKgStore {
             if is_noise_hub(&h.node_id, h.name.as_deref()) {
                 continue;
             }
-            if h.file_path
-                .as_deref()
-                .map(is_noise_path)
-                .unwrap_or(false)
-            {
+            if h.file_path.as_deref().map(is_noise_path).unwrap_or(false) {
                 continue;
             }
             hubs.push(h);
@@ -505,8 +507,7 @@ fn louvain_cluster(nodes: &[String], adj: &FileAdj) -> HashMap<String, usize> {
                 let sigma_tot = community_strength(comm, &membership, adj);
                 // Standard Louvain gain approximation (Newman).
                 let delta = k_i_in - (sigma_tot * k_i) / (2.0 * m);
-                if delta > best_delta + 1e-12
-                    || ((delta - best_delta).abs() < 1e-12 && comm < best)
+                if delta > best_delta + 1e-12 || ((delta - best_delta).abs() < 1e-12 && comm < best)
                 {
                     best_delta = delta;
                     best = comm;
@@ -537,11 +538,7 @@ fn louvain_cluster(nodes: &[String], adj: &FileAdj) -> HashMap<String, usize> {
     membership
 }
 
-fn community_strength(
-    comm: usize,
-    membership: &HashMap<String, usize>,
-    adj: &FileAdj,
-) -> f64 {
+fn community_strength(comm: usize, membership: &HashMap<String, usize>, adj: &FileAdj) -> f64 {
     let mut s = 0.0;
     for (n, &c) in membership {
         if c != comm {
@@ -600,8 +597,8 @@ mod tests {
     use super::{is_noise_hub, louvain_cluster, path_prefix};
     use crate::kg::{KgStore, SqliteKgStore};
     use prism_ir::{
-        edge_id, file_node_id, symbol_node_id, Confidence, EdgeKind, FactBundle, FactEdge, FactNode,
-        NodeKind, Tier,
+        edge_id, file_node_id, symbol_node_id, Confidence, EdgeKind, FactBundle, FactEdge,
+        FactNode, NodeKind, Tier,
     };
     use std::collections::HashMap;
     use tempfile::tempdir;
@@ -624,8 +621,7 @@ mod tests {
 
     #[test]
     fn louvain_is_deterministic() {
-        let nodes: Vec<String> =
-            vec!["a.rs".into(), "b.rs".into(), "c.rs".into(), "d.rs".into()];
+        let nodes: Vec<String> = vec!["a.rs".into(), "b.rs".into(), "c.rs".into(), "d.rs".into()];
         let mut adj: HashMap<String, HashMap<String, f64>> = HashMap::new();
         for n in &nodes {
             adj.insert(n.clone(), HashMap::new());
@@ -681,7 +677,12 @@ mod tests {
             attrs: Default::default(),
         });
         b.edges.push(FactEdge {
-            id: edge_id(EdgeKind::Imports, &file_node_id("src/a.rs"), &file_node_id("src/b.rs"), 1),
+            id: edge_id(
+                EdgeKind::Imports,
+                &file_node_id("src/a.rs"),
+                &file_node_id("src/b.rs"),
+                1,
+            ),
             kind: EdgeKind::Imports,
             src: file_node_id("src/a.rs"),
             dst: file_node_id("src/b.rs"),
@@ -693,7 +694,12 @@ mod tests {
             attrs: Default::default(),
         });
         b.edges.push(FactEdge {
-            id: edge_id(EdgeKind::Imports, &file_node_id("src/b.rs"), &file_node_id("src/c.rs"), 2),
+            id: edge_id(
+                EdgeKind::Imports,
+                &file_node_id("src/b.rs"),
+                &file_node_id("src/c.rs"),
+                2,
+            ),
             kind: EdgeKind::Imports,
             src: file_node_id("src/b.rs"),
             dst: file_node_id("src/c.rs"),
@@ -795,7 +801,9 @@ mod tests {
 
         let map = kg.repo_map(10).unwrap();
         assert!(
-            map.hubs.iter().all(|h| !h.node_id.starts_with("unresolved:")),
+            map.hubs
+                .iter()
+                .all(|h| !h.node_id.starts_with("unresolved:")),
             "hubs={:?}",
             map.hubs
         );

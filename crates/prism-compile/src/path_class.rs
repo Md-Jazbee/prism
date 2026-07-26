@@ -90,12 +90,18 @@ mod tests {
 
     #[test]
     fn classifies_noise_and_first_party() {
-        assert_eq!(classify_path("crates/prism-ir/src/lib.rs"), PathClass::FirstParty);
+        assert_eq!(
+            classify_path("crates/prism-ir/src/lib.rs"),
+            PathClass::FirstParty
+        );
         assert_eq!(
             classify_path("fixtures/repos/snapshots/ripgrep/src/main.rs"),
             PathClass::Vendored
         );
-        assert_eq!(classify_path("fixtures/languages/markdown/sample.md"), PathClass::Fixture);
+        assert_eq!(
+            classify_path("fixtures/languages/markdown/sample.md"),
+            PathClass::Fixture
+        );
         assert_eq!(classify_path("target/debug/prism"), PathClass::Generated);
         assert!(is_noise_path("fixtures/repos/snapshots/httpx/x.py"));
         assert!(!is_noise_path("README.md"));

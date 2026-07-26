@@ -12,7 +12,7 @@ mod project;
 pub use budget::{ViewBudget, DEFAULT_MAX_EDGES, DEFAULT_MAX_NODES};
 pub use kinds::ViewKind;
 pub use model::{
-    Citation, DropRecord, GraphView, LayoutInfo, ViewEdge, ViewGroup, ViewNode, ViewTooLarge,
-    ViewOutcome, GRAPH_VIEW_SCHEMA_VERSION,
+    Citation, DropRecord, GraphView, LayoutInfo, ViewEdge, ViewGroup, ViewNode, ViewOutcome,
+    ViewTooLarge, GRAPH_VIEW_SCHEMA_VERSION,
 };
 pub use project::{project_view, ViewParams};

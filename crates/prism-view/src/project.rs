@@ -57,10 +57,7 @@ pub fn project_view(
         expand(kg, workspace, kind, params, &snapshot)?;
 
     // Seeds must fit; otherwise refuse (never silently drop seeds).
-    let seed_count = candidates
-        .iter()
-        .filter(|c| c.drop_priority == 0)
-        .count();
+    let seed_count = candidates.iter().filter(|c| c.drop_priority == 0).count();
     if seed_count > budget.max_nodes {
         let anchors = suggested_anchors(&candidates, params);
         return Ok(ViewOutcome::TooLarge(ViewTooLarge::new(
@@ -198,9 +195,7 @@ fn cite(id: &str, file: Option<&str>) -> Citation {
     }
 }
 
-fn expand_architecture(
-    kg: &SqliteKgStore,
-) -> Result<ExpandResult> {
+fn expand_architecture(kg: &SqliteKgStore) -> Result<ExpandResult> {
     let map = kg.repo_map(20)?;
     let mut cands = Vec::new();
     let mut groups = Vec::new();
@@ -239,7 +234,10 @@ fn expand_architecture(
                 tier: "T1".into(),
                 confidence: "heuristic".into(),
                 lod_rank: 1,
-                group: h.file_path.as_ref().map(|p| format!("comm:{}", path_prefix(p))),
+                group: h
+                    .file_path
+                    .as_ref()
+                    .map(|p| format!("comm:{}", path_prefix(p))),
                 citation: cite(&h.node_id, h.file_path.as_deref()),
                 x: 0.0,
                 y: 0.0,
@@ -247,12 +245,7 @@ fn expand_architecture(
             },
         });
     }
-    Ok((
-        cands,
-        Vec::new(),
-        groups,
-        map.notes,
-    ))
+    Ok((cands, Vec::new(), groups, map.notes))
 }
 
 fn path_prefix(path: &str) -> String {
@@ -263,10 +256,7 @@ fn path_prefix(path: &str) -> String {
     }
 }
 
-fn expand_impact(
-    kg: &SqliteKgStore,
-    params: &ViewParams,
-) -> Result<ExpandResult> {
+fn expand_impact(kg: &SqliteKgStore, params: &ViewParams) -> Result<ExpandResult> {
     let seed = params
         .seed_id
         .clone()
@@ -326,10 +316,7 @@ fn expand_impact(
     ))
 }
 
-fn expand_slice_path(
-    kg: &SqliteKgStore,
-    params: &ViewParams,
-) -> Result<ExpandResult> {
+fn expand_slice_path(kg: &SqliteKgStore, params: &ViewParams) -> Result<ExpandResult> {
     // Approximate slice path via outgoing neighbors of seed (full interproc is HTTP /v1/slice).
     let seed = params
         .seed_id
@@ -422,7 +409,11 @@ fn expand_pack_map(
     for (i, f) in pack.fragments.iter().enumerate() {
         let id = f.id.clone();
         cands.push(Candidate {
-            drop_priority: if f.must_include { 0 } else { 1 + (i as u32 / 10) },
+            drop_priority: if f.must_include {
+                0
+            } else {
+                1 + (i as u32 / 10)
+            },
             node: ViewNode {
                 id: id.clone(),
                 label: format!("{:?}:{}", f.kind, f.id),
@@ -454,10 +445,7 @@ fn expand_pack_map(
     ))
 }
 
-fn expand_hotspots(
-    kg: &SqliteKgStore,
-    workspace: &Path,
-) -> Result<ExpandResult> {
+fn expand_hotspots(kg: &SqliteKgStore, workspace: &Path) -> Result<ExpandResult> {
     let intel = kg.repo_intel(Some(workspace), 15)?;
     let mut cands = Vec::new();
     for (i, h) in intel.hotspots.iter().enumerate() {
@@ -487,9 +475,7 @@ fn expand_hotspots(
     ))
 }
 
-fn expand_layering(
-    kg: &SqliteKgStore,
-) -> Result<ExpandResult> {
+fn expand_layering(kg: &SqliteKgStore) -> Result<ExpandResult> {
     let intel = kg.repo_intel(None, 10)?;
     let mut cands = Vec::new();
     for (i, v) in intel.layering_violations.iter().enumerate() {
@@ -533,9 +519,7 @@ fn expand_layering(
     Ok((cands, Vec::new(), Vec::new(), intel.notes))
 }
 
-fn expand_ambiguity(
-    kg: &SqliteKgStore,
-) -> Result<ExpandResult> {
+fn expand_ambiguity(kg: &SqliteKgStore) -> Result<ExpandResult> {
     let groups = kg.ambiguous_symbol_names(40)?;
     let mut cands = Vec::new();
     for (name, ids) in groups {
