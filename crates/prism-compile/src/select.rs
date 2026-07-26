@@ -772,13 +772,12 @@ fn doc_priority(node: &prism_store::GraphNodeView, anchors: &[String], question:
         {
             return 2;
         }
-        if q.contains("phase 12") || q.contains("graphify") || q.contains("accuracy") {
-            if lower.contains("planning-and-implementation")
+        if (q.contains("phase 12") || q.contains("graphify") || q.contains("accuracy"))
+            && (lower.contains("planning-and-implementation")
                 || lower.contains("repo-feature-summary")
-                || lower.contains("p12")
-            {
-                return 3;
-            }
+                || lower.contains("p12"))
+        {
+            return 3;
         }
     }
 
