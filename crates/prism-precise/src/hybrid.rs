@@ -83,9 +83,7 @@ pub fn hybrid_resolve(
 
     // Critical path: outgoing CALLS from seeds only
     if opts.critical_path_only {
-        candidates.retain(|e| {
-            e.kind == "CALLS" && seed_ids.iter().any(|s| s == &e.src)
-        });
+        candidates.retain(|e| e.kind == "CALLS" && seed_ids.iter().any(|s| s == &e.src));
     }
 
     let precise: Vec<_> = candidates
@@ -103,12 +101,7 @@ pub fn hybrid_resolve(
         .collect();
 
     // Prefer unresolved first (highest value upgrades)
-    ambiguous.sort_by_key(|e| {
-        (
-            !e.dst.starts_with("unresolved:"),
-            e.id.clone(),
-        )
-    });
+    ambiguous.sort_by_key(|e| (!e.dst.starts_with("unresolved:"), e.id.clone()));
 
     for edge in ambiguous {
         if report.upgrades_considered >= opts.max_upgrades
@@ -189,8 +182,8 @@ pub fn hybrid_resolve(
 mod tests {
     use super::*;
     use prism_ir::{
-        edge_id, file_node_id, symbol_node_id, Confidence, EdgeKind, FactBundle, FactEdge, FactNode,
-        NodeKind, Span, Tier,
+        edge_id, file_node_id, symbol_node_id, Confidence, EdgeKind, FactBundle, FactEdge,
+        FactNode, NodeKind, Span, Tier,
     };
     use prism_store::{KgStore, SqliteKgStore};
     use tempfile::tempdir;

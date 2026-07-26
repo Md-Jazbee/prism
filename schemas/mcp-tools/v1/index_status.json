@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/mcp-tools/v1/index_status.json",
+  "title": "index_status",
+  "description": "Return index freshness, graph cardinality, and on-disk size.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}

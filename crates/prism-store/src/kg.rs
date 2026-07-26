@@ -127,9 +127,8 @@ impl SqliteKgStore {
             .prepare("SELECT attrs_json FROM edges WHERE id = ?1")?;
         match stmt.query_row(params![edge_id], |r| r.get::<_, String>(0)) {
             Ok(attrs) => {
-                let edge: prism_ir::FactEdge = serde_json::from_str(&attrs).with_context(|| {
-                    format!("deserialize FactEdge attrs for {edge_id}")
-                })?;
+                let edge: prism_ir::FactEdge = serde_json::from_str(&attrs)
+                    .with_context(|| format!("deserialize FactEdge attrs for {edge_id}"))?;
                 Ok(Some(edge))
             }
             Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),

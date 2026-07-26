@@ -30,7 +30,9 @@ pub fn memo_key(snapshot_id: &str, algo: &str, params_hash: &str) -> String {
 }
 
 pub fn load_memo(workspace: &Path, key: &str) -> Result<Option<MemoEntry>> {
-    let path = semantic_dir(workspace).join("memo").join(format!("{key}.json"));
+    let path = semantic_dir(workspace)
+        .join("memo")
+        .join(format!("{key}.json"));
     if !path.exists() {
         return Ok(None);
     }

@@ -38,7 +38,9 @@ pub fn pack_under_budget(
     // Tag must-include from roles ∩ plan.must_include + hard protected kinds/roles
     for c in &mut candidates {
         let protected = matches!(c.kind, FragmentKind::ErrorVerbatim)
-            || c.roles.iter().any(|r| PROTECTED_ROLES.contains(&r.as_str()))
+            || c.roles
+                .iter()
+                .any(|r| PROTECTED_ROLES.contains(&r.as_str()))
             || plan.must_include.iter().any(|r| c.roles.contains(r));
         if protected {
             c.must_include = true;

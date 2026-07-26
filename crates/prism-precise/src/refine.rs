@@ -31,9 +31,11 @@ pub fn refine_edges(heuristic: &[FactEdge], precise: &[FactEdge]) -> (Vec<FactEd
         if edge.kind != EdgeKind::Calls && edge.kind != EdgeKind::References {
             continue;
         }
-        if let Some((idx, p)) = precise.iter().enumerate().find(|(i, p)| {
-            !used[*i] && p.kind == edge.kind && edges_join(edge, p)
-        }) {
+        if let Some((idx, p)) = precise
+            .iter()
+            .enumerate()
+            .find(|(i, p)| !used[*i] && p.kind == edge.kind && edges_join(edge, p))
+        {
             used[idx] = true;
             edge.dst = p.dst.clone();
             edge.confidence = Confidence::Precise;
@@ -42,8 +44,7 @@ pub fn refine_edges(heuristic: &[FactEdge], precise: &[FactEdge]) -> (Vec<FactEd
             if let Some(span) = &p.span {
                 edge.span = Some(*span);
             }
-            edge.attrs
-                .insert("refined_from".into(), json!("heuristic"));
+            edge.attrs.insert("refined_from".into(), json!("heuristic"));
             edge.attrs
                 .insert("precise_analyzer".into(), json!(p.analyzer));
             stats.matched += 1;
@@ -166,7 +167,10 @@ pub fn apply_overlay_to_store(
         let existing = kg.edges_for_file(edge.file_path.as_deref().unwrap_or(""))?;
         for e in existing {
             if e.confidence == "heuristic"
-                && (e.kind == "CALLS" || e.kind == "REFERENCES" || e.kind == "Calls" || e.kind == "References")
+                && (e.kind == "CALLS"
+                    || e.kind == "REFERENCES"
+                    || e.kind == "Calls"
+                    || e.kind == "References")
             {
                 if let Some(fe) = kg.load_fact_edge(&e.id)? {
                     if !heuristic.iter().any(|h: &FactEdge| h.id == fe.id) {
@@ -182,7 +186,10 @@ pub fn apply_overlay_to_store(
         if let Some(fp) = &node.file_path {
             for e in kg.edges_for_file(fp)? {
                 if e.confidence == "heuristic"
-                    && (e.kind == "CALLS" || e.kind == "Calls" || e.kind == "REFERENCES" || e.kind == "References")
+                    && (e.kind == "CALLS"
+                        || e.kind == "Calls"
+                        || e.kind == "REFERENCES"
+                        || e.kind == "References")
                 {
                     if let Some(fe) = kg.load_fact_edge(&e.id)? {
                         if !heuristic.iter().any(|h: &FactEdge| h.id == fe.id) {

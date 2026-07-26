@@ -129,7 +129,11 @@ pub fn invalidate_shards_for(workspace: &Path, dirty_paths: &[String]) -> Result
             Ok(s) => s,
             Err(_) => continue,
         };
-        if shard.member_paths.iter().any(|m| dirty.contains(m.as_str())) {
+        if shard
+            .member_paths
+            .iter()
+            .any(|m| dirty.contains(m.as_str()))
+        {
             fs::remove_file(&p)?;
             removed += 1;
         }

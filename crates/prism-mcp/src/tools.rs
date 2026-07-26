@@ -288,8 +288,7 @@ fn parse_hints(args: &Value) -> Result<PlanHints, ToolError> {
         ..Default::default()
     };
     if let Some(raw) = args.get("intent").and_then(|v| v.as_str()) {
-        hints.intent_override =
-            Some(Intent::from_str(raw).map_err(ToolError::invalid_args)?);
+        hints.intent_override = Some(Intent::from_str(raw).map_err(ToolError::invalid_args)?);
     }
     if let Some(arr) = args.get("anchors").and_then(|v| v.as_array()) {
         hints.anchors = arr
@@ -339,13 +338,16 @@ fn tool_compile_context(ctx: &ToolContext, args: Value) -> ToolOutcome {
             || question.to_lowercase().contains("refactor")
             || question.to_lowercase().contains("impact");
         if high_stakes {
-            if let Err(e) = prism_precise::require_precise_claim(&ctx.workspace, &{
-                match ctx.kg() {
-                    Ok(k) => k,
-                    Err(e) => return ToolOutcome::Err { error: e },
-                }
-            }, None)
-            {
+            if let Err(e) = prism_precise::require_precise_claim(
+                &ctx.workspace,
+                &{
+                    match ctx.kg() {
+                        Ok(k) => k,
+                        Err(e) => return ToolOutcome::Err { error: e },
+                    }
+                },
+                None,
+            ) {
                 return ToolOutcome::Err {
                     error: ToolError::precision_required(e.message),
                 };
@@ -619,10 +621,7 @@ fn tool_impact(ctx: &ToolContext, args: Value) -> ToolOutcome {
 
 fn tool_repo_map(ctx: &ToolContext, args: Value) -> ToolOutcome {
     let started = Instant::now();
-    let hub_limit = args
-        .get("hub_limit")
-        .and_then(|v| v.as_u64())
-        .unwrap_or(15) as usize;
+    let hub_limit = args.get("hub_limit").and_then(|v| v.as_u64()).unwrap_or(15) as usize;
     let full = args
         .get("full_intel")
         .and_then(|v| v.as_bool())
@@ -788,10 +787,7 @@ mod tests {
                 let frags = s.result["fragments"].as_array().unwrap();
                 assert!(!frags.is_empty());
                 for f in frags {
-                    assert!(!f["provenance"]["node_ids"]
-                        .as_array()
-                        .unwrap()
-                        .is_empty());
+                    assert!(!f["provenance"]["node_ids"].as_array().unwrap().is_empty());
                 }
             }
             ToolOutcome::Err { error } => panic!("{error:?}"),

@@ -145,7 +145,9 @@ mod tests {
             other => panic!("{other:?}"),
         };
         assert!(
-            plan.steps.iter().any(|s| matches!(s.op, Operator::Slice) && s.executable),
+            plan.steps
+                .iter()
+                .any(|s| matches!(s.op, Operator::Slice) && s.executable),
             "Slice must be executable"
         );
         let mut cands = select_candidates(&plan);
@@ -201,7 +203,9 @@ mod tests {
                     pack.drops
                 );
                 assert!(
-                    pack.drops.iter().any(|d| d.fragment_id == "frag:noise:huge"),
+                    pack.drops
+                        .iter()
+                        .any(|d| d.fragment_id == "frag:noise:huge"),
                     "noise should drop under pressure"
                 );
             }
@@ -363,8 +367,7 @@ mod tests {
         };
 
         let outcome = if let Some(cands) = input.get("candidates") {
-            let candidates: Vec<CandidateFragment> =
-                serde_json::from_value(cands.clone()).unwrap();
+            let candidates: Vec<CandidateFragment> = serde_json::from_value(cands.clone()).unwrap();
             compile_from_candidates(&plan, candidates)
         } else {
             compile_synthetic(&plan)

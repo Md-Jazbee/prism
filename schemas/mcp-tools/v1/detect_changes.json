@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/mcp-tools/v1/detect_changes.json",
+  "title": "detect_changes",
+  "description": "Worktree impact: reverse-dep dirty set for changed paths + change hotspots.",
+  "type": "object",
+  "properties": {
+    "changed_paths": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Repo-relative paths that changed"
+    }
+  },
+  "additionalProperties": false
+}

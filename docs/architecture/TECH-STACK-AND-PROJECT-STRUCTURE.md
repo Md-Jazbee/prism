@@ -2,9 +2,9 @@
 
 **Project working name:** Prism — Repository Intelligence Platform  
 **Document type:** Technology decisions + repository layout by phase  
-**Status:** Agreed for implementation kickoff  
-**Date:** 2026-07-19  
-**Decides:** Language, libraries, tooling, and how the monorepo grows across P0–P6  
+**Status:** Active — P0–P5 built; P6–P9 (interaction half) decided but unimplemented  
+**Date:** 2026-07-19 · **Revised:** 2026-07-26 (as-built audit; visualization / extension / agent stack added)  
+**Decides:** Language, libraries, tooling, and how the monorepo grows across P0–P10  
 **Governs alongside:** [Architecture Design Document](./ARCHITECTURE-DESIGN-DOCUMENT.md) · [Planning & Implementation](../planning/PLANNING-AND-IMPLEMENTATION.md)
 
 ---
@@ -25,6 +25,14 @@
 4. **Plugin ABI (contributed langs):** WASM Component Model via wasmtime
 5. **First-party extractors (P1 langs):** Native Rust (no WASM on the hot path yet)
 
+**Decisions added for the interaction half (2026-07-26):**
+
+6. **Local service:** `prismd` daemon — Tokio + axum + tower-http, SSE for progress, `notify` for file watching
+7. **Graph rendering:** Cytoscape.js with ELK.js layered layout for determinism; Sigma.js/WebGL escape hatch above the LOD ceiling
+8. **Webview UI:** React + Vite, TypeScript strict, VS Code theme CSS variables (no component-library lock-in)
+9. **Extension packaging:** esbuild bundle + `@vscode/vsce`; published to VS Code Marketplace and Open VSX
+10. **Renderer input:** a versioned **Graph View-Model** (`schemas/graph-view/v1`) — the renderer never touches the store
+
 ---
 
 ## Table of Contents
@@ -39,10 +47,16 @@
 8. [Phase 3 — Precise Tier](#8-phase-3--precise-tier)
 9. [Phase 4 — Semantic Slicing](#9-phase-4--semantic-slicing)
 10. [Phase 5 — Intelligence + Hardening](#10-phase-5--intelligence--hardening)
-11. [Phase 6 — Team / Distributed (optional)](#11-phase-6--team--distributed-optional)
-12. [Toolchain & CI baseline](#12-toolchain--ci-baseline)
-13. [Dependency pin policy](#13-dependency-pin-policy)
-14. [Appendix — Stack → ADD/Planning map](#14-appendix--stack--addplanning-map)
+11. [Phase 6 — Consolidation & Interaction Substrate](#11-phase-6--consolidation--interaction-substrate)
+12. [Phase 7 — Visual Repository Intelligence](#12-phase-7--visual-repository-intelligence)
+13. [Phase 8 — IDE Extension (VS Code / Cursor)](#13-phase-8--ide-extension-vs-code--cursor)
+14. [Phase 9 — Agent Experience & Workflows](#14-phase-9--agent-experience--workflows)
+15. [Phase 10 — Team / Distributed (optional)](#15-phase-10--team--distributed-optional)
+16. [Toolchain & CI baseline](#16-toolchain--ci-baseline)
+17. [Dependency pin policy](#17-dependency-pin-policy)
+18. [Appendix — Stack → ADD/Planning map](#18-appendix--stack--addplanning-map)
+
+> **Phase renumbering (2026-07-26):** the former *Phase 6 — Team / Distributed* is now **Phase 10**. Phases 6–9 cover service surfaces, visualization, the IDE extension, and agent experience.
 
 ---
 
@@ -66,12 +80,17 @@
 
 ```mermaid
 flowchart TB
+    subgraph Clients["Clients — P8/P9"]
+      VSC[VS Code / Cursor ext — TypeScript]
+      WEBV[Webview renderer — React + Cytoscape]
+      AGENT[Agents — MCP clients]
+    end
+
     subgraph Surfaces
-      MCP[MCP — rmcp]
-      LSP[LSP — async-lsp]
-      HTTP[HTTP — axum]
+      MCP[MCP — stdio JSON-RPC]
+      LSP[LSP — async-lsp · P6]
+      HTTP[HTTP + SSE — axum · P6]
       CLI[CLI — clap]
-      VSC[VS Code ext — TypeScript]
     end
 
     subgraph Core["prismd / prism (Rust)"]
@@ -80,6 +99,7 @@ flowchart TB
       QP[Query Planner]
       CC[Context Compiler]
       RI[Repo Intelligence]
+      VIEW[View-Model projector · P6]
     end
 
     subgraph Data
@@ -97,6 +117,11 @@ flowchart TB
       PY[Eval harness — Python]
     end
 
+    VSC --> HTTP
+    VSC --> LSP
+    VSC --> WEBV
+    AGENT --> MCP
+    WEBV -->|graph-view/v1 only| VIEW
     Surfaces --> Core
     Core --> Data
     IDX --> NAT
@@ -104,6 +129,8 @@ flowchart TB
     Core --> JOERN
     PY -->|score against frozen snapshots| Core
 ```
+
+**Reading the diagram:** everything left of `Surfaces` is planned (P6–P9); everything inside `Core`, `Data`, and `Ext` exists today except the view-model projector, the LSP host, the HTTP surface, and the WASM host. See [§2.11](#211-as-built-vs-specified--post-p5-audit).
 
 ---
 
@@ -210,15 +237,112 @@ flowchart TB
 |---|---|
 | Neo4j / hosted graph DBs | Not for solo mode |
 | Embedding-centric vector DBs as spine | Forbidden as architecture; optional low-confidence fallback only |
-| Answer-cache-as-product | Deferred to P6 Stage C |
+| Answer-cache-as-product | Deferred to P10 Stage C |
 | Python / Go core rewrite | Out of scope |
 | Full-repo CPG at index time | Forbidden (lazy shards only) |
+| Electron / standalone desktop app | Out of scope — the editor is the shell |
+| Web-hosted graph explorer | Out of scope until P10; local-first stands |
+| Heavy front-end frameworks (Angular/Next) in the webview | Rejected — a webview panel is not an application |
+| 3D graph layouts | Rejected — impressive, unreadable, non-deterministic |
+
+---
+
+### 2.10 Interaction, visualization & agent-surface stack (P6–P9)
+
+#### 2.10.1 Service layer (P6)
+
+| Concern | Choice | Notes |
+|---|---|---|
+| Daemon runtime | **Tokio** multi-thread | First real use of async in the workspace |
+| HTTP + middleware | **axum** + **tower-http** | `/v1/*` per ADD §22; loopback bind by default |
+| Streaming | **SSE** over axum | Index progress, pack progress, view invalidation |
+| File watching | **notify** + debounce | Drives incremental re-index and invalidation events |
+| CPU fan-out | **Rayon** | Parallel parse/extract — the original Rust rationale, still unexercised |
+| Cancellation | `tokio_util::sync::CancellationToken` | Superseded UI requests must actually stop |
+| LSP server | **async-lsp** (fallback `tower-lsp`) | Hover, code lens, custom commands |
+| Tracing export | **opentelemetry** + OTLP, opt-in | Turns `OTEL-SPANS.md` from design into signal |
+| API contract | **utoipa** or hand-written OpenAPI | Must mirror the MCP error model exactly |
+
+**Hard rule:** the CLI must keep working with **no daemon running**. `prismd` is an accelerator, never a dependency — N5 and local-first depend on it.
+
+#### 2.10.2 Graph rendering (P7)
+
+| Concern | Choice | Why |
+|---|---|---|
+| Graph engine (default) | **Cytoscape.js** | Mature, deterministic with fixed positions, good event model, works to ~5k elements |
+| Layout (hierarchical) | **ELK.js** (`elkjs`) via layered algorithm | Best-in-class layered layout for dependency and layering views; deterministic given a seed and stable input order |
+| Layout (radial / cone) | Cytoscape concentric with fixed ordering | Impact cones read naturally as hop rings |
+| Layout (path) | Custom linear layout over slice order | Slices are sequences, not clouds |
+| Escape hatch (>LOD ceiling) | **Sigma.js** + graphology (WebGL) | Only reachable after an explicit “render anyway” confirmation |
+| Static export | SVG/PNG from the canvas; **Mermaid** text fallback | Docs, scorecards, and marketplace screenshots |
+| Diffing / testing | Screenshot-diff over deterministic layouts | Same discipline as pack-stability tests |
+
+**Rejected:** D3 force-directed as the *default* (non-deterministic, hairballs at scale), Graphviz/WASM (poor interactivity), 3D engines.
+
+**Determinism requirement:** layout input must be sorted canonically and seeded, so `(snapshot_id, view_kind, params)` produces byte-identical coordinates. Without this, screenshot tests are impossible and users lose spatial memory between sessions.
+
+#### 2.10.3 Webview & extension (P8)
+
+| Concern | Choice | Notes |
+|---|---|---|
+| Language | **TypeScript** strict, `noUncheckedIndexedAccess` | |
+| Webview UI | **React 18+** + **Vite** | Small surface; the daemon holds all state |
+| Styling | VS Code theme CSS variables | Automatic light/dark/high-contrast |
+| Extension bundling | **esbuild** | Fast, single-file `extension.js` |
+| Packaging | **@vscode/vsce** → Marketplace + **Open VSX** | Open VSX matters for Cursor and forks |
+| Unit tests | **vitest** | Renderer + view-model logic |
+| Integration | **@vscode/test-electron** | Commands, activation, panels |
+| End-to-end | **Playwright** against the webview | Interaction grammar coverage |
+| Package manager | **pnpm** | Workspace for `extensions/vscode` + renderer package |
+| Binary delivery | Platform-specific VSIX **or** verified download-on-demand | Decision recorded in P8 Stage A ADR |
+
+**Hard rule:** thin extension, thick daemon. No analysis logic in TypeScript — the extension issues requests and renders view-models.
+
+#### 2.10.4 Agent surfaces (P9)
+
+| Concern | Choice | Notes |
+|---|---|---|
+| MCP transport | Current hand-rolled stdio JSON-RPC; **`rmcp` migration is an open ADR** | See G-05 in the planning gap register |
+| Tool schemas | `schemas/mcp-tools/v1` as the contract of record | Rust surface validated against it in CI |
+| Agent guidance assets | Generated `AGENTS.md` + host-specific rules from the workflow catalog | Never hand-maintained in two places |
+| Workflow catalog | Declarative (TOML/JSON) → generates rules, docs, and fixtures | Prevents drift between engine recipes and agent instructions |
+| Trace capture | Local JSONL under `.prism/logs/`, opt-in export | Tool sequence and outcomes only — never repository content |
+| Streaming packs | SSE (HTTP) / incremental MCP results | Architecture layer first, so agents can start reasoning early |
+
+---
+
+### 2.11 As-built vs specified — post-P5 audit
+
+**Audited 2026-07-26.** The planning document's [§12 gap register](../planning/PLANNING-AND-IMPLEMENTATION.md#12-post-phase-5-repository-re-analysis--gap-register) is the authoritative work list; this table is the stack-level view of the same finding.
+
+| Specified here | Reality at P5 exit | Disposition |
+|---|---|---|
+| `prism-graph` crate | Merged into `prism-store` | Accept — ADR in P6 Stage A; this doc's §3 layout updated |
+| `prism-intel` crate | Merged as `prism-store::intel` | Accept — same ADR |
+| `prism-api` (axum `/v1/*`) | **Not built**; no axum dependency anywhere | Build in P6 Stage B |
+| `prism-lsp` (async-lsp) | **Not built** | Build in P6 Stage C |
+| `prism-daemon` | **Not built**; every call cold-opens SQLite | Build in P6 Stage B as `prismd` |
+| `prism-plugin-host` (wasmtime + WIT) | **Not built**; the P5 tech-view claim of a *proven* WASM host is unmet | P6 Stage A: build it or amend the claim |
+| MCP via `rmcp` | Hand-rolled stdio JSON-RPC | Open ADR in P6 Stage A |
+| Extractors: Python, TypeScript, Go | Python + **Rust** | Re-baselined; TS/Go move to a language expansion track |
+| Kuzu behind `KgStore` | Not introduced; SQLite only | Fine — but N2 was never measured, so the trigger condition is unknown |
+| Tokio / Rayon | **Unused**; indexing is single-threaded | P6 Stage B |
+| OpenTelemetry / OTLP | Design-only spans | P6 Stage B, opt-in |
+| `criterion` perf gates | `benches/` holds only a README | P6 Stage A |
+| `cargo deny` + `deny.toml` | CI job specified, files absent | P6 Stage A |
+| `LICENSE` file | Absent despite `license = "MIT"` | P6 Stage A |
+| `schemas/mcp-tools/v1` | Never created; schemas inline in Rust | P6 Stage A |
+| `extensions/vscode`, `plugins/examples` | Directories do not exist | P8 / P6 Stage A |
+
+**What is real:** 13 crates, Python + Rust tree-sitter extractors with golden fixtures, SQLite meta+graph store with WAL and file-subgraph replace, planner with intent recipes, Evidence Pack compiler with EXPLAIN and budget invariants, T2 precise overlay, T3/T4 semantic slicing, repo intelligence, 9 MCP tools, 66 passing tests, and CI running fmt/clippy/test/conformance/eval-smoke.
+
+**Rule going forward (mirrors planning guardrail 7):** this document may not describe a crate, dependency, or capability that the repository does not contain. Intended-but-unbuilt items belong in a phase section marked *planned*, never in §2 or §3 as though they exist.
 
 ---
 
 ## 3. Monorepo layout (target end state)
 
-End-state shape after P5 (+ optional P6). Earlier phases only materialize the crates they need — see phase sections.
+End-state shape after P9 (+ optional P10). Earlier phases only materialize the crates they need — see phase sections. Entries marked `‹planned P#›` **do not exist yet**; see [§2.11](#211-as-built-vs-specified--post-p5-audit).
 
 ```text
 prism/
@@ -240,32 +364,39 @@ prism/
 │
 ├── crates/
 │   ├── prism-cli/                      # `prism` binary (clap)
-│   ├── prism-daemon/                   # long-running local service (optional later)
 │   ├── prism-core/                     # workspace, fingerprint, orchestration glue
-│   ├── prism-store/                    # meta.sqlite, KgStore trait, SQLite + Kuzu adapters
-│   ├── prism-graph/                    # node/edge types, query shapes, dirty-set
+│   ├── prism-store/                    # meta.sqlite, KgStore, graph queries, intel
 │   ├── prism-extract/                  # extractor ABI (native), indexing pipeline
 │   ├── prism-extract-python/
-│   ├── prism-extract-typescript/
-│   ├── prism-extract-go/
-│   ├── prism-plugin-host/              # wasmtime WIT host
-│   ├── prism-precise/                  # SCIP ingest + LSP hybrid (P3)
+│   ├── prism-extract-rust/
+│   ├── prism-extract-typescript/       # ‹planned — language expansion track›
+│   ├── prism-extract-go/               # ‹planned — language expansion track›
+│   ├── prism-precise/                  # SCIP ingest + hybrid resolve (P3)
 │   ├── prism-semantic/                 # CFG/DFG + slice + Joern adapter (P4)
 │   ├── prism-plan/                     # intent recipes + planner IR + cost model (P2)
 │   ├── prism-compile/                  # selection, reduction, Evidence Pack, EXPLAIN (P2)
-│   ├── prism-intel/                    # communities, hubs, entrypoints, hotspots (P1 partial → P5)
-│   ├── prism-mcp/                      # MCP tool surface (rmcp)
-│   ├── prism-lsp/                      # LSP server + IDE commands
-│   ├── prism-api/                      # axum HTTP `/v1/*`
+│   ├── prism-mcp/                      # MCP tool surface (stdio JSON-RPC)
 │   ├── prism-ir/                       # shared schemas: facts, packs, plans, provenance
-│   └── prism-obs/                      # metrics, tracing helpers, event schema
+│   ├── prism-obs/                      # metrics, tracing helpers, event schema
+│   ├── prism-view/                     # ‹planned P6› KG → Graph View-Model projection, LOD, budgets
+│   ├── prism-api/                      # ‹planned P6› axum HTTP + SSE `/v1/*`
+│   ├── prism-daemon/                   # ‹planned P6› `prismd` — watcher, warm caches, sessions
+│   ├── prism-lsp/                      # ‹planned P6› LSP server + IDE commands
+│   ├── prism-plugin-host/              # ‹planned P6› wasmtime WIT host
+│   └── prism-agent/                    # ‹planned P9› workflow catalog + rules/asset generation
 │
-├── plugins/                            # third-party / example WASM extractors
+├── plugins/                            # ‹planned P6› third-party / example WASM extractors
 │   └── examples/
 │       └── wit/                        # shared WIT contracts
 │
-├── extensions/
-│   └── vscode/                         # TypeScript VS Code extension
+├── packages/                           # ‹planned P7› TypeScript workspace (pnpm)
+│   └── prism-graph-view/               # renderer: view-model → Cytoscape/ELK; framework-agnostic
+│
+├── extensions/                         # ‹planned P8›
+│   └── vscode/
+│       ├── src/                        # extension host: commands, transport, lifecycle
+│       ├── webview/                    # React + Vite panels (evidence, graph)
+│       └── media/                      # icons, static assets
 │
 ├── eval/                               # Python W-EVAL
 │   ├── pyproject.toml
@@ -273,28 +404,34 @@ prism/
 │   ├── harness/
 │   ├── tasks/                          # gold tasks (versioned)
 │   ├── baselines/
+│   ├── labeling/
 │   ├── scorecards/
 │   └── reports/
 │
 ├── schemas/                            # versioned JSON Schema / protobuf / WIT
-│   ├── fact-schema/
-│   ├── evidence-pack/
-│   ├── plan-ir/
+│   ├── meta/ · fact-schema/ · events/
+│   ├── plan/ · evidence-pack/
+│   ├── precise-index/ · semantic-artifact/
+│   ├── mcp-tools/                      # ‹planned P6› tool contract of record
+│   ├── graph-view/                     # ‹planned P6› view-model schema — renderer input
+│   ├── agent-workflow/                 # ‹planned P9› workflow catalog schema
 │   ├── scip/                           # vendored or generated protobuf
-│   └── plugins/                        # WIT
+│   └── plugins/                        # ABI cards + WIT
 │
 ├── fixtures/                           # golden repos, snippets, expected facts
-│   ├── languages/
-│   ├── repos/                          # small pinned snapshots
-│   └── packs/                          # example Evidence Packs / EXPLAIN
+│   ├── languages/ · repos/ · packs/
+│   ├── plans/ · precise/ · slices/
+│   ├── views/                          # ‹planned P6/P7› golden view-models + screenshots
+│   └── workflows/                      # ‹planned P9› expected agent traces
 │
-├── benches/                            # criterion benches (or per-crate benches/)
-├── scripts/                            # release, schema codegen, scip helpers
+├── benches/                            # criterion benches (P6 Stage A makes these real)
+├── scripts/                            # release, schema codegen, scip, plugin conformance
 └── .github/
     └── workflows/
         ├── ci.yml
-        ├── eval.yml
-        └── release.yml
+        ├── eval.yml                    # ‹planned› split out of ci.yml
+        ├── extension.yml               # ‹planned P8› lint/build/e2e/VSIX
+        └── release.yml                 # ‹planned›
 ```
 
 ### 3.1 On-disk product layout (created by Prism at runtime)
@@ -308,21 +445,26 @@ Not source — written under the user's repo:
   blobs/
   scip/                   # P3+
   semantic/               # P4+
+  views/                  # P7  — memoized view-models + layout coordinates
   artifacts/
-  logs/
+  logs/                   # P9  — local agent traces (opt-in export)
+  daemon.sock / daemon.json  # P6 — endpoint + token, gitignored
 ```
 
 ---
 
 ## 4. Growth rules
 
-1. **No application crates outside `crates/`.** Eval stays in `eval/`; IDE in `extensions/`.
-2. **Schemas live in `schemas/` first.** Rust types in `prism-ir` are generated or hand-synced with a version bump rule.
-3. **One crate ≈ one workstream ID** where practical (`W-STORE` → `prism-store`, `W-CC` → `prism-compile`, …).
+1. **No application crates outside `crates/`.** Eval stays in `eval/`; TypeScript in `packages/` and `extensions/`.
+2. **Schemas live in `schemas/` first.** Rust types in `prism-ir` are generated or hand-synced with a version bump rule. This now includes `mcp-tools`, `graph-view`, and `agent-workflow`.
+3. **One crate ≈ one workstream ID** where practical (`W-STORE` → `prism-store`, `W-CC` → `prism-compile`, `W-VIZ` → `prism-view`, `W-SVC` → `prism-daemon`/`prism-api`, `W-AX` → `prism-agent`).
 4. **Do not create a crate until its phase needs it.** Empty scaffolding is allowed only for workspace wiring in P0.
-5. **First-party extractors stay native Rust until WASM ABI is proven** (target: P5).
-6. **Perf regressions fail CI** once criterion benches exist (from P0 Stage C / early P1).
-7. **Breaking fact/pack/plan schema ⇒ major version bump** in `schemas/` and `prism-ir`.
+5. **First-party extractors stay native Rust until the WASM ABI is proven.** *(Original target P5 — not met; see §2.11 and P6 Stage A.)*
+6. **Perf regressions fail CI** once criterion benches exist. *(Unenforced through P5; becomes real in P6 Stage A.)*
+7. **Breaking fact/pack/plan/view schema ⇒ major version bump** in `schemas/` and `prism-ir`.
+8. **Thin extension, thick daemon.** No analysis logic in TypeScript; the extension issues requests and renders view-models.
+9. **The renderer's only input is `schemas/graph-view/v#`.** No direct store, CLI, or MCP access from rendering code.
+10. **A doc claim requires a repository artifact.** If this document says a thing is built, `ls` must agree; otherwise it is marked `‹planned P#›`.
 
 ---
 
@@ -590,50 +732,274 @@ schemas/
 
 ### 10.1 Tech activated in P5
 
-| Area | Activate |
-|---|---|
-| Intel | Entrypoints, hubs, layering, hotspots (git history) |
-| Plugin SDK | Public docs + WASM host **proven** with one example plugin |
-| IDE | VS Code extension (peek evidence, impact, slice, compile) |
-| Security | Secret redaction, pack audit logs |
-| Public eval | Four-arm scorecard published |
+| Area | Activate | Outcome |
+|---|---|---|
+| Intel | Entrypoints, hubs, layering, hotspots (git history) | ✅ shipped in `prism-store::intel` |
+| Plugin SDK | Public docs + native ABI conformance; WASM host **deferred** (not proven) | ⚠️ claim amended — [ADR-0001](./adr/0001-wasm-plugin-host-deferred.md) |
+| IDE | VS Code extension (peek evidence, impact, slice, compile) | ⚠️ **design only** (gap G-14 → P8) |
+| Security | Secret redaction, pack audit logs | ✅ policies written |
+| Public eval | Four-arm scorecard published | ⚠️ **proxy metrics only**; real four-arm run moves to P9 Stage C |
 
-### 10.2 Repository structure added in P5
+### 10.2 Repository structure added in P5 — planned vs actual
 
 ```text
 crates/
-├── prism-intel/                   # expand to full catalog
-├── prism-plugin-host/             # NEW — wasmtime WIT host + conformance runner
-├── prism-lsp/                     # NEW if not earlier — IDE commands
-plugins/
-└── examples/
-    └── hello-extractor/           # WASM example implementing WIT
-extensions/
-└── vscode/                        # NEW — TypeScript extension
-eval/
-└── reports/
-    └── public/                    # published benchmark report sources
+├── prism-store/src/intel.rs       # ✅ actual — intel landed here, not in prism-intel/
+├── prism-plugin-host/             # ❌ not built — deferred to P6 Stage A
+├── prism-lsp/                     # ❌ not built — deferred to P6 Stage C
+plugins/examples/hello-extractor/  # ❌ not built
+extensions/vscode/                 # ❌ not built — deferred to P8
+eval/reports/                      # ✅ p1…p5 scorecard JSON
 docs/
-├── contributing/
-│   └── plugin-guide.md
-└── security/
-    └── release-checklist.md
+├── contributing/plugin-guide.md   # ✅
+├── security/RELEASE-CHECKLIST.md  # ✅
+└── eval/PUBLIC-BENCHMARK-REPORT.md, RELEASE-READINESS.md, PROGRAM-RESIDUAL-RISKS.md  # ✅
 ```
 
-### 10.3 P5 gate (tech view)
+### 10.3 P5 gate (tech view) — as achieved
 
-- External language path documented via ABI + golden fixtures.
-- Medium + Prism ≈ frontier + explore within ≤3 pts on suite.
-- Plugin SDK + security checklist ready.
+- ✅ External language path documented via ABI + golden fixtures (native Rust ABI; **WASM host deferred per ADR-0001**).
+- ⚠️ Medium + Prism ≈ frontier + explore within ≤3 pts — **interim**; structural token proxies only. Real comparison in P9.
+- ⚠️ Plugin SDK ready as documentation; WASM host + example plugin explicitly deferred (not claimed proven).
+- ✅ Security checklist, audit/redaction policy, pack-stability test.
 
 ---
 
-## 11. Phase 6 — Team / Distributed (optional)
+## 11. Phase 6 — Consolidation & Interaction Substrate
 
 **Planning ref:** P6 Stages A–C  
-**Duration:** TBD after P5
+**Duration:** 3–5 weeks  
+**Goal:** Close the §2.11 drift, then build the machine-side surfaces every UI needs. **No rendering code in this phase.**
 
 ### 11.1 Tech activated in P6
+
+| Area | Activate |
+|---|---|
+| Debt | `LICENSE`, `deny.toml` + `cargo deny` job, criterion benches wired as CI gates |
+| ADRs | `docs/architecture/adr/` — MCP transport, crate consolidation, language re-baseline, WASM host decision |
+| Async runtime | **Tokio** multi-thread (first real use in the workspace) |
+| Parallelism | **Rayon** fan-out in the indexing pipeline |
+| HTTP | **axum** + **tower-http** + **SSE** — `prism-api` |
+| Daemon | `prism-daemon` (`prismd`): **notify** file watcher, debounce, warm caches, session + cancellation |
+| LSP | **async-lsp** — `prism-lsp` hover, code lens, custom commands |
+| View model | `prism-view` — projection, LOD, render budgets → `schemas/graph-view/v1` |
+| Observability | **opentelemetry** + OTLP exporter, opt-in |
+| Contracts | `schemas/mcp-tools/v1`, `schemas/graph-view/v1` |
+| Optional | Kuzu adapter **only if** the new N2 benchmark shows SQLite missing P95 |
+
+### 11.2 Repository structure added in P6
+
+```text
+crates/
+├── prism-view/                    # NEW — KG → view-model projection, LOD, budgets
+│   └── src/{project,lod,layout_hints,budget}.rs
+├── prism-api/                     # NEW — axum routes + SSE streams
+├── prism-daemon/                  # NEW — prismd lifecycle, watcher, sessions, cancellation
+├── prism-lsp/                     # NEW — async-lsp server
+├── prism-plugin-host/             # NEW (or formally deferred by ADR)
+schemas/
+├── mcp-tools/v1/                  # NEW — tool contract of record
+└── graph-view/v1/                 # NEW — renderer input schema
+fixtures/
+└── views/                         # NEW — golden view-models
+benches/                           # criterion: cold index, incremental edit, query P95
+docs/architecture/adr/             # NEW — accepted divergences
+deny.toml · LICENSE                # NEW
+```
+
+### 11.3 P6 crate responsibilities
+
+| Crate | Purpose |
+|---|---|
+| `prism-view` | The only place that decides what appears in a view and at which LOD |
+| `prism-api` | HTTP/SSE transport; mirrors the MCP error model exactly, adds nothing semantic |
+| `prism-daemon` | Warm state and invalidation; must be optional at all times |
+| `prism-lsp` | Editor-native entry points; augments, never replaces, rust-analyzer/pylsp |
+
+### 11.4 P6 gate (tech view)
+
+- Every §2.11 row is built, waived with an expiry, or deprecated.
+- N1/N2 have recorded numbers and CI regression gates.
+- `curl` drives status → view-model → pack over HTTP.
+- `schemas/graph-view/v1` frozen and fixture-backed; oversized scope returns `VIEW_TOO_LARGE`.
+- `prism` CLI still works with `prismd` stopped.
+
+---
+
+## 12. Phase 7 — Visual Repository Intelligence
+
+**Planning ref:** P7 Stages A–C  
+**Duration:** 4–6 weeks  
+**Goal:** Render the graph, packs, slices, and impact cones — budgeted, deterministic, and provenance-bearing.
+
+### 12.1 Tech activated in P7
+
+| Area | Activate |
+|---|---|
+| TS workspace | **pnpm** workspace at `packages/`; TypeScript strict |
+| Graph engine | **Cytoscape.js** (default), **Sigma.js** + graphology (WebGL escape hatch) |
+| Layout | **ELK.js** layered (dependency/layering), concentric (impact cone), custom linear (slice path) |
+| Determinism | Canonical input ordering + seeded layout; memoized coordinates under `.prism/views/` |
+| Build | **Vite** library build for the renderer package |
+| Testing | **vitest** unit; screenshot-diff over deterministic layouts |
+| Export | SVG/PNG; **Mermaid** text fallback for docs and scorecards |
+| Accessibility | Colorblind-safe palette, keyboard navigation, ARIA labels on nodes |
+
+### 12.2 Repository structure added in P7
+
+```text
+packages/
+└── prism-graph-view/              # NEW — framework-agnostic renderer package
+    ├── src/
+    │   ├── model/                 # graph-view/v1 types (generated from schema)
+    │   ├── layout/                # elk-layered, concentric, slice-path adapters
+    │   ├── encode/                # tier/confidence → shape, stroke, color
+    │   ├── interact/              # focus, expand, filter, path-between, why-here
+    │   └── export/                # svg, png, mermaid
+    ├── package.json
+    └── vitest.config.ts
+fixtures/views/
+├── golden/                        # view-model JSON
+└── screenshots/                   # deterministic render baselines
+```
+
+### 12.3 Visual encoding contract
+
+| Signal | Encoding |
+|---|---|
+| Tier (T1/T2/T3/T4) | Node badge + border weight |
+| Confidence `heuristic` | **Dashed** edge |
+| Confidence `precise` | **Solid** edge |
+| Confidence `observed` | **Dotted** edge |
+| Aggregated/collapsed edge | Thickness by member count, confidence = **weakest** member |
+| Stale vs current snapshot | Desaturated fill + explicit staleness banner |
+| Truncated by budget | Ghost node with a count and an “expand” affordance |
+
+A legend is mandatory in every view. Confidence must never be conveyed by color alone.
+
+### 12.4 P7 gate (tech view)
+
+- Renderer consumes only `schemas/graph-view/v1`.
+- Node/edge budgets enforced per LOD; overflow refuses with anchors.
+- Screenshot-diff suite green; layout stable across whitespace-only edits.
+- Frame budget met at each LOD ceiling; WebGL path only behind explicit confirmation.
+
+---
+
+## 13. Phase 8 — IDE Extension (VS Code / Cursor)
+
+**Planning ref:** P8 Stages A–C  
+**Duration:** 4–5 weeks  
+**Goal:** Ship the editor surface — commands, evidence panel, graph panel, decorations, and automatic Cursor MCP registration.
+
+### 13.1 Tech activated in P8
+
+| Area | Activate |
+|---|---|
+| Extension host | TypeScript strict + **VS Code Extension API**, **esbuild** bundle |
+| Webview | **React 18+** + **Vite**, VS Code theme CSS variables |
+| Transport | Daemon HTTP/SSE first → CLI fallback → MCP for agent paths |
+| Binary delivery | Platform-specific VSIX **or** verified download-on-demand (ADR in Stage A) |
+| Testing | **vitest**, **@vscode/test-electron**, **Playwright** for the webview |
+| Packaging | **@vscode/vsce** → VS Code Marketplace + **Open VSX** |
+| CI | `extension.yml`: lint, typecheck, unit, e2e, VSIX artifact |
+
+### 13.2 Repository structure added in P8
+
+```text
+extensions/vscode/
+├── src/
+│   ├── extension.ts               # activation, command registration
+│   ├── transport/                 # daemon client, CLI fallback, version handshake
+│   ├── lifecycle/                 # binary resolution, spawn, health, upgrade prompts
+│   ├── panels/                    # evidence panel, graph panel hosts
+│   ├── decorations/               # ambiguity, hotspot, slice highlighting
+│   └── agent/                     # MCP auto-registration, AGENTS.md/rules generation
+├── webview/                       # React app consuming prism-graph-view
+├── media/
+├── package.json                   # contributes: commands, views, settings, keybindings
+└── tsconfig.json
+.github/workflows/extension.yml    # NEW
+```
+
+### 13.3 Command surface (implements IDE-INTEGRATION.md)
+
+| Command | Backed by |
+|---|---|
+| `prism.compileContext` | `POST /v1/context/compile` |
+| `prism.evidencePeek` | pack citations → file spans |
+| `prism.impact` | `/v1/query/impact` (`require_precise` optional) |
+| `prism.slice` | `/v1/semantic/slice` |
+| `prism.explain` | EXPLAIN payload of the last pack |
+| `prism.repoMap` / `prism.entrypoints` | `/v1/intel/*` → graph panel |
+
+### 13.4 P8 gate (tech view)
+
+- Clean install works on macOS, Linux, Windows; activation within the stated budget.
+- Cold repo → index → orientation → cited pack with zero terminal commands.
+- Cursor MCP registration is automatic, visible, and disableable.
+- Extension CI green, including end-to-end against a pinned fixture repo.
+
+---
+
+## 14. Phase 9 — Agent Experience & Workflows
+
+**Planning ref:** P9 Stages A–C  
+**Duration:** ~4 weeks  
+**Goal:** Make Prism the default agent path, package workflows as first-class assets, and finish the four-arm benchmark.
+
+### 14.1 Tech activated in P9
+
+| Area | Activate |
+|---|---|
+| MCP | Resolve the `rmcp` migration ADR; tool descriptions validated against `schemas/mcp-tools/v1` |
+| Workflows | `prism-agent` crate: declarative catalog → executable workflows |
+| Asset generation | Catalog → `AGENTS.md`, host rules, docs, fixtures (single source, generated adapters) |
+| Streaming | Progressive packs — architecture layer first — over SSE and MCP |
+| Traces | Local JSONL under `.prism/logs/`; opt-in export; tool sequences only, never content |
+| Eval | Provider SDKs for the four-arm run (pinned); dual-review labeling tooling in `eval/labeling/` |
+
+### 14.2 Repository structure added in P9
+
+```text
+crates/prism-agent/
+├── src/
+│   ├── catalog/                   # onboarding, review, debug, refactor-prep
+│   ├── repair/                    # refusal → actionable next step
+│   └── generate/                  # AGENTS.md + host rule emitters
+schemas/agent-workflow/v1/         # NEW — workflow catalog schema
+fixtures/workflows/                # NEW — expected tool traces per workflow
+eval/
+├── baselines/                     # four-arm run configs + outputs
+└── labeling/                      # dual-review tooling + agreement stats
+```
+
+### 14.3 Workflow catalog (initial four)
+
+| Workflow | Chain |
+|---|---|
+| **Onboarding** | `repo_map` → entrypoints → contracts → hotspots → orientation pack |
+| **Review** | changed paths → impact → optional `UpgradePrecision` → review pack |
+| **Debug** | stack/error → slice → diff intersect → debug pack (wraps the P4 recipe) |
+| **Refactor-prep** | T2 gate → precise references → rename dry-run → blast radius |
+
+### 14.4 P9 gate (tech view)
+
+- Four-arm benchmark executed and published; G1 evidenced or withdrawn.
+- Precision measured by dual review against the ≥70% target, with inter-rater agreement reported.
+- First-tool-choice and refusal-repair rates reported from traces.
+- Agent assets regenerate from the catalog; no hand-edited duplicates.
+
+---
+
+## 15. Phase 10 — Team / Distributed (optional)
+
+*(Formerly Phase 6; renumbered 2026-07-26. Remains deferred.)*
+
+**Planning ref:** P10 Stages A–C  
+**Duration:** TBD after P9
+
+### 15.1 Tech activated in P10
 
 | Area | Activate |
 |---|---|
@@ -642,7 +1008,7 @@ docs/
 | CI publishers | Workflows publishing SCIP / index artifacts by git SHA |
 | Caches | Deterministic artifact memoization; optional certified answer cache |
 
-### 11.2 Repository structure added in P6
+### 15.2 Repository structure added in P10
 
 ```text
 crates/
@@ -655,7 +1021,7 @@ deploy/
 └── publish-index.yml
 ```
 
-### 11.3 P6 gate (tech view)
+### 15.3 P10 gate (tech view)
 
 - Two developers read same commit index safely.
 - Solo local mode still requires **no** always-on heavy graph DB.
@@ -663,83 +1029,99 @@ deploy/
 
 ---
 
-## 12. Toolchain & CI baseline
+## 16. Toolchain & CI baseline
 
-### 12.1 Developer toolchain
+### 16.1 Developer toolchain
 
-| Tool | Purpose |
-|---|---|
-| `rustup` + pinned `rust-toolchain.toml` | Reproducible compiler |
-| `cargo fmt` / `clippy -D warnings` | Style + lints |
-| `cargo deny` | Advisories / licenses |
-| `cargo nextest` (optional) | Faster test runner |
-| `criterion` | Perf benches |
-| `uv` | Python eval env |
-| `node` + `pnpm` or `npm` | VS Code extension (P5) |
-| `protoc` | SCIP protobuf codegen (P3) |
+| Tool | Purpose | Status |
+|---|---|---|
+| `rustup` + pinned `rust-toolchain.toml` | Reproducible compiler | ✅ |
+| `cargo fmt` / `clippy -D warnings` | Style + lints | ✅ |
+| `cargo deny` | Advisories / licenses | ✅ `deny.toml` + CI job (P6 Stage A) |
+| `cargo nextest` (optional) | Faster test runner | optional |
+| `criterion` | Perf benches | ✅ `crates/prism-bench` (P6 Stage A) |
+| `uv` | Python eval env | ✅ |
+| `protoc` | SCIP protobuf codegen | P3 (as needed) |
+| `node` ≥20 + **pnpm** | TS workspace: renderer + extension | P7/P8 |
+| `@vscode/vsce` | VSIX packaging | P8 |
+| `playwright` | Webview end-to-end | P8 |
 
-### 12.2 CI matrix (minimum)
+### 16.2 CI matrix
 
-| Job | From phase |
-|---|---|
-| `cargo fmt --check` + `clippy` + `test` | P0 |
-| Extractor golden fixtures | P1 |
-| Incremental edit bench gate | P1 |
-| Pack stability / must-include tests | P2 |
-| Precise oracle P/R | P3 |
-| Slice property tests | P4 |
-| `uv run` eval smoke + scorecard export | P0 skeleton → P5 public |
-| Extension lint/build | P5 |
+| Job | From phase | Status |
+|---|---|---|
+| `cargo fmt --check` + `clippy` + `test` | P0 | ✅ |
+| Extractor golden fixtures | P1 | ✅ |
+| Plugin conformance script | P5 | ✅ |
+| `uv run` eval smoke | P0 → P5 | ✅ |
+| Pack stability / must-include tests | P2 | ✅ (in `cargo test`) |
+| Precise oracle P/R · slice property tests | P3/P4 | ✅ (in `cargo test`) |
+| **`cargo deny`** | P6 | ✅ Stage A |
+| **Incremental edit + query P95 bench gate** | P6 | ✅ smoke job (numeric fail thresholds TBD) |
+| **View-model golden fixtures** | P6 | ⬜ planned |
+| **Screenshot-diff render suite** | P7 | ⬜ planned |
+| **Extension lint / unit / e2e / VSIX** | P8 (was P5) | ⬜ planned |
+| **Workflow trace conformance** | P9 | ⬜ planned |
+| **Four-arm eval run** (scheduled, not per-PR) | P9 | ⬜ planned |
 
-### 12.3 Binary product names
+### 16.3 Binary product names
 
-| Binary | Role |
-|---|---|
-| `prism` | CLI (index, query, compile, doctor) |
-| `prism-mcp` | MCP stdio server (or `prism mcp serve` subcommand) |
-| `prism-lsp` | LSP server (or `prism lsp` subcommand) |
+| Binary | Role | Status |
+|---|---|---|
+| `prism` | CLI (index, query, compile, doctor, precise, semantic) | ✅ |
+| `prism mcp` | MCP stdio server (subcommand) | ✅ |
+| `prismd` | Local daemon: watcher, HTTP/SSE, warm caches | ⬜ P6 |
+| `prism lsp` | LSP server (subcommand) | ⬜ P6 |
 
-Prefer **subcommand-unified** early (`prism mcp serve`) to keep one binary for N5; split only if size/isolation demands it.
+Prefer **subcommand-unified** (`prism mcp`, `prism lsp`) to keep one binary for N5. `prismd` may stay a subcommand (`prism daemon`) unless supervision needs argue otherwise — decide in P6 Stage B.
 
 ---
 
-## 13. Dependency pin policy
+## 17. Dependency pin policy
 
 1. **Workspace-level `[workspace.dependencies]`** for all shared crates — one version graph.
-2. **Lockfile committed** (`Cargo.lock`) for the binary workspace.
-3. **Upgrade policy:** security patches anytime; minor upgrades batched; major upgrades require a short ADR note under `docs/architecture/adr/` (create when first needed).
+2. **Lockfile committed** (`Cargo.lock`) for the binary workspace; `pnpm-lock.yaml` committed for the TS workspace from P7.
+3. **Upgrade policy:** security patches anytime; minor upgrades batched; major upgrades require a short ADR note under `docs/architecture/adr/`. See [UPGRADE-POLICY.md](./UPGRADE-POLICY.md).
 4. **No `git` dependencies** in release builds without an ADR.
 5. **WASM WIT contracts versioned** like fact schema (breaking = major).
+6. **TypeScript dependencies stay minimal and pinned.** A new runtime dependency in the renderer or extension needs the same justification as a new Rust crate; the webview is not a place to accumulate a framework ecosystem.
+7. **Extension version tracks the engine major.** A mismatched pair must refuse at the handshake rather than misbehave.
 
 ---
 
-## 14. Appendix — Stack → ADD/Planning map
+## 18. Appendix — Stack → ADD/Planning map
 
-| Stack choice | ADD section | Planning workstream |
-|---|---|---|
-| Rust core + Rayon | §12.2, N1–N5 | W-STORE, W-KG |
-| tree-sitter | §12, §13 T1 | W-PLUGIN |
-| rusqlite + WAL / Kuzu | §15.2, §21, N4 | W-STORE |
-| KgStore trait | §15 polyglot persistence | W-KG |
-| rmcp MCP | §25 | W-MCP |
-| axum / clap | §22 | W-MCP / CLI |
-| async-lsp | §24 | W-IDE |
-| SCIP + prost + LSP | §13 T2, §7 SCIP | W-PLUGIN |
-| Joern adapter | §13 T4, §7 Joern | W-PLUGIN |
-| wasmtime WIT | §23, §29 | W-PLUGIN |
-| prism-plan / compile | §16–§19 | W-PLAN, W-CC |
-| tracing + OTel | §30 | W-OBS |
-| Python eval/ | §31–§32 | W-EVAL |
-| VS Code extension | §24 | W-IDE |
-| Shared server (P6) | §26 | P6 stages |
+| Stack choice | ADD section | Planning workstream | Phase |
+|---|---|---|---|
+| Rust core + Rayon | §12.2, N1–N5 | W-STORE, W-KG | P0 (Rayon: P6) |
+| tree-sitter | §12, §13 T1 | W-PLUGIN | P1 |
+| rusqlite + WAL / Kuzu | §15.2, §21, N4 | W-STORE | P0 (Kuzu: conditional) |
+| KgStore trait | §15 polyglot persistence | W-KG | P0 |
+| MCP (stdio; `rmcp` ADR open) | §25 | W-MCP | P1 |
+| clap CLI | §22 | CLI | P0 |
+| SCIP + prost + LSP client | §13 T2, §7 SCIP | W-PLUGIN | P3 |
+| Joern adapter | §13 T4, §7 Joern | W-PLUGIN | P4 |
+| wasmtime WIT | §23, §29 | W-PLUGIN | P6 (deferred from P5) |
+| prism-plan / compile | §16–§19 | W-PLAN, W-CC | P2 |
+| tracing (+ OTel exporter) | §30 | W-OBS | P0 / P6 |
+| Python eval/ | §31–§32 | W-EVAL | P0 |
+| **axum + SSE, Tokio, notify** | §22, §26 | **W-SVC** | **P6** |
+| **async-lsp server** | §24 | W-IDE | **P6** |
+| **Graph View-Model schema** | §11, §18 (budget discipline) | **W-VIZ** | **P6** |
+| **Cytoscape + ELK renderer** | §24 | **W-VIZ** | **P7** |
+| **VS Code / Cursor extension** | §24 | W-IDE | **P8** |
+| **Workflow catalog + agent assets** | §25 | **W-AX** | **P9** |
+| Shared server | §26 | P10 stages | P10 |
 
 ---
 
 ## Related documents
 
 - [Architecture Design Document](./ARCHITECTURE-DESIGN-DOCUMENT.md) — design authority  
-- [Planning & Implementation](../planning/PLANNING-AND-IMPLEMENTATION.md) — phase gates and stage packs  
+- [Planning & Implementation](../planning/PLANNING-AND-IMPLEMENTATION.md) — phase gates, stage packs, and the §12 gap register  
+- [IDE Integration](./IDE-INTEGRATION.md) — command surface implemented in P8  
+- [Tasks & Progress](../planning/TASKS-AND-PROGRESS.md) — living phase state  
 
 ---
 
-*End of Tech Stack & Project Structure document.*
+*End of Tech Stack & Project Structure document. Sections marked `‹planned P#›` or ⬜ describe decisions, not existing code.*

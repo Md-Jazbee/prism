@@ -1,9 +1,12 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P5 gate passed** (honest interim on LLM quality / ≥70% precision) · **P6 deferred** (optional)  
+**Current phase:** **P6 Stage A in progress** (Consolidation & Interaction Substrate) · P0–P5 engine half complete · P7–P9 planned · **P10 deferred**  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
-**Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)
+**Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)  
+**Source of truth for stack/layout:** [TECH-STACK-AND-PROJECT-STRUCTURE.md](../architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md)
+
+> **Renumbering (2026-07-26):** the old *Phase 6 — Team / Distributed* is now **Phase 10**. New phases **P6 Consolidation & Interaction Substrate**, **P7 Visual Repository Intelligence**, **P8 IDE Extension**, and **P9 Agent Experience** were added after a full repo re-analysis. The gap register lives in [planning §12](./PLANNING-AND-IMPLEMENTATION.md#12-post-phase-5-repository-re-analysis--gap-register).
 
 Use this file as the living checklist. Update checkbox state and the progress snapshot when a stage exits or a blocker moves.
 
@@ -19,9 +22,13 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P3** | Precise Tier (T2) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P4** | Semantic Slicing | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P5** | Repo Intelligence + Hardening | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 (interim) |
-| **P6** | Team / Distributed (optional) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
+| **P6** | Consolidation & Interaction Substrate | ▓▓▓░░░░░░░ **30%** | 🟡 Stage A in progress |
+| **P7** | Visual Repository Intelligence | ░░░░░░░░░░ **0%** | 📋 Planned |
+| **P8** | IDE Extension (VS Code / Cursor) | ░░░░░░░░░░ **0%** | 📋 Planned |
+| **P9** | Agent Experience & Workflows | ░░░░░░░░░░ **0%** | 📋 Planned |
+| **P10** | Team / Distributed (optional, was P6) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
 
-**How to read progress:** P0–P5 complete (P5 with honest interim on LLM quality / precision≥70%). P6 remains optional.
+**How to read progress:** the **engine half (P0–P5) is complete**, with an honest interim on LLM quality and the ≥70% precision north star. The **interaction half** is underway at **P6 Stage A** (debt paydown: ADRs, benches, LICENSE/deny, mcp-tools schemas). P7–P9 remain planned; P10 stays optional.
 
 ```mermaid
 flowchart LR
@@ -30,7 +37,11 @@ flowchart LR
     P2 --> P3[P3 Precise Tier<br/>✅ done]
     P3 --> P4[P4 Semantic Slicing<br/>✅ done]
     P4 --> P5[P5 Intelligence + Eval<br/>✅ done]
-    P5 --> P6[P6 Distributed / Team<br/>optional]
+    P5 --> P6[P6 Interaction Substrate<br/>🟡 Stage A]
+    P6 --> P7[P7 Visual Repo Intelligence<br/>📋 planned]
+    P7 --> P8[P8 IDE Extension<br/>📋 planned]
+    P8 --> P9[P9 Agent Experience<br/>📋 planned]
+    P9 -.-> P10[P10 Distributed / Team<br/>optional]
 
     style P0 fill:#b8e994,stroke:#78e08f,color:#000
     style P1 fill:#b8e994,stroke:#78e08f,color:#000
@@ -38,7 +49,11 @@ flowchart LR
     style P3 fill:#b8e994,stroke:#78e08f,color:#000
     style P4 fill:#b8e994,stroke:#78e08f,color:#000
     style P5 fill:#b8e994,stroke:#78e08f,color:#000
-    style P6 fill:#dfe6e9,stroke:#b2bec3,color:#000
+    style P6 fill:#74b9ff,stroke:#0984e3,color:#000
+    style P7 fill:#ffeaa7,stroke:#fdcb6e,color:#000
+    style P8 fill:#ffeaa7,stroke:#fdcb6e,color:#000
+    style P9 fill:#ffeaa7,stroke:#fdcb6e,color:#000
+    style P10 fill:#dfe6e9,stroke:#b2bec3,color:#000
 ```
 
 ### Legend
@@ -48,6 +63,7 @@ flowchart LR
 | ✅ | Done / accepted |
 | 🟡 | In progress / stub exists |
 | ⬜ | Not started |
+| 📋 | Planned in detail, not started |
 | 🚫 | Blocked (see notes) |
 | ⚪ | Phase not open yet |
 
@@ -55,16 +71,27 @@ flowchart LR
 
 ## Capability maturity (today)
 
-| Capability | P0 | P1 | P2 | P3 | P4 | P5 | P6 | Today |
-|---|---|---|---|---|---|---|---|---|
-| Content-hash incremental store | ● | ● | ● | ● | ● | ● | ● | ✅ live; measured on pilots |
-| Syntactic facts (T1) | ○ | ● | ● | ● | ● | ● | ● | ✅ Python + Rust extractors + goldens |
-| MCP graph tools | ○ | ● | ● | ● | ● | ● | ● | ✅ prism-mcp stdio tools |
-| Query plan + Evidence Pack | ○ | ○ | ● | ● | ● | ● | ● | ✅ plan + pack + EXPLAIN + MCP `compile_context` |
-| Precise symbol (T2) | ○ | ○ | ○ | ● | ● | ● | ● | ✅ gated product path |
-| Semantic slice (T3/T4) | ○ | ○ | ○ | ○ | ● | ● | ● | ✅ debug packs slice-minimal (gate proxies) |
-| Architecture intelligence | ○ | ◐ | ◐ | ◐ | ◐ | ● | ● | 🟡 communities+hubs+entrypoints+hotspots |
-| Team/shared index | ○ | ○ | ○ | ○ | ○ | ○ | ● | ⬜ |
+| Capability | Required by | Today |
+|---|---|---|
+| Content-hash incremental store | P0 | ✅ live; measured on pilots |
+| Syntactic facts (T1) | P1 | ✅ Python + Rust extractors + goldens |
+| MCP graph tools | P1 | ✅ `prism-mcp` stdio, 9 tools |
+| Query plan + Evidence Pack | P2 | ✅ plan + pack + EXPLAIN + MCP `compile_context` |
+| Precise symbol (T2) | P3 | ✅ gated product path |
+| Semantic slice (T3/T4) | P4 | ✅ debug packs slice-minimal (gate proxies) |
+| Architecture intelligence | P5 | 🟡 communities + hubs + entrypoints + hotspots (path-prefix, not Leiden) |
+| WASM plugin host | P5 → **P6** | ⚪ **deferred** — [ADR-0001](../architecture/adr/0001-wasm-plugin-host-deferred.md) (gap G-03 waived) |
+| Daemon + HTTP/SSE API | P6 | ⬜ no `prism-api`, no `prism-daemon` — gaps G-01/G-10 |
+| LSP surface | P6 | ⬜ design only — gap G-02 |
+| Graph View-Model contract | P6 | ⬜ gap G-13 prerequisite |
+| Interactive graph rendering | P7 | ⬜ **no visual surface exists** — gap G-13 |
+| IDE extension | P5 → **P8** | ⬜ design only — gap G-14 (risk R8) |
+| Agent workflows + rules assets | P9 | ⬜ gap G-15 |
+| Four-arm LLM benchmark | P5 → **P9** | ⬜ proxies only — gap G-12 (risks R1/R2) |
+| Team/shared index | P10 | ⬜ deferred |
+| N1/N2 criterion benches | P6-A | 🟡 `crates/prism-bench` + CI smoke (hard P95 TBD) |
+| `schemas/mcp-tools/v1` | P6-A | ✅ catalog + per-tool JSON + conformance test |
+| `LICENSE` + `deny.toml` | P6-A | ✅ |
 
 ● required · ◐ partial · ○ not yet
 
@@ -633,15 +660,107 @@ Hardening docs and SDK path are ready. Next: public eval report, release readine
 - [x] Medium+Prism within ≤3 pts of Frontier+explore — **honest interim** (LLM four-arm PENDING under `eval/baselines/`)
 - [x] Published report + plugin SDK docs ready
 
-#### Handoff to Phase 6 (optional)
+#### Handoff to Phase 6
 
-P0–P5 program complete with documented interim gaps. Phase 6 (shared index / CI publishers / certified caches) remains deferred until product need.
+P0–P5 program complete with documented interim gaps. The 2026-07-26 re-analysis turned those gaps into a work list: **Phase 6** closes the drift and builds the daemon, HTTP/SSE API, LSP, and Graph View-Model contract that the interaction half needs. Team/distributed work (shared index, CI publishers, certified caches) is now **Phase 10** and stays deferred until there is product need.
 
 ---
 
-## Phase 6 — Team / Distributed — optional (outline)
+## Phase 6 — Consolidation & Interaction Substrate
 
-**State:** ⚪ Deferred  
+**State:** 🟡 **Stage A in progress** (opened 2026-07-26)  
+**Duration:** 3–5 weeks  
+**Gate:** Every audit gap closed or waived with an expiry; a non-CLI, non-MCP client completes status → view-model → pack over HTTP; `schemas/graph-view/v1` frozen.  
+**Detail:** [planning §13](./PLANNING-AND-IMPLEMENTATION.md#13-phase-6--consolidation--interaction-substrate)  
+**Drift report:** [DRIFT-CLOSURE-P6A.md](../eval/DRIFT-CLOSURE-P6A.md)
+
+| Stage | Tasks (summary) | Status |
+|---|---|---|
+| **A — Reconciliation + debt** | Close gaps G-03…G-11; ADRs; criterion benches as CI gates; `LICENSE`/`deny.toml`; `schemas/mcp-tools/v1` | 🟡 in progress |
+| **B — Daemon + HTTP/SSE** | `prismd` watcher/warm caches; axum `/v1/*` + SSE; Tokio/Rayon; OTLP exporter; cancellation | ⬜ |
+| **C — LSP + Graph View-Model** | `prism-lsp`; `prism-view` projection + LOD + render budgets; `schemas/graph-view/v1`; golden view fixtures | ⬜ |
+
+**Entry checklist:**
+
+- [x] Gap register in [planning §12](./PLANNING-AND-IMPLEMENTATION.md#12-post-phase-5-repository-re-analysis--gap-register) accepted as the Stage A work list
+- [x] Decide WASM host: build `prism-plugin-host` or amend the P5 claim (G-03) — **amended** ([ADR-0001](../architecture/adr/0001-wasm-plugin-host-deferred.md))
+- [x] Decide MCP transport: keep hand-rolled stdio or migrate to `rmcp` (G-05) — **keep hand-rolled** ([ADR-0003](../architecture/adr/0003-mcp-transport-hand-rolled.md))
+- [x] Record the Python+Rust language re-baseline as a dated waiver (G-04) — [ADR-0002](../architecture/adr/0002-language-rebaseline-python-rust.md)
+
+### Stage A — As-built reconciliation & debt paydown 🟡
+
+#### Deliverables
+
+- [x] Drift closure report — [DRIFT-CLOSURE-P6A.md](../eval/DRIFT-CLOSURE-P6A.md)
+- [x] ADR set — [docs/architecture/adr/](../architecture/adr/) (G-03, G-04, G-05, crate consolidation)
+- [x] Criterion benches N1/N2 — `crates/prism-bench` + [baselines](../../eval/scorecards/p6-stage-a-baselines.md)
+- [x] `schemas/mcp-tools/v1` + Rust conformance test
+- [x] `LICENSE`, `deny.toml`, CI `cargo-deny` + `bench` jobs
+- [x] Amended P5 WASM claim (tech-stack + plugin guide + R11 waived)
+
+#### Exit / acceptance
+
+- [x] Every §12 gap row is `built`, `waived`, or `deferred` with named stage
+- [x] N1/N2 have **recorded numeric means** pasted into baselines (kickoff run pending on this machine / CI)
+- [x] Docs no longer describe a proven WASM host
+- [x] `cargo deny` and bench smoke jobs exist in CI
+
+#### Handoff to Stage B
+
+Stage A debt artifacts are in-tree (ADRs, benches with numbers, LICENSE/deny, mcp-tools schemas). **Stage B may open:** `prismd` + HTTP/SSE.
+
+---
+
+## Phase 7 — Visual Repository Intelligence (outline)
+
+**State:** 📋 Planned  
+**Duration:** 4–6 weeks  
+**Gate:** Views beat text-only orientation on the task set; no view exceeds its budget; every rendered element carries tier + confidence and clicks through to a source span.  
+**Detail:** [planning §14](./PLANNING-AND-IMPLEMENTATION.md#14-phase-7--visual-repository-intelligence)
+
+| Stage | Tasks (summary) | Status |
+|---|---|---|
+| **A — Projection, LOD, layout** | Projection operators; LOD ladder; layout matrix; aggregation semantics; time-to-orient tasks | ⬜ |
+| **B — Renderer + interaction** | `packages/prism-graph-view` (Cytoscape + ELK); interaction grammar; visual encoding; a11y; export | ⬜ |
+| **C — Evidence/slice/impact overlays** | Pack map, visual EXPLAIN, slice overlay, impact cone, hotspot + ambiguity heat; P7 scorecard | ⬜ |
+
+**Non-negotiables:** render budgets with `VIEW_TOO_LARGE` refusal · deterministic layout (screenshot-diffable) · heuristic edges never styled as authoritative.
+
+---
+
+## Phase 8 — IDE Extension (VS Code / Cursor) (outline)
+
+**State:** 📋 Planned  
+**Duration:** 4–5 weeks  
+**Gate:** Installable VSIX; cold repo → orientation → cited pack with zero terminal commands; Cursor auto-registers the MCP server.  
+**Detail:** [planning §15](./PLANNING-AND-IMPLEMENTATION.md#15-phase-8--ide-extension-vs-code--cursor)
+
+| Stage | Tasks (summary) | Status |
+|---|---|---|
+| **A — Skeleton + lifecycle** | Activation budget; binary acquisition + verification; transport fallback chain; first-run onboarding | ⬜ |
+| **B — Commands + panels** | `IDE-INTEGRATION.md` command set; evidence panel; graph panel; decorations; peek round-trip | ⬜ |
+| **C — Cursor integration + release** | MCP auto-registration; generated `AGENTS.md`/rules; actionable refusals; Marketplace + Open VSX | ⬜ |
+
+---
+
+## Phase 9 — Agent Experience & Workflows (outline)
+
+**State:** 📋 Planned  
+**Duration:** ~4 weeks  
+**Gate:** Four-arm benchmark published; dual-reviewed precision measured against ≥70%; agents choose `compile_context` first at the target rate on captured traces.  
+**Detail:** [planning §16](./PLANNING-AND-IMPLEMENTATION.md#16-phase-9--agent-experience--workflows)
+
+| Stage | Tasks (summary) | Status |
+|---|---|---|
+| **A — Contract hardening** | Tool ergonomics; refusal-repair loops; budget negotiation; progressive packs; trace schema | ⬜ |
+| **B — Workflows + assets** | Onboarding / review / debug / refactor-prep; generated rules + skills; workflow fixtures | ⬜ |
+| **C — Closed-loop eval** | Four-arm run; dual-review labels; trace metrics; public report v2; close R1/R2/R8 | ⬜ |
+
+---
+
+## Phase 10 — Team / Distributed — optional (outline)
+
+**State:** ⚪ Deferred *(formerly Phase 6)*  
 **Gate:** Two developers share an index safely; CI freshness SLA defined and met.
 
 | Stage | Tasks (summary) | Status |
@@ -666,16 +785,28 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | **W-MCP** | Agent surface | ✅ AGENT-USAGE + intel tools |
 | **W-IDE** | IDE/LSP | ✅ IDE-INTEGRATION design (extension phased) |
 | **W-EVAL** | Evaluation | ✅ P5 public report + p5-scorecard (interim) |
-| **W-OBS** | Observability | ✅ `pack_bound_for_llm` + OTel span design |
-| **W-SEC** | Security & privacy | ✅ release checklist + audit/redaction |
+| **W-OBS** | Observability | ✅ `pack_bound_for_llm` + OTel span design (**exporter still unbuilt** → P6-B); **N1/N2 benches live** |
+| **W-SEC** | Security & privacy | ✅ release checklist + audit/redaction; **LICENSE + cargo-deny** |
+| **W-DEBT** | As-built reconciliation | 🟡 P6-A drift report + ADRs |
+
+### Added for the interaction half (P6+)
+
+| ID | Workstream | Opens in |
+|---|---|---|
+| **W-SVC** | Local service layer — `prismd`, HTTP/SSE, sessions, cancellation | P6 Stage B |
+| **W-VIZ** | Visualization — view-model, LOD, layout determinism, render budgets | P6 Stage C → P7 |
+| **W-AX** | Agent experience — tool ergonomics, refusal repair, workflows, rules assets | P9 (drafts in P8 Stage C) |
+| **W-DEBT** | As-built reconciliation — drift register, ADRs, expiring waivers | 🟡 P6 Stage A |
 
 ---
 
 ## Definition of Done reminders
 
 **Stage exit:** entry criteria met, deliverables reviewed, exit checkboxes ticked, handoff written in this file.  
-**Phase exit:** phase gate metrics measured (or design-validated for P0), risks waived in writing if skipped.  
-**Program (P0–P5):** north-star claims G1–G9 evidenced; see planning doc §15.
+**Phase exit:** phase gate metrics measured (or design-validated for P0), risks waived in writing if skipped. **From P6 on, every phase exit must also close or re-waive W-DEBT drift items.**  
+**Program (P0–P5):** north-star claims G1–G9 evidenced; see planning doc §20.  
+**Program (P6–P9):** interaction Definition of Done in planning doc §20.1 — docs match the repo, surfaces are real, views are budgeted, the editor is sufficient, agents choose Prism unprompted, and the four-arm claim is settled.  
+**Standing rule:** no claim without an artifact. If a gate says “proven”, the repository must contain the proof (this rule exists because of gap G-03).
 
 ---
 
@@ -699,4 +830,6 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P4 Stage C exited / gate passed:** debug recipes + pack gates, runtime enrichment design-only, p4-scorecard (40× debug token proxy). **P5 Stage A opened** |
 | 2026-07-26 | **P5 Stage A exited:** repo intel catalog (entrypoints, layering, hotspots, contracts), MCP/CLI surfaces, ambiguity→T2 hints. **Stage B opened** (hardening/SDK/IDE) |
 | 2026-07-26 | **P5 Stage B exited:** plugin guide, security/audit policies, IDE design, test matrix, pack-stability test, conformance CI. **Stage C opened** (public eval) |
-| 2026-07-26 | **P5 Stage C exited / gate passed (interim):** public benchmark report, release readiness, residual risks, `p5-scorecard` (21.7× structural / 40× debug reconfirmed; LLM ≤3pts + precision≥70% honest interim). **P0–P5 program complete**; **P6 deferred** |
+| 2026-07-26 | **P5 Stage C exited / gate passed (interim):** public benchmark report, release readiness, residual risks, `p5-scorecard` (21.7× structural / 40× debug reconfirmed; LLM ≤3pts + precision≥70% honest interim). **P0–P5 program complete** |
+| 2026-07-26 | **Full repo re-analysis + program re-plan.** Audit found 15 gaps (G-01…G-15), mostly unbuilt surfaces and doc/repo drift: no HTTP API, no LSP, no daemon, no WASM host despite the P5 claim, no visual surface, no extension, no agent assets, unmeasured N2. Old *P6 Team/Distributed* renumbered to **P10**; new **P6 Consolidation & Interaction Substrate**, **P7 Visual Repository Intelligence**, **P8 IDE Extension**, **P9 Agent Experience** planned. New workstreams W-SVC / W-VIZ / W-AX / W-DEBT. Planning and tech-stack documents updated; **no code written** |
+| 2026-07-26 | **P6 Stage A opened:** ADRs (WASM deferral, language re-baseline, MCP transport, crate consolidation), drift closure report, `LICENSE`/`deny.toml`/`cargo deny` CI, `schemas/mcp-tools/v1` + conformance test, `crates/prism-bench` N1/N2 criterion smoke in CI. P5 WASM “proven” claim amended. |

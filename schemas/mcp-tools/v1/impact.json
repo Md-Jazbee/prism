@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/mcp-tools/v1/impact.json",
+  "title": "impact",
+  "description": "Depth-limited blast-radius from a seed node id. Default is HEURISTIC T1. Set require_precise=true for accuracy claims (PRECISION_REQUIRED without T2 overlay).",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "depth": { "type": "integer", "default": 2, "maximum": 8 },
+    "limit": { "type": "integer", "default": 100 },
+    "require_precise": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, require T2 overlay + precise edges on seed"
+    }
+  },
+  "required": ["id"],
+  "additionalProperties": false
+}

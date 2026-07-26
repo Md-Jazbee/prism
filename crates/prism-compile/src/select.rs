@@ -1,8 +1,6 @@
 //! Selection: plan (+ optional KG) → candidate fragments.
 
-use crate::fragment::{
-    estimate_tokens, CandidateFragment, FragmentKind, PackLayer, Provenance,
-};
+use crate::fragment::{estimate_tokens, CandidateFragment, FragmentKind, PackLayer, Provenance};
 use anyhow::Result;
 use prism_obs::{emit_index_event, IndexEvent};
 use prism_plan::{Intent, Operator, Plan};
@@ -65,7 +63,9 @@ pub fn select_candidates(plan: &Plan) -> Vec<CandidateFragment> {
 
     // Architecture always gets a tiny community stub if not already must-included
     if matches!(plan.intent, Intent::Architecture)
-        && !out.iter().any(|c| c.roles.iter().any(|r| r == "community_map"))
+        && !out
+            .iter()
+            .any(|c| c.roles.iter().any(|r| r == "community_map"))
     {
         let text = "communities: (synthetic path-prefix map)".to_string();
         out.push(CandidateFragment {
@@ -167,7 +167,12 @@ pub fn select_from_kg(
                         // 1-hop neighbors as optional signatures (prefer precise)
                         let mut nbrs = kg.neighbors(
                             &hit.id,
-                            Some(&["CALLS".into(), "IMPORTS".into(), "DEFINES".into(), "REFERENCES".into()]),
+                            Some(&[
+                                "CALLS".into(),
+                                "IMPORTS".into(),
+                                "DEFINES".into(),
+                                "REFERENCES".into(),
+                            ]),
                             EdgeDirection::Both,
                             15,
                         )?;
@@ -220,11 +225,11 @@ pub fn select_from_kg(
                     .get("critical_path_only")
                     .and_then(|v| v.as_bool())
                     .unwrap_or(false);
-                let max_upgrades = step
-                    .inputs
-                    .get("max_upgrades")
-                    .and_then(|v| v.as_u64())
-                    .unwrap_or(DEFAULT_MAX_UPGRADES as u64) as usize;
+                let max_upgrades =
+                    step.inputs
+                        .get("max_upgrades")
+                        .and_then(|v| v.as_u64())
+                        .unwrap_or(DEFAULT_MAX_UPGRADES as u64) as usize;
                 let max_latency_ms = step
                     .inputs
                     .get("max_latency_ms")
@@ -382,8 +387,7 @@ pub fn select_from_kg(
                     }
                     if !ran {
                         gaps_extra.push(
-                            "Slice skipped: no path:line or resolvable symbol criterion"
-                                .into(),
+                            "Slice skipped: no path:line or resolvable symbol criterion".into(),
                         );
                     }
                 } else {
@@ -531,9 +535,8 @@ pub fn select_from_kg(
 
     // Prefer precise over heuristic when same fragment id stem / neighbor target
     out.sort_by(|a, b| {
-        a.id.cmp(&b.id).then_with(|| {
-            confidence_rank(&b.confidence).cmp(&confidence_rank(&a.confidence))
-        })
+        a.id.cmp(&b.id)
+            .then_with(|| confidence_rank(&b.confidence).cmp(&confidence_rank(&a.confidence)))
     });
     out.dedup_by(|a, b| a.id == b.id);
 
@@ -597,10 +600,7 @@ fn fragments_from_slice(report: &prism_semantic::InterprocSliceReport) -> Vec<Ca
             s.path, s.function, s.start_line, s.end_line, report.depth_reached
         );
         out.push(CandidateFragment {
-            id: format!(
-                "frag:slice:{}:{}:{}:{i}",
-                s.path, s.start_line, s.end_line
-            ),
+            id: format!("frag:slice:{}:{}:{}:{i}", s.path, s.start_line, s.end_line),
             kind: FragmentKind::Slice,
             layer: PackLayer::Core,
             text: text.clone(),

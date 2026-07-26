@@ -1,7 +1,7 @@
 //! Rename dry-run + accuracy claim gating (P3 Stage C).
 
-use crate::require::{precision_required, PrecisionGate, PrecisionRequired};
 use crate::has_precise_overlay;
+use crate::require::{precision_required, PrecisionGate, PrecisionRequired};
 use anyhow::Result;
 use prism_store::{EdgeDirection, SqliteKgStore};
 use serde::{Deserialize, Serialize};
@@ -128,9 +128,7 @@ pub fn rename_dry_run(
         "This is a dry-run procedure, not a production rename engine.".into(),
     ];
     if allow_heuristic && !saw_precise {
-        notes.push(
-            "allow_heuristic: sites may be incomplete; do not claim rename safety.".into(),
-        );
+        notes.push("allow_heuristic: sites may be incomplete; do not claim rename safety.".into());
     }
 
     Ok(Ok(RenameDryRunReport {

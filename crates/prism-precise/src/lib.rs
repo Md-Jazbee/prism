@@ -115,11 +115,7 @@ pub fn index_to_fact_bundle(index: &PreciseIndex) -> FactBundle {
 
     for edge in &index.edges {
         let kind = parse_edge_kind(&edge.kind);
-        let start = edge
-            .span
-            .as_ref()
-            .map(|s| s.start_byte)
-            .unwrap_or(0);
+        let start = edge.span.as_ref().map(|s| s.start_byte).unwrap_or(0);
         let mut attrs = serde_json::Map::new();
         attrs.insert(
             "overlay".into(),
@@ -189,8 +185,7 @@ pub fn import_precise_index(
         );
     }
     let scip_dir = prism.join("scip");
-    std::fs::create_dir_all(&scip_dir)
-        .with_context(|| format!("create {}", scip_dir.display()))?;
+    std::fs::create_dir_all(&scip_dir).with_context(|| format!("create {}", scip_dir.display()))?;
 
     let artifact_name = index_path
         .file_name()
@@ -211,12 +206,8 @@ pub fn import_precise_index(
         analyzer: index.analyzer.clone(),
         artifact: artifact_name,
         imported_at: chrono_like_now(),
-        git_commit: git_commit.or_else(|| {
-            index
-                .snapshot
-                .as_ref()
-                .and_then(|s| s.git_commit.clone())
-        }),
+        git_commit: git_commit
+            .or_else(|| index.snapshot.as_ref().and_then(|s| s.git_commit.clone())),
         tree_fingerprint: tree_fingerprint.or_else(|| {
             index
                 .snapshot
@@ -254,8 +245,8 @@ pub fn read_manifest(workspace: &Path) -> Result<Option<PreciseManifest>> {
     if !path.exists() {
         return Ok(None);
     }
-    let text = std::fs::read_to_string(&path)
-        .with_context(|| format!("read {}", path.display()))?;
+    let text =
+        std::fs::read_to_string(&path).with_context(|| format!("read {}", path.display()))?;
     Ok(Some(serde_json::from_str(&text)?))
 }
 
@@ -281,7 +272,10 @@ mod tests {
         let index = load_precise_index(&index_path).expect("load fixture");
         let bundle = index_to_fact_bundle(&index);
         assert_eq!(bundle.tier, Tier::T2);
-        assert!(bundle.edges.iter().all(|e| e.confidence == Confidence::Precise));
+        assert!(bundle
+            .edges
+            .iter()
+            .all(|e| e.confidence == Confidence::Precise));
 
         let t1: Vec<CallEdge> = serde_json::from_str(
             &fs::read_to_string(root.join("fixtures/precise/oracle/python/t1-calls.json")).unwrap(),

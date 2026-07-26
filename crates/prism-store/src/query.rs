@@ -250,11 +250,11 @@ impl SqliteKgStore {
     ///
     /// Returns `(total, precise, heuristic_resolved, unresolved)`.
     pub fn calls_confidence_counts(&self) -> Result<(u64, u64, u64, u64)> {
-        let total: u64 = self.conn.query_row(
-            "SELECT COUNT(*) FROM edges WHERE kind = 'CALLS'",
-            [],
-            |r| r.get(0),
-        )?;
+        let total: u64 =
+            self.conn
+                .query_row("SELECT COUNT(*) FROM edges WHERE kind = 'CALLS'", [], |r| {
+                    r.get(0)
+                })?;
         let precise: u64 = self.conn.query_row(
             "SELECT COUNT(*) FROM edges WHERE kind = 'CALLS' AND confidence = 'precise'",
             [],

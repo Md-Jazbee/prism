@@ -11,9 +11,8 @@ use prism_precise::{
     rename_dry_run, score_call_resolution, CallEdge, PrecisionGate,
 };
 use prism_semantic::{
-    build_file_artifact, build_workspace_python, ensure_shard, interproc_slice,
-    local_slice, read_manifest as read_semantic_manifest, SliceCriterion, SliceDirection,
-    SliceParams,
+    build_file_artifact, build_workspace_python, ensure_shard, interproc_slice, local_slice,
+    read_manifest as read_semantic_manifest, SliceCriterion, SliceDirection, SliceParams,
 };
 use prism_store::{parse_edge_kinds, EdgeDirection, SqliteKgStore, SqliteMetaStore};
 use std::path::PathBuf;
@@ -468,8 +467,7 @@ fn main() -> Result<()> {
             } => {
                 let (wm, kg) = open_kg(&path)?;
                 if require_precise {
-                    if let Err(e) =
-                        prism_precise::require_precise_claim(wm.root(), &kg, Some(&id))
+                    if let Err(e) = prism_precise::require_precise_claim(wm.root(), &kg, Some(&id))
                     {
                         println!("{}", serde_json::to_string_pretty(&e)?);
                         eprintln!("# impact status=PRECISION_REQUIRED");

@@ -182,11 +182,7 @@ pub fn interproc_slice(
     }
 
     let seed_key = format!("{}::{}", params.path, seed_fn);
-    let call_edges: Vec<&OverlayEdge> = shard
-        .edges
-        .iter()
-        .filter(|e| e.kind == "CALLS")
-        .collect();
+    let call_edges: Vec<&OverlayEdge> = shard.edges.iter().filter(|e| e.kind == "CALLS").collect();
 
     let mut frontier = vec![seed_key.clone()];
     let mut seen = std::collections::BTreeSet::from([seed_key.clone()]);

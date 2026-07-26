@@ -36,9 +36,11 @@ Optional later: PreciseImporter / SemanticBackend plugins — separate cards und
 
 ---
 
-## WASM path (future)
+## WASM path (deferred — ADR-0001)
 
-`prism-plugin-host` (wasmtime WIT) is the long-term sandbox. Until that crate ships, first-party languages land as native Rust crates that honor the same ABI. External contributors can still prototype against the ABI + goldens; hosting moves to WASM without changing Fact IR.
+`prism-plugin-host` (wasmtime WIT) is the long-term sandbox. **It is not built.** Until that crate ships, first-party languages land as native Rust crates that honor the same ABI. External contributors can still prototype against the ABI + goldens; hosting moves to WASM without changing Fact IR.
+
+Do **not** claim the WASM host is proven until an example plugin runs under wasmtime in-tree.
 
 ---
 

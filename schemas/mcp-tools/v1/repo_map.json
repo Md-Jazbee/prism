@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/mcp-tools/v1/repo_map.json",
+  "title": "repo_map",
+  "description": "Lightweight orientation: path-prefix communities, hubs, and intel notes.",
+  "type": "object",
+  "properties": {
+    "hub_limit": { "type": "integer", "default": 15 },
+    "full_intel": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, return RepoIntelReport (entrypoints, layering, hotspots, contracts)"
+    }
+  },
+  "additionalProperties": false
+}

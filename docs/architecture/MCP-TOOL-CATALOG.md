@@ -1,8 +1,10 @@
-# MCP tool catalog (P5 Stage A)
+# MCP tool catalog (P5 Stage A · schemas externalized P6 Stage A)
 
 **Server:** `prism mcp <workspace>` (stdio JSON-RPC 2.0, protocol `2024-11-05`)  
 **Allowlist only** — no write / apply-rename tools (dry-run is CLI-only).  
 **Primary tool:** `compile_context`  
+**Contract of record:** [`schemas/mcp-tools/v1/`](../../schemas/mcp-tools/v1/) (gap G-11)  
+**Transport ADR:** [ADR-0003](./adr/0003-mcp-transport-hand-rolled.md) — hand-rolled stdio; `rmcp` deferred  
 **Gating:** [PRECISION-GATING.md](./PRECISION-GATING.md)  
 **Intel:** [REPO-INTELLIGENCE.md](./REPO-INTELLIGENCE.md)
 

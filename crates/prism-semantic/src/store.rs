@@ -121,13 +121,16 @@ pub fn build_workspace_python(workspace: &Path) -> Result<SemanticManifest> {
     Ok(manifest)
 }
 
-fn walk_py(
-    workspace: &Path,
-    dir: &Path,
-    files: &mut usize,
-    functions: &mut usize,
-) -> Result<()> {
-    let skip = [".prism", ".git", "node_modules", "target", ".venv", "venv", "__pycache__"];
+fn walk_py(workspace: &Path, dir: &Path, files: &mut usize, functions: &mut usize) -> Result<()> {
+    let skip = [
+        ".prism",
+        ".git",
+        "node_modules",
+        "target",
+        ".venv",
+        "venv",
+        "__pycache__",
+    ];
     for ent in fs::read_dir(dir)? {
         let ent = ent?;
         let name = ent.file_name();

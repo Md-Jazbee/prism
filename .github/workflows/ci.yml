@@ -23,6 +23,28 @@ jobs:
       - name: plugin conformance
         run: ./scripts/plugins/conformance-check.sh
 
+  cargo-deny:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: EmbarkStudios/cargo-deny-action@v2
+
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: criterion smoke (N1/N2)
+        run: >
+          cargo bench -p prism-bench
+          --bench n1_index
+          --bench n2_structural_query
+          --
+          --sample-size 10
+          --warm-up-time 1
+          --measurement-time 1
+
   eval:
     runs-on: ubuntu-latest
     steps:

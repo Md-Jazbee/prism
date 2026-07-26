@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/mcp-tools/v1/resolve_symbol.json",
+  "title": "resolve_symbol",
+  "description": "Lookup symbols by exact name. Prefer compile_context for most Q&A; use this for targeted id lookup.",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string", "description": "Exact symbol name" },
+    "file": { "type": "string", "description": "Optional path substring filter" },
+    "limit": { "type": "integer", "default": 20 }
+  },
+  "required": ["name"],
+  "additionalProperties": false
+}

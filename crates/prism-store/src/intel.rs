@@ -391,11 +391,9 @@ fn git_hotspots(workspace: &Path, limit: usize) -> Result<Vec<Hotspot>> {
 fn ambiguity_require_t2(kg: &SqliteKgStore) -> bool {
     let total: u64 = kg
         .conn
-        .query_row(
-            "SELECT COUNT(*) FROM edges WHERE kind = 'CALLS'",
-            [],
-            |r| r.get(0),
-        )
+        .query_row("SELECT COUNT(*) FROM edges WHERE kind = 'CALLS'", [], |r| {
+            r.get(0)
+        })
         .unwrap_or(0);
     if total == 0 {
         return false;
@@ -427,8 +425,8 @@ mod tests {
     use super::*;
     use crate::kg::{KgStore, SqliteKgStore};
     use prism_ir::{
-        edge_id, file_node_id, symbol_node_id, Confidence, EdgeKind, FactBundle, FactEdge, FactNode,
-        NodeKind, Tier,
+        edge_id, file_node_id, symbol_node_id, Confidence, EdgeKind, FactBundle, FactEdge,
+        FactNode, NodeKind, Tier,
     };
     use tempfile::tempdir;
 

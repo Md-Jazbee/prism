@@ -1,0 +1,23 @@
+[package]
+name = "prism-bench"
+description = "Criterion benches for N1 (index) and N2 (structural query) — P6 Stage A"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+anyhow = { workspace = true }
+criterion = { workspace = true }
+tempfile = { workspace = true }
+prism-core = { workspace = true }
+prism-store = { workspace = true }
+
+[[bench]]
+name = "n1_index"
+harness = false
+
+[[bench]]
+name = "n2_structural_query"
+harness = false

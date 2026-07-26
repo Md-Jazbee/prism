@@ -2,8 +2,8 @@
 
 **Project working name:** Prism — Repository Intelligence Platform  
 **Document type:** Detailed Planning & Implementation Guide (phase → stage)  
-**Status:** Planning only — no codebase deliverable  
-**Date:** 2026-07-19  
+**Status:** Active — P0–P5 delivered; interaction track (P6–P9) planned; P10 optional  
+**Date:** 2026-07-19 · **Revised:** 2026-07-26 (post-P5 re-analysis; interaction & visualization phases added)  
 **Governs:** Execution of the [Architecture Design Document](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)  
 **Audience:** Project leads, architects, implementers, evaluators, open-source contributors  
 
@@ -21,7 +21,7 @@ This document turns the ADD’s high-level roadmap into an executable plan. It d
 | **Deliverable** | Concrete artifact (schema, tool surface, harness, report) — not source trees |
 | **Gate** | Must-pass checks before the next stage or phase may start |
 
-**Out of scope for this document:** writing application code, scaffolding repositories, or choosing a specific language/runtime for the binary. Technology choices remain guidance until an implementation kickoff decides them.
+**Out of scope for this document:** writing application code. Technology choices live in [TECH-STACK-AND-PROJECT-STRUCTURE.md](../architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md), which was promoted from guidance to decisions at implementation kickoff. Day-to-day checkbox state lives in [TASKS-AND-PROGRESS.md](./TASKS-AND-PROGRESS.md).
 
 ---
 
@@ -38,11 +38,18 @@ This document turns the ADD’s high-level roadmap into an executable plan. It d
 9. [Phase 3 — Precise Tier](#9-phase-3--precise-tier)
 10. [Phase 4 — Semantic Slicing](#10-phase-4--semantic-slicing)
 11. [Phase 5 — Repository Intelligence + Hardening](#11-phase-5--repository-intelligence--hardening)
-12. [Phase 6 — Team / Distributed (optional)](#12-phase-6--team--distributed-optional)
-13. [Evaluation program (runs across phases)](#13-evaluation-program-runs-across-phases)
-14. [Risk register & guardrails](#14-risk-register--guardrails)
-15. [Definition of Done (program-level)](#15-definition-of-done-program-level)
-16. [Appendix — Checklists & templates](#16-appendix--checklists--templates)
+12. [Post-Phase-5 repository re-analysis & gap register](#12-post-phase-5-repository-re-analysis--gap-register)
+13. [Phase 6 — Consolidation & Interaction Substrate](#13-phase-6--consolidation--interaction-substrate)
+14. [Phase 7 — Visual Repository Intelligence](#14-phase-7--visual-repository-intelligence)
+15. [Phase 8 — IDE Extension (VS Code / Cursor)](#15-phase-8--ide-extension-vs-code--cursor)
+16. [Phase 9 — Agent Experience & Workflows](#16-phase-9--agent-experience--workflows)
+17. [Phase 10 — Team / Distributed (optional)](#17-phase-10--team--distributed-optional)
+18. [Evaluation program (runs across phases)](#18-evaluation-program-runs-across-phases)
+19. [Risk register & guardrails](#19-risk-register--guardrails)
+20. [Definition of Done (program-level)](#20-definition-of-done-program-level)
+21. [Appendix — Checklists & templates](#21-appendix--checklists--templates)
+
+> **Phase renumbering note (2026-07-26).** The former *Phase 6 — Team / Distributed* is now **Phase 10** and stays optional/deferred. Phases 6–9 are new and cover the *interaction* half of the product: service surfaces, graph rendering, IDE extension, and agent experience. Historical references to “P6 Stage C certified caches” now mean **P10 Stage C**.
 
 ---
 
@@ -110,14 +117,25 @@ Align with ADD Goals G1–G9:
 
 ### 3.1 Phase sequence
 
+The program has two halves. **P0–P5 (the engine half, delivered)** made repository understanding correct, budgeted, and measurable. **P6–P9 (the interaction half, planned)** makes that understanding *usable by humans and agents* — service surfaces, rendered graphs, an IDE extension, and agent workflows. P10 remains an optional scale-out.
+
 ```mermaid
 flowchart LR
-    P0[P0 Foundations] --> P1[P1 Syntactic KG + MCP]
-    P1 --> P2[P2 Context Compiler]
-    P2 --> P3[P3 Precise Tier]
-    P3 --> P4[P4 Semantic Slicing]
-    P4 --> P5[P5 Intelligence + Eval]
-    P5 --> P6[P6 Distributed / Team]
+    subgraph Engine["Engine half — delivered"]
+      P0[P0 Foundations] --> P1[P1 Syntactic KG + MCP]
+      P1 --> P2[P2 Context Compiler]
+      P2 --> P3[P3 Precise Tier]
+      P3 --> P4[P4 Semantic Slicing]
+      P4 --> P5[P5 Intelligence + Eval]
+    end
+    subgraph Interaction["Interaction half — planned"]
+      P6[P6 Consolidation + Interaction Substrate]
+      P7[P7 Visual Repo Intelligence]
+      P8[P8 IDE Extension]
+      P9[P9 Agent Experience]
+    end
+    P5 --> P6 --> P7 --> P8 --> P9
+    P9 -.optional.-> P10[P10 Distributed / Team]
 ```
 
 | Phase | Intent | Duration (calendar) | Primary user-visible outcome |
@@ -128,20 +146,30 @@ flowchart LR
 | **P3** | High-stakes nav/refactor becomes trustworthy | 4–6 weeks | SCIP/LSP hybrid resolution; precision-gated tools |
 | **P4** | Debug/security packs become slice-minimal | 5–8 weeks | CFG/DFG/CPG shards + slice operator + debug recipes |
 | **P5** | Product hardening + published proof | ~4 weeks | Repo intelligence + public eval; plugin SDK polish |
-| **P6** | Team/CI scale (optional) | TBD | Shared index, authz, optional certified caches |
+| **P6** | Close as-built drift; build the surfaces a UI needs | 3–5 weeks | `prismd` daemon, HTTP/SSE API, LSP, Graph View-Model contract |
+| **P7** | Make the graph *seeable* without dumping it | 4–6 weeks | Budgeted, provenance-bearing interactive graph views |
+| **P8** | A developer never needs the terminal | 4–5 weeks | Installable VS Code / Cursor extension with panels + peek |
+| **P9** | Agents choose Prism first, and we can prove it | ~4 weeks | Agent workflows, rules/skills assets, closed-loop eval |
+| **P10** | Team/CI scale (optional) | TBD | Shared index, authz, optional certified caches |
 
 ### 3.2 Capability maturity ladder
 
-| Capability | P0 | P1 | P2 | P3 | P4 | P5 | P6 |
-|---|---|---|---|---|---|---|---|
-| Content-hash incremental store | ● | ● | ● | ● | ● | ● | ● |
-| Syntactic facts (T1) | ○ | ● | ● | ● | ● | ● | ● |
-| MCP graph tools | ○ | ● | ● | ● | ● | ● | ● |
-| Query plan + Evidence Pack | ○ | ○ | ● | ● | ● | ● | ● |
-| Precise symbol (T2) | ○ | ○ | ○ | ● | ● | ● | ● |
-| Semantic slice (T3/T4) | ○ | ○ | ○ | ○ | ● | ● | ● |
-| Architecture intelligence | ○ | ◐ | ◐ | ◐ | ◐ | ● | ● |
-| Team/shared index | ○ | ○ | ○ | ○ | ○ | ○ | ● |
+| Capability | P0 | P1 | P2 | P3 | P4 | P5 | P6 | P7 | P8 | P9 | P10 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Content-hash incremental store | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
+| Syntactic facts (T1) | ○ | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
+| MCP graph tools | ○ | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
+| Query plan + Evidence Pack | ○ | ○ | ● | ● | ● | ● | ● | ● | ● | ● | ● |
+| Precise symbol (T2) | ○ | ○ | ○ | ● | ● | ● | ● | ● | ● | ● | ● |
+| Semantic slice (T3/T4) | ○ | ○ | ○ | ○ | ● | ● | ● | ● | ● | ● | ● |
+| Architecture intelligence | ○ | ◐ | ◐ | ◐ | ◐ | ● | ● | ● | ● | ● | ● |
+| Long-lived daemon + HTTP/SSE API | ○ | ○ | ○ | ○ | ○ | ○ | ● | ● | ● | ● | ● |
+| LSP surface | ○ | ○ | ○ | ○ | ○ | ○ | ● | ● | ● | ● | ● |
+| Graph View-Model contract | ○ | ○ | ○ | ○ | ○ | ○ | ● | ● | ● | ● | ● |
+| Interactive graph rendering | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ● | ● | ● | ● |
+| IDE extension (VS Code / Cursor) | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ◐ | ● | ● | ● |
+| Agent workflows + rules assets | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ◐ | ● | ● |
+| Team/shared index | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ● |
 
 ● = required deliverable · ◐ = partial / heuristic · ○ = not yet
 
@@ -177,9 +205,22 @@ These run in every phase. Stage plans reference them by ID.
 | **W-IDE** | IDE/LSP | Commands, peek UX, edit-time incremental policy | Replacing language servers |
 | **W-EVAL** | Evaluation | Gold tasks, baselines, scorecard automation | Feature shipping |
 | **W-OBS** | Observability | Metrics, traces, audit logs of packs sent to LLMs | Business logic |
-| **W-SEC** | Security & privacy | Local default, secret redaction, plugin sandbox policy | Multi-tenant SaaS (until P6) |
+| **W-SEC** | Security & privacy | Local default, secret redaction, plugin sandbox policy | Multi-tenant SaaS (until P10) |
 
-**Planning rule:** Every phase exit must update W-EVAL and W-OBS, even if the product surface barely changed.
+### 4.1 Workstreams added for the interaction half (P6+)
+
+| ID | Workstream | Owns | Never owns |
+|---|---|---|---|
+| **W-SVC** | Local service layer | `prismd` lifecycle, HTTP/SSE contracts, session + cancellation, warm caches | Graph algorithms, pixels |
+| **W-VIZ** | Visualization | Graph View-Model schema, level-of-detail, layout determinism, render budgets, visual encoding of tier/confidence | Selecting evidence (that is W-CC) |
+| **W-AX** | Agent experience | Tool ergonomics, refusal-repair loops, workflow recipes, rules/skills assets, trace capture | Model hosting, prompt magic |
+| **W-DEBT** | As-built reconciliation | Drift register between docs and repo, waivers, deprecations | New features |
+
+**Planning rules:**
+
+1. Every phase exit must update **W-EVAL** and **W-OBS**, even if the product surface barely changed.
+2. From P6 onward, every phase exit must also update **W-DEBT** — either close a drift item or record a written waiver.
+3. **W-VIZ never invents evidence.** A view may only render facts the KG or a pack already contains, with the same provenance and confidence labels.
 
 ---
 
@@ -207,7 +248,19 @@ flowchart TD
     P4S3 --> P5S1[P5 Stage A: Repo intelligence]
     P5S1 --> P5S2[P5 Stage B: Hardening + SDK]
     P5S2 --> P5S3[P5 Stage C: Public eval]
-    P5S3 --> P6[P6 Optional team mode]
+    P5S3 --> P6S1[P6 Stage A: Debt paydown]
+    P6S1 --> P6S2[P6 Stage B: Daemon + HTTP/SSE]
+    P6S2 --> P6S3[P6 Stage C: LSP + Graph View-Model]
+    P6S3 --> P7S1[P7 Stage A: View-model + layout]
+    P7S1 --> P7S2[P7 Stage B: Renderer + interaction]
+    P7S2 --> P7S3[P7 Stage C: Evidence overlays gate]
+    P7S3 --> P8S1[P8 Stage A: Extension skeleton]
+    P8S1 --> P8S2[P8 Stage B: Commands + panels]
+    P8S2 --> P8S3[P8 Stage C: Cursor + release]
+    P8S3 --> P9S1[P9 Stage A: Agent contract hardening]
+    P9S1 --> P9S2[P9 Stage B: Workflows + rules assets]
+    P9S2 --> P9S3[P9 Stage C: Closed-loop eval gate]
+    P9S3 --> P10[P10 Optional team mode]
 ```
 
 ### 5.2 Hard dependency rules
@@ -216,8 +269,12 @@ flowchart TD
 2. **No `compile_context` as primary tool** before P2 Stage C gate.  
 3. **No safe rename / precise impact claims** before P3 Stage C gate.  
 4. **No “slice-based debug” claims** before P4 Stage C gate.  
-5. **No shared index / answer cache** before P5 Stage C succeeds.  
-6. **Embedding work** may appear as a tiny fallback prototype in P2+, but must be flagged `low_confidence` and excluded from success narratives.
+5. **No shared index / answer cache** before P9 Stage C succeeds (was: P5 Stage C — moved because the interaction half now precedes scale-out).  
+6. **Embedding work** may appear as a tiny fallback prototype in P2+, but must be flagged `low_confidence` and excluded from success narratives.  
+7. **No pixels before contracts.** No renderer work before the Graph View-Model schema is frozen in P6 Stage C.  
+8. **No extension release** before P7 Stage C — an extension without views is a CLI with extra steps.  
+9. **No “agents prefer Prism” claim** before P9 Stage C measures it on real traces.  
+10. **No visualization that invents structure.** Every rendered node/edge maps to a KG node/edge or pack fragment with its original tier and confidence.
 
 ### 5.3 Approximate effort envelope
 
@@ -229,9 +286,13 @@ flowchart TD
 | P3 | 4–6 | Integration-heavy |
 | P4 | 5–8 | Deepest analysis risk |
 | P5 | ~4 | Proof + polish |
-| P6 | optional | Ops/product expansion |
+| P6 | 3–5 | Plumbing + debt (unglamorous, unblocking) |
+| P7 | 4–6 | New discipline (front-end + layout determinism) |
+| P8 | 4–5 | Packaging & platform integration |
+| P9 | ~4 | Proof of the agent thesis |
+| P10 | optional | Ops/product expansion |
 
-Total critical path (P0–P5): roughly **22–36 weeks**, depending on language count, fixture quality, and eval labeling bandwidth.
+Total critical path (P0–P5): roughly **22–36 weeks**. Interaction half (P6–P9): roughly **15–20 weeks** on top, and it is the first block of work that needs a **TypeScript/front-end skill set** alongside Rust.
 
 ---
 
@@ -761,7 +822,7 @@ Ship the agent UX change: **one** high-value call returns the substrate for answ
 |---|---|---|---|
 | Agents ignore one-shot tool | Medium | High | IDE/MCP guidance; hooks where available |
 | Precision &lt;60% | Medium | High | Tighten recipes; improve must-include labeling |
-| Feature creep into answer cache | Medium | Medium | Explicit non-goal until P6 |
+| Feature creep into answer cache | Medium | Medium | Explicit non-goal until P10 |
 
 ---
 
@@ -1166,11 +1227,703 @@ Publish proof. Close the quality gap claim for the program.
 
 ---
 
-## 12. Phase 6 — Team / Distributed (optional)
+## 12. Post-Phase-5 repository re-analysis & gap register
+
+**Audit date:** 2026-07-26 · **Auditor:** program re-analysis pass · **Method:** crate inventory vs [TECH-STACK-AND-PROJECT-STRUCTURE.md](../architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md) §3, graph orientation via `repo_map` / `index_status`, workspace test run, docs↔code cross-check.
+
+**Verdict:** the **engine is real and green** — 13 crates, 138 files indexed / 658 nodes / 3057 edges in its own self-index, 66 workspace tests passing, CI running fmt + clippy + test + plugin conformance + eval smoke. The P5 gate stands. What is missing is almost entirely **surface area and stated-but-unbuilt tech**, which is exactly what the new phases exist to close.
+
+### 12.1 As-built crate inventory
+
+| Planned (tech stack §3) | As-built | Note |
+|---|---|---|
+| `prism-cli` | ✅ | `index`, `doctor`, `index-status`, `query`, `compile`, `mcp`, `precise`, `semantic` |
+| `prism-core` | ✅ | workspace identity, fingerprint, ignore policy, incremental |
+| `prism-store` | ✅ | **also absorbed `prism-graph` and `prism-intel`** |
+| `prism-ir` | ✅ | facts, IDs, confidence, schema versions |
+| `prism-obs` | ✅ | event schema + emit |
+| `prism-extract`, `-python`, `-rust` | ✅ | Rust replaced the planned TypeScript/Go as the second language |
+| `prism-mcp` | ✅ | 9 tools; **hand-rolled stdio JSON-RPC, not `rmcp`** |
+| `prism-plan`, `prism-compile` | ✅ | recipes, plan IR, packs, EXPLAIN |
+| `prism-precise`, `prism-semantic` | ✅ | T2 overlay, T3/T4 slices |
+| `prism-graph` | ➖ merged | Folded into `prism-store`; acceptable, but the doc still claims a separate crate |
+| `prism-intel` | ➖ merged | Lives as `prism-store::intel` |
+| `prism-api` | ❌ | HTTP `/v1/*` is a **contract on paper only**; no axum, no tower |
+| `prism-lsp` | ❌ | IDE commands are design-only |
+| `prism-plugin-host` | ❌ | **WASM ABI is documentation only**; no wasmtime, no example plugin |
+| `prism-daemon` | ❌ | Every invocation cold-opens SQLite; no file watching, no warm state |
+| `prism-extract-typescript`, `-go` | ❌ | P1 named Python/TS/Go; delivered Python/Rust |
+| `extensions/vscode`, `plugins/examples` | ❌ | Directories do not exist |
+
+### 12.2 Gap register
+
+Severity: **S1** blocks a stated claim · **S2** blocks planned product surface · **S3** hygiene/debt.
+
+| ID | Gap | Sev | Evidence | Closed by |
+|---|---|---|---|---|
+| **G-01** | No HTTP/SSE API surface — nothing but the CLI and MCP stdio can talk to Prism | S2 | no `prism-api`, no axum in any manifest | P6 Stage B |
+| **G-02** | No LSP server; `IDE-INTEGRATION.md` commands have no host | S2 | no `prism-lsp` | P6 Stage C |
+| **G-03** | P5 tech-view claimed “WASM host **proven** with one example plugin”; nothing was built | **S1** | no `prism-plugin-host`, no `plugins/` | P6 Stage A — build it **or** amend the claim to “native ABI documented, WASM deferred” |
+| **G-04** | Language coverage re-baselined silently (TS/Go → Rust) without a written waiver | S3 | `crates/prism-extract-*` | P6 Stage A waiver + language expansion track |
+| **G-05** | MCP transport diverges from the `rmcp` decision | S3 | `prism-mcp/Cargo.toml` has no `rmcp` | P6 Stage A ADR: keep hand-rolled or migrate |
+| **G-06** | No Kuzu adapter and **no measured evidence** for the P95 <50ms structural-query NFR | S2 | no bench, no criterion | P6 Stage A |
+| **G-07** | `benches/` contains only a README, so growth rule 6 (“perf regressions fail CI”) is unenforceable | S3 | `benches/README.md` | P6 Stage A |
+| **G-08** | No `LICENSE` file despite `license = "MIT"`; no `deny.toml` despite a stated `cargo deny` job | S3 | repo root | P6 Stage A |
+| **G-09** | OpenTelemetry is design-only; no exporter, so `OTEL-SPANS.md` is aspirational | S3 | no `opentelemetry` dep | P6 Stage B |
+| **G-10** | No Tokio/Rayon anywhere — indexing is single-threaded; the “parallel fan-out” rationale for choosing Rust is unexercised | S2 | workspace manifest | P6 Stage B |
+| **G-11** | `schemas/mcp-tools/v1` was a P1 deliverable and does not exist; tool schemas live inline in Rust | S3 | `schemas/` tree | P6 Stage A |
+| **G-12** | Four-arm LLM benchmark still pending (R1); precision is a 60% proxy vs the 70% north star (R2) | **S1** | `PROGRAM-RESIDUAL-RISKS.md` | P9 Stage C |
+| **G-13** | **No visual surface at all.** `repo_map`, impact cones, slices and packs are JSON; a human must read a wall of text to orient | S2 | MCP/CLI output only | P7 |
+| **G-14** | No IDE extension (R8) | S2 | no `extensions/` | P8 |
+| **G-15** | No agent-side assets — no rules, no `AGENTS.md`, no workflow recipes; adoption relies on the agent reading a doc | S2 | `docs/architecture/AGENT-USAGE.md` only | P9 |
+
+### 12.3 What the audit did **not** find
+
+Worth recording, because it constrains the new phases:
+
+- No architectural drift from the ADD spine. There is no answer cache, no embedding retrieval, no whole-repo CPG at index time.
+- No provenance leaks — the tools that return fragments carry tier and confidence.
+- No unbounded-dump regressions; `SCOPE_UNRESOLVED` and `BUDGET_EXCEEDED` are live behaviors.
+
+**Consequence for P7:** the refuse-to-dump discipline that governs packs must be ported to rendering. A graph view is just another budgeted context artifact, and “render the whole repo” is the visual equivalent of dumping the codebase into a prompt.
+
+---
+
+## 13. Phase 6 — Consolidation & Interaction Substrate
+
+**Phase goal:** Pay down the drift found in §12 and build the *machine-side* surfaces that any human or agent UI needs — a long-lived daemon, an HTTP/SSE API, an LSP host, and a frozen **Graph View-Model** contract. No pixels in this phase.
+
+**Phase duration:** 3–5 weeks  
+**Phase gate (summary):** A process that is neither the CLI nor an MCP client can obtain index status, a graph view-model, and an Evidence Pack over a documented API inside latency budget; every §12 gap is closed or waived in writing.
+
+```mermaid
+flowchart LR
+    A[Stage A Reconciliation + Debt] --> B[Stage B Daemon + HTTP/SSE]
+    B --> C[Stage C LSP + Graph View-Model + Gate]
+```
+
+---
+
+### Stage A — As-built reconciliation & debt paydown
+
+#### Purpose
+
+Make the documents and the repository agree, and make the unmeasured NFRs measurable. This stage ships almost no user-visible feature and is the highest-leverage stage in the phase.
+
+#### Entry criteria
+
+- P5 gate recorded (done, with interim flags)  
+- §12 gap register accepted as the work list
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| W-DEBT | Resolve each of G-03 … G-11: build, or write a dated waiver naming the residual risk |
+| W-DEBT | ADR set under `docs/architecture/adr/`: MCP transport (G-05), crate consolidation (`prism-graph`/`prism-intel` merge), language re-baseline (G-04) |
+| W-OBS / W-STORE | criterion benches for structural query P95, cold index, incremental edit; wire as CI gates (G-06, G-07) |
+| W-PLUGIN | Decide WASM host: implement `prism-plugin-host` + `plugins/examples/hello-extractor`, **or** downgrade the P5 claim (G-03) |
+| W-MCP | Externalize tool schemas to `schemas/mcp-tools/v1` and generate/validate the Rust surface against them (G-11) |
+| W-SEC | `LICENSE`, `deny.toml`, `cargo deny` CI job (G-08) |
+
+#### Deliverables
+
+1. **Drift closure report** — one row per §12 gap: built / waived / deprecated, with owner and date  
+2. **ADR set** for the three accepted divergences  
+3. **Benchmark suite** with recorded baselines for N1 (cold index, incremental edit) and N2 (structural query P95)  
+4. **`schemas/mcp-tools/v1`** as the tool contract of record  
+5. **Amended P5 claims** wherever evidence does not support the original wording
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Debt stage gets skipped “because it isn’t a feature” | It is the gate for P6; no daemon work merges before the benches land |
+| Waivers become a way to never do the work | Every waiver carries an expiry phase, not just a note |
+
+#### Exit / acceptance
+
+- [ ] Every §12 gap row is `built`, `waived (dated, with expiry)`, or `deprecated`  
+- [ ] N1/N2 have **numbers**, not targets — even if the numbers miss  
+- [ ] Docs no longer describe crates that do not exist  
+- [ ] `cargo deny` and bench regression jobs are green in CI
+
+#### Handoff to Stage B
+
+A repository whose documentation is trustworthy, with performance baselines that the daemon must not regress.
+
+---
+
+### Stage B — `prismd` daemon & HTTP/SSE service layer
+
+#### Purpose
+
+Today every CLI or MCP invocation cold-opens SQLite and rebuilds in-memory state. A UI that renders a graph, re-lays it out on filter changes, and streams progress cannot pay that cost per interaction.
+
+#### Entry criteria
+
+- Stage A benches exist (they define “does not regress”)  
+- Session/cancellation semantics drafted
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| W-SVC | `prismd` lifecycle: autostart, single instance per workspace, idle shutdown, version handshake with clients |
+| W-SVC | File watching → debounce → incremental re-index → invalidation broadcast |
+| W-SVC | HTTP `/v1/*` per ADD §22: `index/status`, `query/*`, `context/compile`, `query/plan`, `semantic/slice`, `intel/*` |
+| W-SVC | **SSE/streaming**: index progress, pack-compile progress, view invalidation events |
+| W-SVC | Cancellation + backpressure: a superseded UI request must be cancellable, not merely ignored |
+| W-STORE | Warm caches: parsed grammars, prepared statements, memoized intel; parallel fan-out via Rayon (G-10) |
+| W-OBS | Real OTLP exporter behind an opt-in flag (G-09); per-request spans |
+| W-SEC | Loopback-only bind by default, token handshake, no remote origin without explicit config |
+
+#### Deliverables
+
+1. **Daemon lifecycle spec** — start/stop, staleness, crash recovery, multi-workspace  
+2. **HTTP + SSE API v1** — OpenAPI-style contract with error model mirroring MCP (`SCOPE_UNRESOLVED`, `BUDGET_EXCEEDED`, `PRECISION_REQUIRED`)  
+3. **Invalidation event contract** — what a client must re-fetch when a file changes  
+4. **Concurrency + cancellation design** — request lifecycle, superseded-request policy  
+5. **Local security posture note** — bind address, auth token, audit of packs served
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Daemon becomes a required always-on service (violates N5 / local-first) | CLI must keep working with **no** daemon; daemon is an accelerator, not a dependency |
+| Stale index served to a UI that looks authoritative | Every response carries `snapshot_id` + freshness; clients must render staleness |
+| Concurrency bugs corrupt the store | Single-writer discipline; readers on snapshots; property tests under concurrent edit |
+
+#### Exit / acceptance
+
+- [ ] `curl` can drive status, plan, compile, slice, and intel end-to-end  
+- [ ] Editing a file emits an invalidation event within the incremental budget  
+- [ ] Killing `prismd` degrades to CLI behavior with no data loss  
+- [ ] Warm-path latency beats the cold CLI path by a recorded factor
+
+---
+
+### Stage C — LSP surface, Graph View-Model contract & Phase 6 gate
+
+#### Purpose
+
+Freeze the contract that P7 will render and P8 will host. The Graph View-Model is deliberately **not** the knowledge graph: it is a projected, budgeted, layout-ready subset — the visual analogue of an Evidence Pack.
+
+#### Entry criteria
+
+- Stage B API serving  
+- Renderer candidates surveyed (so the schema is not accidentally engine-specific)
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| W-IDE | `prism-lsp`: hover with evidence summary, code lens for impact/slice entry points, custom commands from `IDE-INTEGRATION.md`, workspace symbol backed by the KG |
+| W-VIZ | **Graph View-Model schema v1**: nodes, edges, groups, `tier`, `confidence`, `citation`, `lod_rank`, `truncated` markers |
+| W-VIZ | **View budget model**: `max_nodes` / `max_edges`, deterministic drop order, `VIEW_TOO_LARGE` refusal with suggested anchors |
+| W-VIZ | **View kinds catalog** and their queries: architecture map, impact cone, slice path, pack map, hotspot heat, layering violations, ambiguity heat |
+| W-VIZ | Layout determinism contract: same `(snapshot_id, view_kind, params)` ⇒ identical coordinates |
+| W-EVAL | Golden view-model fixtures, mirroring golden fact fixtures |
+
+#### Deliverables
+
+1. **`schemas/graph-view/v1`** — view-model JSON Schema + versioning rule  
+2. **View kinds catalog** — for each kind: seeds, expansion rule, default budget, drop order, refusal condition  
+3. **Layout determinism note** — seeding, tie-breaking, stability under whitespace-only edits  
+4. **LSP capability matrix** — what Prism provides vs what it defers to rust-analyzer / pylsp  
+5. **Golden view fixtures** under `fixtures/views/`
+
+#### Exit / acceptance (Phase 6 gate)
+
+- [ ] Every §12 gap is closed or has a dated, expiring waiver  
+- [ ] A non-CLI, non-MCP client completes status → view-model → pack over HTTP within budget  
+- [ ] `schemas/graph-view/v1` is frozen, versioned, and fixture-backed  
+- [ ] Requesting a view of an oversized scope returns `VIEW_TOO_LARGE` with anchors — **never** a truncated dump pretending to be complete  
+- [ ] LSP server answers hover/codelens on the pilot repos  
+- [ ] N1/N2 benches did not regress against the Stage A baselines
+
+#### Phase 6 phase-level risks
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Phase becomes an infinite refactor | Medium | High | Gap register is the scope; new work goes to P7+ |
+| View-model schema leaks renderer assumptions | Medium | High | Validate against two renderers on paper before freezing |
+| Daemon erodes the local-first, no-service promise | Medium | High | CLI-without-daemon stays a tested path |
+
+---
+
+## 14. Phase 7 — Visual Repository Intelligence
+
+**Phase goal:** Make the graph, packs, slices, and impact cones **seeable and navigable** — with exactly the discipline that governs Evidence Packs: budgeted, provenance-bearing, deterministic, and willing to refuse.
+
+**Phase duration:** 4–6 weeks  
+**Phase gate (summary):** On orientation and impact tasks, a developer using the views reaches the correct answer faster than reading files; no view exceeds its render budget; every rendered element carries tier and confidence.
+
+```mermaid
+flowchart LR
+    A[Stage A View-model + LOD + layout] --> B[Stage B Renderer + interaction grammar]
+    B --> C[Stage C Evidence / slice / impact overlays + Gate]
+```
+
+### 14.1 Design principles (bind every stage)
+
+| Principle | Consequence for rendering |
+|---|---|
+| **Render budget = token budget** | A view has `max_nodes`/`max_edges` and a deterministic drop order; overflow refuses with anchors rather than truncating silently |
+| **Confidence is visible, not buried** | Heuristic edges render dashed, precise solid, observed dotted; tier badges on nodes; a legend is mandatory, not decorative |
+| **Every pixel cites** | Click a node → file span; click an edge → the fact that produced it; a view with no citations is a diagram, not evidence |
+| **Deterministic layout** | Same `(snapshot, view kind, params)` ⇒ same coordinates, so views are diffable and screenshot-testable |
+| **Progressive disclosure over completeness** | Start at community/module level; expand on demand; never “show all 50k nodes” |
+| **The view is a pack** | Views are compiled from the same selection machinery, so they inherit must-include and drop-order guarantees |
+
+---
+
+### Stage A — View-model projection, level-of-detail & layout
+
+#### Purpose
+
+Decide *what appears* before deciding *how it looks*. Most graph tools fail here: they render everything and delegate comprehension to the user's eyes.
+
+#### Entry criteria
+
+- P6 gate passed; `schemas/graph-view/v1` frozen  
+- View kinds catalog drafted in P6 Stage C
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| W-VIZ | Projection operators: collapse to community, collapse to file, expand symbol, filter by edge kind / tier / confidence |
+| W-VIZ | Level-of-detail ladder: repo → subsystem → module → file → symbol, with node-count targets per level |
+| W-VIZ | Layout strategy per view kind: layered (dependency/layering), radial (impact cone), path-oriented (slice), force (exploration fallback) |
+| W-VIZ | Aggregation semantics: what a collapsed super-node’s edge weight *means*, and how to avoid implying precision that the tier does not support |
+| W-CC | Reuse selection/drop-order machinery so a view and a pack agree on what matters |
+| W-EVAL | “Time to orient” task design: how we will measure that a view beats reading |
+
+#### Deliverables
+
+1. **Projection operator catalog** — inputs, outputs, budget cost  
+2. **LOD policy** — target node counts and the promotion/demotion rules between levels  
+3. **Layout selection matrix** — view kind → algorithm → determinism strategy  
+4. **Aggregation semantics note** — the honest meaning of a collapsed edge  
+5. **Time-to-orient task set** added to the eval suite
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Hairball graphs that impress in screenshots and teach nothing | Node-count budgets per LOD are exit criteria, not preferences |
+| Aggregated edges imply precision the tier lacks | Collapsed edges inherit the **weakest** confidence of their members |
+
+#### Exit / acceptance
+
+- [ ] Each view kind has a documented projection, budget, and layout  
+- [ ] Aggregation rules stated, including confidence inheritance  
+- [ ] Time-to-orient tasks specified with a measurement protocol
+
+---
+
+### Stage B — Renderer & interaction grammar
+
+#### Purpose
+
+One rendering implementation, one interaction vocabulary, reusable across the IDE panel, the docs, and any future web surface.
+
+#### Entry criteria
+
+- Stage A projections + layouts specified  
+- Rendering technology decided in the tech-stack document
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| W-VIZ | Renderer package consumed by the extension webview and standalone previews |
+| W-VIZ | **Interaction grammar**: focus, expand/collapse, pin, filter, path-between, “why is this here?”, breadcrumb back to the previous view |
+| W-VIZ | Visual encoding spec: shape/color/stroke → node kind, tier, confidence, staleness; colorblind-safe palette; theme adaptation |
+| W-VIZ | Performance envelope: interaction frame budget at the LOD node ceiling; WebGL escape hatch above it |
+| W-SVC | Incremental view updates driven by the P6 invalidation stream — re-project, do not re-layout from scratch |
+| W-SEC | Redaction applies to rendered spans exactly as it does to packs |
+
+#### Deliverables
+
+1. **Renderer package** with a documented, view-model-only input contract  
+2. **Interaction grammar spec** — every gesture, its query, and its budget cost  
+3. **Visual encoding spec** + accessibility notes (contrast, keyboard navigation, screen-reader labels for nodes)  
+4. **Performance envelope report** at each LOD ceiling  
+5. **Static export path** — SVG/PNG plus a Mermaid fallback for docs and reports
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Front-end complexity outgrows the team | Single renderer package, no framework sprawl, view-model is the only input |
+| Interactions issue unbounded queries | Every gesture maps to a budgeted request; the daemon can refuse |
+| Pretty but unreadable at scale | Frame-budget and node-ceiling numbers are exit criteria |
+
+#### Exit / acceptance
+
+- [ ] Renderer consumes only `schemas/graph-view/v1` — no direct store access  
+- [ ] Every interaction has a bounded query and a defined refusal path  
+- [ ] Determinism test: same params ⇒ pixel-stable layout  
+- [ ] Keyboard-navigable and legible without color alone
+
+---
+
+### Stage C — Evidence, slice & impact overlays + Phase 7 gate
+
+#### Purpose
+
+Connect views to the things that make Prism distinctive: Evidence Packs, EXPLAIN, slices, precision tiers.
+
+#### Entry criteria
+
+- Stage B renderer usable  
+- Pack/EXPLAIN/slice contracts unchanged since P5
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| W-VIZ / W-CC | **Pack map**: render a compiled pack as a graph — what was included, what was dropped, and why (EXPLAIN reason codes as visual annotations) |
+| W-VIZ | **Slice overlay**: highlight the slice path over the CFG/DFG with the criterion pinned and never elided |
+| W-VIZ | **Impact overlay**: cone with confidence decay by hop; heuristic hops visually distinct from precise ones |
+| W-VIZ | **Change/hotspot heat** and **layering-violation** views from `prism-store::intel` |
+| W-VIZ | **Ambiguity heat**: where T2 would help most — a direct visual call to action for the precision ladder |
+| W-EVAL | Run time-to-orient and impact-comprehension tasks; compare against text-only baselines |
+
+#### Deliverables
+
+1. **Overlay catalog** — five view kinds with fixtures  
+2. **Visual EXPLAIN** — dropped fragments and their reason codes, visible rather than buried in JSON  
+3. **Phase 7 scorecard** — time-to-orient, budget adherence, render latency, correctness of user conclusions  
+4. **Screenshot-diff test suite** built on layout determinism
+
+#### Exit / acceptance (Phase 7 gate)
+
+- [ ] Views measurably beat text-only orientation on the task set (report the delta honestly, including where they do not)  
+- [ ] No view exceeds its node/edge budget; oversized scopes refuse with anchors  
+- [ ] Every rendered node/edge carries tier + confidence, and clicking reaches a source span  
+- [ ] Visual EXPLAIN shows drops and reasons for a real pack  
+- [ ] Screenshot-diff suite is green and stable across whitespace-only edits
+
+#### Phase 7 phase-level risks
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Visualization becomes the product and the engine stalls | Medium | High | Views may only render existing facts; no new analysis lands in P7 |
+| Users trust a pretty graph more than its confidence labels | **High** | **High** | Confidence encoding is mandatory; legend always visible; heuristic edges never styled as authoritative |
+| Layout instability makes views feel random | Medium | Medium | Determinism contract + screenshot tests |
+| Large monorepos make every view a hairball | High | Medium | LOD ceilings; refuse-and-anchor instead of degrade |
+
+---
+
+## 15. Phase 8 — IDE Extension (VS Code / Cursor)
+
+**Phase goal:** Put the whole capability inside the editor: index, orient, compile, peek, slice, and inspect impact without a terminal — and register Prism as an agent tool automatically in Cursor.
+
+**Phase duration:** 4–5 weeks  
+**Phase gate (summary):** An installable extension takes a developer from a cold repository to a rendered orientation and a cited Evidence Pack without the command line; Cursor picks Prism up as an MCP server with no manual JSON editing.
+
+```mermaid
+flowchart LR
+    A[Stage A Skeleton + binary lifecycle] --> B[Stage B Commands + panels + decorations]
+    B --> C[Stage C Cursor agent integration + release Gate]
+```
+
+---
+
+### Stage A — Extension skeleton, binary lifecycle & transport
+
+#### Purpose
+
+The unglamorous part that decides whether anyone ever sees Phase 7's work: shipping and supervising a native binary from a TypeScript extension across three operating systems.
+
+#### Entry criteria
+
+- P7 renderer packaged and consumable from a webview  
+- Daemon handshake/version contract stable (P6 Stage B)
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| W-IDE | Activation events (avoid slowing editor start), workspace detection, multi-root behavior |
+| W-IDE | Binary acquisition: bundled per-platform vs download-on-demand vs use-PATH; checksum verification; version-skew handling |
+| W-IDE | Transport selection: daemon HTTP first, CLI fallback, MCP for agent paths |
+| W-IDE | First-run experience: detect missing index, offer to build it, stream progress from SSE |
+| W-SEC | Never transmit repository content off-machine; explicit consent for any telemetry; redaction on “copy for LLM” |
+
+#### Deliverables
+
+1. **Extension architecture note** — processes, transports, failure and recovery paths  
+2. **Binary distribution decision** with a signing/verification story  
+3. **Activation & performance budget** — contribution to editor startup  
+4. **First-run onboarding flow**
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Version skew between extension and binary | Handshake refuses mismatched majors with a clear upgrade action |
+| Bloated VSIX from bundled binaries | Platform-specific packages or verified download-on-demand |
+| Extension slows editor startup | Lazy activation; measured budget as an exit criterion |
+
+#### Exit / acceptance
+
+- [ ] Clean install works on macOS, Linux, Windows  
+- [ ] No index present → guided build with streamed progress  
+- [ ] Daemon absent or crashed → CLI fallback, with the degradation stated in the UI  
+- [ ] Activation cost within the stated budget
+
+---
+
+### Stage B — Commands, panels & editor decorations
+
+#### Purpose
+
+Deliver the `IDE-INTEGRATION.md` command set for real, plus the graph panel from P7.
+
+#### Entry criteria
+
+- Stage A lifecycle stable
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| W-IDE | Commands: `prism.compileContext`, `prism.evidencePeek`, `prism.impact`, `prism.slice`, `prism.explain`, `prism.repoMap`, `prism.entrypoints` |
+| W-IDE | **Evidence panel**: layers, citations, gaps, token usage vs budget, EXPLAIN toggle, “copy for LLM” with audit event |
+| W-IDE | **Graph panel**: P7 renderer in a webview, synchronized with editor selection |
+| W-IDE | Editor decorations: ambiguity/heuristic-call gutter hints, hotspot indicators, slice highlighting in place |
+| W-IDE | Peek navigation: citation → file span → graph node, bidirectionally |
+| W-OBS | Local-only usage counters: which commands are used, which refusals occur (opt-in, never content) |
+
+#### Deliverables
+
+1. **Command reference** with keybindings and context-menu placement  
+2. **Panel UX specs** — evidence panel and graph panel  
+3. **Decoration policy** — what is shown inline and when it becomes noise  
+4. **Extension test suite** — unit, webview integration, and end-to-end against a fixture repo
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Decoration noise annoys users into disabling it | Off by default beyond a minimal set; per-feature toggles |
+| Webview/extension state divergence | Single source of truth in the daemon; webview stays a pure view |
+
+#### Exit / acceptance
+
+- [ ] Every command works from palette, context menu, and keybinding  
+- [ ] Citation → span → graph node round-trips  
+- [ ] Panels survive reload, theme switch, and workspace change  
+- [ ] End-to-end tests pass against a pinned fixture repo
+
+---
+
+### Stage C — Cursor agent integration, packaging & Phase 8 gate
+
+#### Purpose
+
+Make Prism the *default* context source for the agent already living in the editor, and ship it where people can install it.
+
+#### Entry criteria
+
+- Stage B feature-complete  
+- P9 agent-asset drafts available (the two phases overlap here by design)
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| W-AX | Auto-register the Prism MCP server in Cursor/VS Code agent config, with a visible on/off control |
+| W-AX | Generate project agent guidance (`AGENTS.md` / rules) from `AGENT-USAGE.md` so agents learn the “compile first” path in-repo |
+| W-AX | Surface refusals as *actionable* UI: `SCOPE_UNRESOLVED` becomes an anchor picker, `PRECISION_REQUIRED` becomes a “generate SCIP” action |
+| W-IDE | Packaging: VSIX, Marketplace + Open VSX, release workflow, changelog, versioning tied to engine majors |
+| W-EVAL | Task-based usability pass: can a developer new to the repo answer orientation and impact questions using only the extension? |
+
+#### Deliverables
+
+1. **Cursor/VS Code agent integration guide**  
+2. **Generated rules/`AGENTS.md` template** with a regeneration rule  
+3. **Marketplace listing** — description, screenshots from the deterministic renderer, honest capability and limitation notes  
+4. **Release workflow** — signed, versioned, reproducible  
+5. **Phase 8 scorecard** — task completion without terminal, activation cost, refusal-recovery success rate
+
+#### Exit / acceptance (Phase 8 gate)
+
+- [ ] Installable from a marketplace; cold repo → orientation → cited pack with **zero terminal commands**  
+- [ ] Cursor registers the MCP server automatically, and the user can see and disable it  
+- [ ] Refusals present a next action rather than an error string  
+- [ ] Listing states limitations honestly — heuristic tiers, language coverage, interim eval status  
+- [ ] Extension CI: lint, unit, webview, and end-to-end jobs green
+
+#### Phase 8 phase-level risks
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Editor platform churn breaks the extension | Medium | Medium | Pin API version; end-to-end tests in CI |
+| Maintenance burden of a second language ecosystem | High | Medium | Thin extension, thick daemon: logic stays in Rust |
+| Cursor-specific integration rots as the product changes | Medium | Medium | Feature-detect rather than version-detect; degrade to plain MCP |
+
+---
+
+## 16. Phase 9 — Agent Experience & Workflows
+
+**Phase goal:** Close the loop the whole program was built for — agents reach for Prism first, recover from refusals without human help, and the four-arm benchmark finally settles the quality claim.
+
+**Phase duration:** ~4 weeks  
+**Phase gate (summary):** On captured traces, agents choose `compile_context` before explore loops at a target rate; the four-arm LLM benchmark is published; residual risks R1/R2 are closed or restated with evidence.
+
+```mermaid
+flowchart LR
+    A[Stage A Agent contract hardening] --> B[Stage B Workflows + rules assets]
+    B --> C[Stage C Closed-loop eval + Gate]
+```
+
+---
+
+### Stage A — Agent contract hardening
+
+#### Purpose
+
+G-15 exists because adoption currently depends on an agent reading a documentation page. Tool ergonomics should make the right path the easy one.
+
+#### Entry criteria
+
+- P6 API + P8 extension available as delivery channels  
+- Trace capture design agreed with W-OBS
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| W-AX | Tool description rewrite: descriptions that make `compile_context` obviously first, and micro-tools obviously secondary |
+| W-AX | **Refusal-repair loops**: `SCOPE_UNRESOLVED` returns candidate anchors; `BUDGET_EXCEEDED` returns a smaller viable plan; `PRECISION_REQUIRED` returns the exact command to produce the index |
+| W-AX | **Budget negotiation**: agents declare their remaining context; the compiler targets it instead of a fixed default |
+| W-AX | **Progressive packs**: stream the architecture layer first so an agent can start reasoning before the pack completes |
+| W-OBS | Trace schema: tool sequence, refusals, repairs, tokens, outcome — local by default |
+
+#### Deliverables
+
+1. **Agent tool ergonomics spec** — naming, descriptions, ordering, deprecation guidance  
+2. **Refusal-repair contract** — every error carries a machine-actionable next step  
+3. **Budget negotiation protocol**  
+4. **Progressive pack streaming design**  
+5. **Agent trace schema** + privacy posture
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Over-helpful refusals become another dump | Repair suggestions are bounded lists, not content |
+| Streaming complicates the must-include invariant | Must-include is computed before streaming begins |
+
+#### Exit / acceptance
+
+- [ ] Every error type has a defined repair action, fixture-tested  
+- [ ] Budget negotiation works from MCP and HTTP  
+- [ ] Traces capture the tool sequence without capturing repository content
+
+---
+
+### Stage B — Prism-native workflows & rules assets
+
+#### Purpose
+
+Package the recipes the engine already supports into workflows a developer or agent invokes by name.
+
+#### Entry criteria
+
+- Stage A contracts stable
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| W-AX | **Onboarding workflow**: repo map → entrypoints → contracts → hotspots as a guided orientation for a newcomer or a fresh agent |
+| W-AX | **Review workflow**: changed paths → impact → precision upgrade where warranted → review pack |
+| W-AX | **Debug workflow**: stack/error → slice → diff intersect → debug pack (wraps the P4 recipe) |
+| W-AX | **Refactor-prep workflow**: T2 gate → precise references → rename dry-run → blast radius |
+| W-AX | Distribution as agent-native assets: rules, skills, and slash-command style entry points where the host supports them |
+| W-EVAL | Each workflow maps to gold tasks so “it works” is measured, not asserted |
+
+#### Deliverables
+
+1. **Workflow catalog** — trigger, steps, tools, expected pack shape, refusal points  
+2. **Rules/skills asset set**, generated from the catalog rather than hand-maintained  
+3. **Workflow fixtures** with expected tool traces  
+4. **Documentation pass** aligning `AGENT-USAGE.md` with the shipped workflows
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Workflows drift from engine behavior | Generated from recipes; conformance-tested in CI |
+| Host-specific assets fragment maintenance | One catalog, generated adapters per host |
+
+#### Exit / acceptance
+
+- [ ] Four workflows runnable from MCP, CLI, and the extension  
+- [ ] Each has a gold task and an expected trace  
+- [ ] Assets regenerate from the catalog; no hand-edited duplicates
+
+---
+
+### Stage C — Closed-loop evaluation & Phase 9 gate
+
+#### Purpose
+
+Finish what P5 deferred. This stage owns the two S1 gaps in the register (G-12: R1 and R2).
+
+#### Entry criteria
+
+- Workflows shipped; traces flowing  
+- Frozen suite version bumped for the new arms
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| W-EVAL | **Four-arm benchmark executed**: Frontier+explore, Medium+explore, Medium+Prism, Frontier+Prism |
+| W-EVAL | **Dual-review precision labels** replacing proxy-v0, targeting the ≥70% north star |
+| W-EVAL | Trace-derived metrics: first-tool-choice rate, refusal-repair success, hops to answer |
+| W-EVAL | Visual-surface metrics from P7 folded into the public report |
+| Docs | Public benchmark report v2; residual risk register updated |
+
+#### Deliverables
+
+1. **Public benchmark report v2** — four arms, real models, reproducible harness  
+2. **Dual-reviewed precision sample** with inter-rater agreement reported  
+3. **Agent adoption report** — first-tool-choice and repair rates from traces  
+4. **Updated residual risks** — R1, R2, R8 closed or honestly restated
+
+#### Exit / acceptance (Phase 9 gate)
+
+- [ ] Four-arm benchmark published; the G1 claim is stated with evidence or explicitly withdrawn  
+- [ ] Context precision measured with dual review against the ≥70% target  
+- [ ] Agents choose `compile_context` first at the target rate on captured traces  
+- [ ] Refusal-repair success rate reported  
+- [ ] R1, R2, R8 resolved in `PROGRAM-RESIDUAL-RISKS.md`
+
+#### Phase 9 phase-level risks
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Four-arm benchmark contradicts the thesis | Medium | **High** | Publish anyway; the program's credibility is the honest eval, not the win |
+| LLM API cost or access blocks the run | Medium | High | Budget it in P6; use open-weight models for the medium arm if needed |
+| Trace collection reads as surveillance | Low | High | Local-only by default, opt-in export, never repository content |
+
+---
+
+## 17. Phase 10 — Team / Distributed (optional)
+
+*(Formerly Phase 6. Content unchanged; renumbered in the 2026-07-26 revision. Remains **deferred** and optional.)*
 
 **Phase goal:** Share indexes safely across a team/CI without abandoning local-first defaults. Optional deterministic artifact caches; optional answer memoization **only with dependency certificates**.
 
-**Phase duration:** TBD after Phase 5 learnings  
+**Phase duration:** TBD after Phase 9 learnings  
 **Phase gate (summary):** Two developers share an index safely; CI freshness SLA defined and met.
 
 ```mermaid
@@ -1189,7 +1942,7 @@ Content-addressed published indexes keyed by git SHA; per-dev worktree deltas st
 
 #### Entry criteria
 
-- Phase 5 gate passed  
+- Phase 9 gate passed  
 - Explicit product need for team sharing  
 
 #### Workstreams
@@ -1243,7 +1996,7 @@ Memoize **deterministic** artifacts (slices, packs) freely; LLM answer reuse onl
 
 #### Entry criteria
 
-- Evidence Packs solid (P5)  
+- Evidence Packs solid (P5) and the interaction half shipped (P6–P9)  
 - Team understands certificate model  
 
 #### Deliverables
@@ -1252,7 +2005,7 @@ Memoize **deterministic** artifacts (slices, packs) freely; LLM answer reuse onl
 2. **Answer cache certificate design** (optional, explicit)  
 3. **Invalidation rules** tied to graph dirtiness |
 
-#### Exit / acceptance (Phase 6 gate)
+#### Exit / acceptance (Phase 10 gate)
 
 - [ ] Two developers share index safely with authz  
 - [ ] CI freshness SLA met in pilot  
@@ -1260,9 +2013,9 @@ Memoize **deterministic** artifacts (slices, packs) freely; LLM answer reuse onl
 
 ---
 
-## 13. Evaluation program (runs across phases)
+## 18. Evaluation program (runs across phases)
 
-### 13.1 Benchmark arms (always)
+### 18.1 Benchmark arms (always)
 
 | Arm | Description |
 |---|---|
@@ -1271,9 +2024,9 @@ Memoize **deterministic** artifacts (slices, packs) freely; LLM answer reuse onl
 | A3 | Medium model + Prism |
 | A4 | Frontier model + Prism (optional best) |
 
-**Program success:** A3 approaches A1; A4 optional ceiling.
+**Program success:** A3 approaches A1; A4 optional ceiling. The four-arm run with real models is **executed in P9 Stage C** — until then, published numbers are structural proxies and must say so.
 
-### 13.2 Task categories by phase emphasis
+### 18.2 Task categories by phase emphasis
 
 | Category | Introduce | Primary phase gate |
 |---|---|---|
@@ -1283,8 +2036,11 @@ Memoize **deterministic** artifacts (slices, packs) freely; LLM answer reuse onl
 | Repo-QA / generate / review packs | P2 | P2 |
 | Refactor prep | P3 | P3 |
 | Bug localization / debug | P4 | P4 |
+| **Time-to-orient (visual vs text)** | P7 | P7 |
+| **Terminal-free task completion** | P8 | P8 |
+| **Agent tool-choice & refusal repair** | P9 | P9 |
 
-### 13.3 Metrics ownership
+### 18.3 Metrics ownership
 
 | Metric | Owner workstream | First measured |
 |---|---|---|
@@ -1295,19 +2051,27 @@ Memoize **deterministic** artifacts (slices, packs) freely; LLM answer reuse onl
 | Call resolution P/R | W-EVAL | P3 |
 | Incremental latency | W-OBS | P0 design / P1 measure |
 | Pack compile latency | W-OBS + W-CC | P2 |
-| Answer quality | W-EVAL | P1 onward; hard gate P5 |
+| Answer quality | W-EVAL | P1 onward; hard gate P9 (four-arm) |
+| **Structural query P95 (N2)** | W-OBS + W-STORE | **P6 Stage A** (never measured before) |
+| **Warm vs cold path latency** | W-SVC | P6 Stage B |
+| **View render latency + budget adherence** | W-VIZ | P7 |
+| **Time to orient** | W-EVAL + W-VIZ | P7 |
+| **Extension activation cost** | W-IDE | P8 |
+| **First-tool-choice rate** | W-AX + W-EVAL | P9 |
+| **Refusal-repair success rate** | W-AX | P9 |
 
-### 13.4 Labeling discipline
+### 18.4 Labeling discipline
 
 - Necessary-span labels are **versioned** with pack algorithm version.  
-- Prefer dual review on precision samples.  
-- Never change gold answers silently after a published report—cut a new suite version.
+- Prefer dual review on precision samples; dual review becomes **mandatory** from P9 Stage C.  
+- Never change gold answers silently after a published report—cut a new suite version.  
+- Visual-surface metrics (P7) are reported alongside token metrics, never instead of them: a faster-to-read wrong answer is still wrong.
 
 ---
 
-## 14. Risk register & guardrails
+## 19. Risk register & guardrails
 
-### 14.1 Program risks (from ADD, planning actions)
+### 19.1 Program risks (from ADD, planning actions)
 
 | Risk | Planning guardrail |
 |---|---|
@@ -1316,20 +2080,35 @@ Memoize **deterministic** artifacts (slices, packs) freely; LLM answer reuse onl
 | CPG cost explodes | P4 Stage B sharding + depth caps are exit criteria |
 | Quality still needs frontier | Escalate context before model; accept hybrid |
 | Plugin ecosystem stagnation | Ship 3–5 languages excellently; SDK in P5 |
-| Users bypass Prism | P2 one-shot `compile_context` is the UX bet |
-| AOE cache bet returns | Answer cache blocked until P6 Stage C |
+| Users bypass Prism | P2 one-shot `compile_context` is the UX bet; P9 measures whether the bet paid |
+| AOE cache bet returns | Answer cache blocked until P10 Stage C |
 
-### 14.2 Stage churn guardrails
+### 19.2 Interaction-half risks (added 2026-07-26)
+
+| Risk | Planning guardrail |
+|---|---|
+| Documentation describes systems that were never built | W-DEBT reconciliation is a gate item in every phase from P6 |
+| Visualization becomes the product; the engine stagnates | P7 may only render existing facts — no new analysis lands in a rendering phase |
+| A pretty graph is trusted more than its confidence labels | Confidence/tier encoding and a visible legend are exit criteria, not polish |
+| Rendering degenerates into hairballs on real monorepos | LOD ceilings + `VIEW_TOO_LARGE` refusal; the same refuse-to-dump rule as packs |
+| Daemon quietly becomes mandatory, breaking local-first | CLI-without-daemon stays a tested, supported path |
+| TypeScript surface area outgrows the maintainers | Thin extension, thick daemon; one renderer package; no framework sprawl |
+| Editor/agent platform churn | Feature-detect, degrade to plain MCP, pin API versions in CI |
+| The four-arm benchmark never happens (again) | It is the P9 gate; the phase cannot exit without it |
+
+### 19.3 Stage churn guardrails
 
 1. **No skipping phase gates** without a written waiver listing residual risk.  
 2. **No embedding-centric retrieval narrative** in release notes.  
 3. **No whole-repo CPG** as default indexing.  
 4. **No abstractive code summaries** as default packing.  
-5. **Vertical first:** correctness + tokens on one large repo before distributed work.
+5. **Vertical first:** correctness + tokens on one large repo before distributed work.  
+6. **No unbounded rendering** — views obey budgets and refuse, exactly as packs do.  
+7. **No claim without an artifact.** If a gate says “proven”, the repository must contain the thing that proves it (this rule exists because of gap G-03).
 
 ---
 
-## 15. Definition of Done (program-level)
+## 20. Definition of Done (program-level)
 
 Prism’s planning program (P0–P5) is done when all are true:
 
@@ -1341,13 +2120,27 @@ Prism’s planning program (P0–P5) is done when all are true:
 6. **Local-first privacy:** Default indexing path never requires network.  
 7. **Operational clarity:** Incremental invalidation, observability, and security checklists exist.
 
-Phase 6 is an **optional expansion**, not required for MVP product identity.
+**Status:** items 1–3 and 5–7 are met as of the P5 gate. Item 4 is **interim** — the four-arm benchmark lands in P9 Stage C.
+
+### 20.1 Definition of Done — interaction half (P6–P9)
+
+The interaction program is done when all are true:
+
+1. **Documents match the repository.** No planning or tech-stack claim describes an artifact that does not exist; every accepted divergence has an ADR.
+2. **Surfaces are real.** A daemon, an HTTP/SSE API, an LSP host, and an MCP server expose the same capabilities with the same error model.
+3. **The graph is seeable without being dumped.** Every view is budgeted, deterministic, provenance-bearing, and refuses oversized scopes with anchors.
+4. **The editor is sufficient.** A developer completes orientation, impact, and debug tasks without a terminal.
+5. **Agents choose Prism unprompted,** measured on traces rather than asserted in a guide.
+6. **The quality claim is settled.** The four-arm benchmark is published, and G1 is either evidenced or withdrawn.
+7. **Local-first survived.** No surface added in P6–P9 requires network access or an always-on service.
+
+Phase 10 is an **optional expansion**, not required for MVP product identity.
 
 ---
 
-## 16. Appendix — Checklists & templates
+## 21. Appendix — Checklists & templates
 
-### 16.1 Stage kickoff checklist
+### 21.1 Stage kickoff checklist
 
 - [ ] Re-read relevant ADD sections for this stage  
 - [ ] Confirm entry criteria  
@@ -1356,7 +2149,7 @@ Phase 6 is an **optional expansion**, not required for MVP product identity.
 - [ ] Identify eval measurement (even qualitative)  
 - [ ] List non-goals for this stage (what we refuse to build now)  
 
-### 16.2 Stage exit review template
+### 21.2 Stage exit review template
 
 | Field | Content |
 |---|---|
@@ -1367,7 +2160,7 @@ Phase 6 is an **optional expansion**, not required for MVP product identity.
 | Waiver? | none / signed waiver |
 | Next stage entry | confirmed / blocked by X |
 
-### 16.3 Intent recipe card (template)
+### 21.3 Intent recipe card (template)
 
 ```text
 Intent: <name>
@@ -1380,7 +2173,7 @@ Refuse when: <SCOPE_UNRESOLVED conditions>
 Eval tasks: <IDs>
 ```
 
-### 16.4 Gold task card (template)
+### 21.4 Gold task card (template)
 
 ```text
 Task ID:
@@ -1394,7 +2187,7 @@ Labels (necessary spans):
 Scoring method:
 ```
 
-### 16.5 Phase gate evidence pack (required artifacts)
+### 21.5 Phase gate evidence pack (required artifacts)
 
 | Phase | Evidence to archive |
 |---|---|
@@ -1404,9 +2197,30 @@ Scoring method:
 | P3 | Resolution P/R, gating matrix, rename dry-run script |
 | P4 | Debug scorecard, shard policy, slice properties |
 | P5 | Public report, SDK docs, security checklist |
-| P6 | Authz pilot notes, SLA, cache certificate design |
+| P6 | Drift closure report, ADR set, N1/N2 benchmark baselines, `graph-view/v1` schema + fixtures |
+| P7 | View kinds catalog, render budget report, time-to-orient scorecard, screenshot-diff suite |
+| P8 | VSIX artifact, activation budget, end-to-end test run, marketplace listing copy |
+| P9 | Four-arm benchmark report v2, dual-reviewed precision sample, agent trace metrics |
+| P10 | Authz pilot notes, SLA, cache certificate design |
 
-### 16.6 Glossary (planning-oriented)
+### 21.6 View kind card (template — P7)
+
+```text
+View kind: <name>
+Purpose: <what question it answers in one sentence>
+Seeds: <anchors / query>
+Projection: <collapse + expand rules>
+Default LOD: repo | subsystem | module | file | symbol
+Budget: max_nodes / max_edges
+Drop order: <what disappears first>
+Never drop: <criterion / must-show elements>
+Layout: <algorithm + determinism seed>
+Confidence encoding: <how tier + confidence are shown>
+Refuse when: <VIEW_TOO_LARGE conditions + suggested anchors>
+Eval tasks: <IDs>
+```
+
+### 21.7 Glossary (planning-oriented)
 
 | Term | Meaning |
 |---|---|
@@ -1415,14 +2229,22 @@ Scoring method:
 | Query plan | Operator DAG for assembling evidence |
 | Gate | Must-pass phase/stage exit condition |
 | Certified cache | Memoization allowed only with dependency freshness proof |
+| **Graph View-Model** | Projected, budgeted, layout-ready subset of the KG — the visual analogue of an Evidence Pack |
+| **Render budget** | `max_nodes`/`max_edges` ceiling with a deterministic drop order; overflow refuses |
+| **LOD** | Level of detail: repo → subsystem → module → file → symbol |
+| **Refusal repair** | A machine-actionable next step returned with every error, so agents recover unaided |
+| **Drift register** | The W-DEBT list of divergences between documentation and the repository |
 
 ---
 
 ## Related documents
 
 - [Architecture Design Document](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md) — design authority  
+- [Tech Stack & Project Structure](../architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md) — how it is built, per phase  
+- [Tasks & Progress](./TASKS-AND-PROGRESS.md) — living checklist and phase state  
+- [Program residual risks](../eval/PROGRAM-RESIDUAL-RISKS.md) — R1/R2/R8 are the P9 targets  
 - ADD §36 Phased Implementation Roadmap — phase durations and high-level gates (expanded here)
 
 ---
 
-*End of Planning & Implementation Document. No implementation codebase is implied by this plan.*
+*End of Planning & Implementation Document. P0–P5 are delivered; P6–P9 are planned but unimplemented; P10 is optional.*

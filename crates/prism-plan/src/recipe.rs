@@ -40,7 +40,11 @@ pub fn recipe_for(intent: Intent) -> IntentRecipe {
             intent,
             seed_description: "stack frames + error text",
             expand_description: "backward interproc slice + recent diff + callee signatures",
-            must_include: &["error_or_stack_verbatim", "primary_frame_body", "criterion_slice"],
+            must_include: &[
+                "error_or_stack_verbatim",
+                "primary_frame_body",
+                "criterion_slice",
+            ],
             drop_order: &[
                 "embedding_fallback_seeds",
                 "depth_3_plus_impact",

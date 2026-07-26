@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/mcp-tools/v1/query_plan.json",
+  "title": "query_plan",
+  "description": "Plan-only: return the operator DAG without building an Evidence Pack. Useful to inspect recipes before compile_context.",
+  "type": "object",
+  "properties": {
+    "question": { "type": "string" },
+    "budget_tokens": { "type": "integer", "default": 4000 },
+    "intent": { "type": "string" },
+    "anchors": { "type": "array", "items": { "type": "string" } },
+    "stack_frames": { "type": "array", "items": { "type": "string" } },
+    "error_text": { "type": "string" },
+    "changed_paths": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["question"],
+  "additionalProperties": false
+}

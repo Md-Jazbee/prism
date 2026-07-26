@@ -205,7 +205,10 @@ pub fn extract_anchors(question: &str) -> Vec<String> {
     // path-like tokens with extension or slash
     for tok in question.split_whitespace() {
         let cleaned = tok.trim_matches(|c: char| {
-            matches!(c, ',' | '.' | ';' | ':' | ')' | '(' | '"' | '\'' | '?' | '!')
+            matches!(
+                c,
+                ',' | '.' | ';' | ':' | ')' | '(' | '"' | '\'' | '?' | '!'
+            )
         });
         if cleaned.contains('/')
             && (cleaned.contains('.') || cleaned.ends_with(".py") || cleaned.ends_with(".rs"))
@@ -255,7 +258,5 @@ fn looks_like_symbol(tok: &str) -> bool {
         return false;
     }
     // Prefer CamelCase, SCREAMING, or snake with underscore / qualified ::
-    tok.contains('_')
-        || tok.contains("::")
-        || tok.chars().any(|c| c.is_ascii_uppercase())
+    tok.contains('_') || tok.contains("::") || tok.chars().any(|c| c.is_ascii_uppercase())
 }

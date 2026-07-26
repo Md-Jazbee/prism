@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/mcp-tools/v1/neighbors.json",
+  "title": "neighbors",
+  "description": "1-hop graph neighbors for a node id. Prefer compile_context unless you need a single hop.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "kind": { "type": "string", "description": "Comma-separated edge kinds" },
+    "dir": { "type": "string", "enum": ["outgoing", "incoming", "both"], "default": "outgoing" },
+    "limit": { "type": "integer", "default": 50 }
+  },
+  "required": ["id"],
+  "additionalProperties": false
+}

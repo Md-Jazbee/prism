@@ -3,8 +3,8 @@
 use crate::budget::BudgetExceeded;
 use crate::explain::{DropRecord, ExplainReport};
 use crate::fragment::{EvidenceFragment, PackLayer};
-use prism_plan::{Intent, ScopeUnresolved};
 use prism_ir::PACK_SCHEMA_VERSION;
+use prism_plan::{Intent, ScopeUnresolved};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

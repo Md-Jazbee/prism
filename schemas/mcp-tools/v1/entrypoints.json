@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/mcp-tools/v1/entrypoints.json",
+  "title": "entrypoints",
+  "description": "Heuristic entrypoints (main/cli/handlers) for orientation.",
+  "type": "object",
+  "properties": {
+    "limit": { "type": "integer", "default": 40 }
+  },
+  "additionalProperties": false
+}

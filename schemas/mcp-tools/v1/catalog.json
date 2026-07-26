@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/mcp-tools/v1/catalog.json",
+  "title": "Prism MCP tools catalog v1",
+  "description": "Contract of record for allowlisted MCP tools. Rust surface in prism-mcp must match tool names and required inputs.",
+  "version": "1.0.0",
+  "transport": "stdio JSON-RPC 2.0 (hand-rolled; see ADR-0003)",
+  "protocol": "2024-11-05",
+  "primary_tool": "compile_context",
+  "tools": [
+    "compile_context",
+    "query_plan",
+    "index_status",
+    "resolve_symbol",
+    "neighbors",
+    "impact",
+    "repo_map",
+    "entrypoints",
+    "detect_changes"
+  ]
+}

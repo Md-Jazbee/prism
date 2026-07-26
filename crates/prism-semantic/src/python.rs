@@ -354,7 +354,8 @@ fn collect_assignment_targets(node: Node, src: &[u8], defs: &mut Vec<DfgDef>) {
                 });
             }
         }
-        "pattern_list" | "tuple_pattern" | "list_pattern" | "expression_list" | "tuple" | "list" => {
+        "pattern_list" | "tuple_pattern" | "list_pattern" | "expression_list" | "tuple"
+        | "list" => {
             let mut c = node.walk();
             for child in node.children(&mut c) {
                 collect_assignment_targets(child, src, defs);

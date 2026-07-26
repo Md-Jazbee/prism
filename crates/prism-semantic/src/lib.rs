@@ -12,7 +12,7 @@ mod slice;
 mod store;
 
 pub use artifact::{
-    CallSite, CfgBlock, CfgEdge, DfgDep, DfgDef, DfgGraph, DfgUse, FunctionFlow,
+    CallSite, CfgBlock, CfgEdge, DfgDef, DfgDep, DfgGraph, DfgUse, FunctionFlow,
     SemanticFileArtifact, ALGO_VERSION, INTERPROC_ALGO_VERSION, SEMANTIC_SCHEMA_VERSION,
 };
 pub use crash::SemanticPartial;
@@ -21,9 +21,7 @@ pub use interproc::{
     SliceParams, SliceProvenance,
 };
 pub use memo::{memo_key, params_hash};
-pub use shard::{
-    ensure_shard, invalidate_shards_for, load_shard, CallGraphShard, OverlayEdge,
-};
+pub use shard::{ensure_shard, invalidate_shards_for, load_shard, CallGraphShard, OverlayEdge};
 pub use slice::{local_slice, SliceCriterion, SliceReport, SliceSpan};
 pub use store::{
     build_file_artifact, build_workspace_python, load_file_artifact, read_manifest,
@@ -31,7 +29,11 @@ pub use store::{
 };
 
 /// Analyze Python source bytes into a semantic file artifact (never panics).
-pub fn analyze_python_file(path: &str, source: &str, content_hash: Option<String>) -> SemanticFileArtifact {
+pub fn analyze_python_file(
+    path: &str,
+    source: &str,
+    content_hash: Option<String>,
+) -> SemanticFileArtifact {
     match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         python::analyze_file(path, source, content_hash.clone())
     })) {
@@ -60,7 +62,11 @@ mod tests {
         let src_path = root.join("fixtures/slices/python/sample.py");
         let source = fs::read_to_string(&src_path).unwrap();
         let art = analyze_python_file("sample.py", &source, None);
-        assert!(!art.functions.is_empty(), "expected functions: {:?}", art.notes);
+        assert!(
+            !art.functions.is_empty(),
+            "expected functions: {:?}",
+            art.notes
+        );
 
         let crit = SliceCriterion::Line {
             path: "sample.py".into(),
@@ -70,7 +76,9 @@ mod tests {
         let b = local_slice(&art, &crit).unwrap();
         assert_eq!(a.spans, b.spans);
         assert!(
-            a.spans.iter().any(|s| s.start_line <= 15 && s.end_line >= 15),
+            a.spans
+                .iter()
+                .any(|s| s.start_line <= 15 && s.end_line >= 15),
             "slice must contain criterion line: {:?}",
             a.spans
         );
@@ -126,8 +134,7 @@ def root(n):
             a.spans
         );
         assert!(
-            a.functions_visited.iter().any(|f| f.contains("mid"))
-                || a.depth_reached >= 1,
+            a.functions_visited.iter().any(|f| f.contains("mid")) || a.depth_reached >= 1,
             "expected interproc callers: visited={:?} depth={}",
             a.functions_visited,
             a.depth_reached
