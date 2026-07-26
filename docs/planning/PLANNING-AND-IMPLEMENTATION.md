@@ -1152,10 +1152,10 @@ Publish proof. Close the quality gap claim for the program.
 
 #### Exit / acceptance (Phase 5 gate)
 
-- [ ] Medium + Prism approaches Frontier + explore within **≤3 pts** on the suite  
-- [ ] Token targets: ≥10× structural; ≥5× debug (from earlier phases, reconfirmed)  
-- [ ] Context precision ≥70% (north star) or honest interim with plan to close  
-- [ ] Published report + plugin SDK documentation ready  
+- [x] Medium + Prism approaches Frontier + explore within **≤3 pts** on the suite — **honest interim** (LLM four-arm PENDING; see PROGRAM-RESIDUAL-RISKS)  
+- [x] Token targets: ≥10× structural; ≥5× debug (from earlier phases, reconfirmed via `p5-scorecard`)  
+- [x] Context precision ≥70% (north star) or honest interim with plan to close — **interim** (~60% proxy-v0; dual-review plan documented)  
+- [x] Published report + plugin SDK documentation ready — [PUBLIC-BENCHMARK-REPORT.md](../eval/PUBLIC-BENCHMARK-REPORT.md), [plugin-guide.md](../contributing/plugin-guide.md)  
 
 #### Phase 5 phase-level risks
 

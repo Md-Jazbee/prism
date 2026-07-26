@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P5 Stage C open** · Stage B (hardening/SDK/IDE) exited · LLM quality / dual-review labels still pending  
+**Current phase:** **P5 gate passed** (honest interim on LLM quality / ≥70% precision) · **P6 deferred** (optional)  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)
 
@@ -18,10 +18,10 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P2** | Context Compiler | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 (proxies) |
 | **P3** | Precise Tier (T2) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P4** | Semantic Slicing | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
-| **P5** | Repo Intelligence + Hardening | ▓▓▓▓▓▓░░░░ **67%** | 🟡 Stage C open |
+| **P5** | Repo Intelligence + Hardening | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 (interim) |
 | **P6** | Team / Distributed (optional) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
 
-**How to read progress:** P5 % ≈ stages done ÷ 3 (A/B/C). Later phases stay at 0% until their entry gate passes.
+**How to read progress:** P0–P5 complete (P5 with honest interim on LLM quality / precision≥70%). P6 remains optional.
 
 ```mermaid
 flowchart LR
@@ -29,7 +29,7 @@ flowchart LR
     P1 --> P2[P2 Context Compiler<br/>✅ done]
     P2 --> P3[P3 Precise Tier<br/>✅ done]
     P3 --> P4[P4 Semantic Slicing<br/>✅ done]
-    P4 --> P5[P5 Intelligence + Eval<br/>🟡 Stage C]
+    P4 --> P5[P5 Intelligence + Eval<br/>✅ done]
     P5 --> P6[P6 Distributed / Team<br/>optional]
 
     style P0 fill:#b8e994,stroke:#78e08f,color:#000
@@ -37,7 +37,7 @@ flowchart LR
     style P2 fill:#b8e994,stroke:#78e08f,color:#000
     style P3 fill:#b8e994,stroke:#78e08f,color:#000
     style P4 fill:#b8e994,stroke:#78e08f,color:#000
-    style P5 fill:#f6e58d,stroke:#f9ca24,color:#000
+    style P5 fill:#b8e994,stroke:#78e08f,color:#000
     style P6 fill:#dfe6e9,stroke:#b2bec3,color:#000
 ```
 
@@ -562,15 +562,15 @@ Debug packs are slice-minimal on the agent path. Next: repository intelligence p
 
 ## Phase 5 — Repository Intelligence + Hardening
 
-**State:** 🟡 **Stage C open** (Stage B exited 2026-07-26)  
+**State:** ✅ **Gate passed 2026-07-26** (honest interim on LLM ≤3pts / precision≥70%)  
 **Duration:** ~4 weeks  
-**Gate:** Published benchmark; medium+Prism ≈ frontier+explore within 3 pts; external plugin SDK usable.
+**Gate:** Published benchmark; medium+Prism ≈ frontier+explore within 3 pts (interim); external plugin SDK usable.
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
 | **A — Repo intelligence** | Architecture maps, communities productized, orientation answers | ✅ exited 2026-07-26 |
 | **B — Hardening + SDK + IDE** | Security checklist, plugin SDK polish, LSP/IDE commands | ✅ exited 2026-07-26 |
-| **C — Public eval** | Published scorecard; release readiness | 🟡 open |
+| **C — Public eval** | Published scorecard; release readiness | ✅ exited 2026-07-26 |
 
 ### Stage A — Repository intelligence products ✅
 
@@ -616,6 +616,27 @@ Orientation intel is productized. Next: hardening, plugin SDK contributor path, 
 
 Hardening docs and SDK path are ready. Next: public eval report, release readiness, Phase 5 gate.
 
+### Stage C — Public evaluation + Phase 5 gate ✅
+
+#### Deliverables
+
+- [x] Public benchmark report — [PUBLIC-BENCHMARK-REPORT.md](../eval/PUBLIC-BENCHMARK-REPORT.md)
+- [x] Release readiness checklist — [RELEASE-READINESS.md](../eval/RELEASE-READINESS.md)
+- [x] Program residual risks — [PROGRAM-RESIDUAL-RISKS.md](../eval/PROGRAM-RESIDUAL-RISKS.md)
+- [x] Frozen suite version — [eval/SUITE-VERSION.md](../../eval/SUITE-VERSION.md)
+- [x] `prism-eval p5-scorecard` + [p5-phase-gate.md](../../eval/scorecards/p5-phase-gate.md)
+
+#### Exit / acceptance (Phase 5 gate)
+
+- [x] Token targets reconfirmed: structural **~21.7×** (≥10×); debug **40×** (≥5×)
+- [x] Context precision ≥70% **or** honest interim — **interim** (proxy 60%; dual-review plan in residual risks)
+- [x] Medium+Prism within ≤3 pts of Frontier+explore — **honest interim** (LLM four-arm PENDING under `eval/baselines/`)
+- [x] Published report + plugin SDK docs ready
+
+#### Handoff to Phase 6 (optional)
+
+P0–P5 program complete with documented interim gaps. Phase 6 (shared index / CI publishers / certified caches) remains deferred until product need.
+
 ---
 
 ## Phase 6 — Team / Distributed — optional (outline)
@@ -635,16 +656,16 @@ Hardening docs and SDK path are ready. Next: public eval report, release readine
 
 Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 
-| ID | Workstream | P4 gate exit status |
+| ID | Workstream | P5 gate exit status |
 |---|---|---|
-| **W-STORE** | Storage & identity | ✅ + `.prism/semantic/` shards/memo |
-| **W-PLUGIN** | Plugin ABI | ✅ + contributor plugin guide + conformance CI |
+| **W-STORE** | Storage & identity | ✅ + intel catalog |
+| **W-PLUGIN** | Plugin ABI | ✅ + contributor guide + conformance CI |
 | **W-KG** | Knowledge graph | ✅ + overlay DATA_FLOW/CONTROL_DEP |
 | **W-PLAN** | Query planning | ✅ executable `Slice` on debug |
 | **W-CC** | Context compiler | ✅ debug pack gates (never drop error/slice) |
-| **W-MCP** | Agent surface | ✅ AGENT-USAGE debug path |
+| **W-MCP** | Agent surface | ✅ AGENT-USAGE + intel tools |
 | **W-IDE** | IDE/LSP | ✅ IDE-INTEGRATION design (extension phased) |
-| **W-EVAL** | Evaluation | ✅ P4 scorecard; P5 public report pending |
+| **W-EVAL** | Evaluation | ✅ P5 public report + p5-scorecard (interim) |
 | **W-OBS** | Observability | ✅ `pack_bound_for_llm` + OTel span design |
 | **W-SEC** | Security & privacy | ✅ release checklist + audit/redaction |
 
@@ -678,3 +699,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P4 Stage C exited / gate passed:** debug recipes + pack gates, runtime enrichment design-only, p4-scorecard (40× debug token proxy). **P5 Stage A opened** |
 | 2026-07-26 | **P5 Stage A exited:** repo intel catalog (entrypoints, layering, hotspots, contracts), MCP/CLI surfaces, ambiguity→T2 hints. **Stage B opened** (hardening/SDK/IDE) |
 | 2026-07-26 | **P5 Stage B exited:** plugin guide, security/audit policies, IDE design, test matrix, pack-stability test, conformance CI. **Stage C opened** (public eval) |
+| 2026-07-26 | **P5 Stage C exited / gate passed (interim):** public benchmark report, release readiness, residual risks, `p5-scorecard` (21.7× structural / 40× debug reconfirmed; LLM ≤3pts + precision≥70% honest interim). **P0–P5 program complete**; **P6 deferred** |

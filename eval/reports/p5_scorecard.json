@@ -1,0 +1,77 @@
+{
+  "summary": {
+    "phase": "P5",
+    "suite_id": "prism-eval-suite@0.5.0",
+    "public_benchmark_report": true,
+    "release_readiness_checklist": true,
+    "program_residual_risks": true,
+    "suite_version_frozen": true,
+    "plugin_sdk_documented": true,
+    "structural_token_reduction_proxy": 21.68,
+    "gate_10x_structural_tokens_reconfirmed": true,
+    "debug_token_reduction_proxy": 40.0,
+    "gate_5x_debug_tokens_reconfirmed": true,
+    "mean_context_precision": 0.6,
+    "labeled_packs": 5,
+    "gate_precision_ge_70": false,
+    "precision_honest_interim": true,
+    "quality_within_3pts_frontier_explore": "PENDING_LLM",
+    "quality_honest_interim": true,
+    "four_arm": {
+      "A_frontier_explore": null,
+      "B_medium_explore": null,
+      "C_medium_prism": null,
+      "D_frontier_prism": null,
+      "gate_C_within_3pts_of_A": "PENDING_LLM",
+      "interim_documented": true
+    },
+    "notes": "Reconfirms P1/P4 token proxies; LLM four-arm and \u226570% dual-review precision documented as honest interim in docs/eval/PROGRAM-RESIDUAL-RISKS.md."
+  },
+  "precision_rows": [
+    {
+      "task_id": "T001",
+      "intent": "repo_qa",
+      "fragment_count": 5,
+      "necessary": 3,
+      "unnecessary": 2,
+      "precision": 0.6,
+      "reviewer": "proxy-v0"
+    },
+    {
+      "task_id": "T002",
+      "intent": "impact",
+      "fragment_count": 5,
+      "necessary": 3,
+      "unnecessary": 2,
+      "precision": 0.6,
+      "reviewer": "proxy-v0"
+    },
+    {
+      "task_id": "T003",
+      "intent": "architecture",
+      "fragment_count": 5,
+      "necessary": 3,
+      "unnecessary": 2,
+      "precision": 0.6,
+      "reviewer": "proxy-v0"
+    },
+    {
+      "task_id": "T004",
+      "intent": "repo_qa",
+      "fragment_count": 5,
+      "necessary": 3,
+      "unnecessary": 2,
+      "precision": 0.6,
+      "reviewer": "proxy-v0"
+    },
+    {
+      "task_id": "T005",
+      "intent": "impact",
+      "fragment_count": 5,
+      "necessary": 3,
+      "unnecessary": 2,
+      "precision": 0.6,
+      "reviewer": "proxy-v0"
+    }
+  ]
+}

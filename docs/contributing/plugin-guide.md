@@ -1,6 +1,6 @@
 # Contributor plugin guide — adding a language
 
-**Status:** P5 Stage B  
+**Status:** P5 Stage C (gate passed; plugin path ready)  
 **ABI:** [`schemas/plugins/LanguageExtractor.md`](../../schemas/plugins/LanguageExtractor.md)  
 **Registry:** `crates/prism-extract`  
 **Goal:** Add a language **without changing** the store, planner, or MCP core.

@@ -27,6 +27,7 @@ Until live LLM baselines exist under `baselines/`, use structural proxies:
 ```bash
 uv run prism-eval tool-hops
 uv run prism-eval p1-scorecard
+uv run prism-eval p5-scorecard
 ```
 
 See `scorecards/p1-phase-gate.md`.

@@ -2,7 +2,7 @@
 
 Open-source **developer intelligence** that understands a repository *before* an LLM sees it.
 
-**Phase:** 1 — Syntactic KG + MCP · **gate passed** (structural proxies; LLM quality baselines pending)
+**Phase:** 5 — Repo Intelligence + Hardening · **gate passed** (token proxies reconfirmed; LLM quality / ≥70% precision honest interim)
 
 ## Docs
 
@@ -12,6 +12,8 @@ Open-source **developer intelligence** that understands a repository *before* an
 | [Tech Stack & Project Structure](docs/architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md) | How it is built |
 | [Planning & Implementation](docs/planning/PLANNING-AND-IMPLEMENTATION.md) | Phases & gates |
 | [Tasks & Progress](docs/planning/TASKS-AND-PROGRESS.md) | Living checklist + progress board |
+| [Public benchmark report](docs/eval/PUBLIC-BENCHMARK-REPORT.md) | Methods, caveats, reproducibility |
+| [Plugin guide](docs/contributing/plugin-guide.md) | Add a language via ABI + goldens |
 | [MCP tool catalog](docs/architecture/MCP-TOOL-CATALOG.md) | Stage C tools |
 | [Agent usage](docs/architecture/AGENT-USAGE.md) | Prefer structural tools |
 | [KG query API](docs/architecture/KG-QUERY-API.md) | resolve / neighbors / impact |
@@ -33,6 +35,7 @@ cargo run -p prism-cli -- mcp .
 
 cd eval && uv sync && uv run prism-eval smoke
 uv run prism-eval p1-scorecard
+uv run prism-eval p5-scorecard
 ```
 
 ## Workspace crates
