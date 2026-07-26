@@ -1041,6 +1041,7 @@ dependencies = [
  "prism-semantic",
  "prism-store",
  "prism-view",
+ "serde",
  "serde_json",
  "tokio",
  "tracing",

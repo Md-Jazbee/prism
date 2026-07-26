@@ -33,6 +33,7 @@ export interface PrismTransport {
   indexStatus(): Promise<unknown>;
   buildIndex(paths?: string[]): Promise<unknown>;
   compile(req: CompileRequest): Promise<EvidencePack>;
+  resolveSymbol(name: string, limit?: number): Promise<Array<{ id: string; name?: string; path?: string }>>;
   impact(id: string, opts?: { depth?: number; require_precise?: boolean }): Promise<unknown>;
   slice(opts: {
     path: string;
@@ -44,6 +45,8 @@ export interface PrismTransport {
   repoMap(hubLimit?: number): Promise<unknown>;
   entrypoints(limit?: number): Promise<unknown>;
   view(body: Record<string, unknown>): Promise<GraphViewPayload>;
+  setup(opts?: { skipIndex?: boolean }): Promise<unknown>;
+  doctorReady(): Promise<unknown>;
   assertVersionOk(health: HealthInfo): void;
 }
 
@@ -85,16 +88,72 @@ async function cliJson(
   args: string[],
   cwd: string,
 ): Promise<unknown> {
-  const { stdout } = await execFileAsync(prismPath, args, {
-    cwd,
-    maxBuffer: 16 * 1024 * 1024,
-    env: process.env,
-  });
-  const lines = stdout.trim().split(/\r?\n/);
-  // CLI may print pretty JSON; take from first `{` or `[`
-  const start = lines.findIndex((l) => l.startsWith("{") || l.startsWith("["));
-  const blob = start >= 0 ? lines.slice(start).join("\n") : stdout;
-  return JSON.parse(blob);
+  try {
+    const { stdout } = await execFileAsync(prismPath, args, {
+      cwd,
+      maxBuffer: 16 * 1024 * 1024,
+      env: process.env,
+    });
+    const lines = stdout.trim().split(/\r?\n/);
+    const start = lines.findIndex((l) => l.startsWith("{") || l.startsWith("["));
+    const blob = start >= 0 ? lines.slice(start).join("\n") : stdout;
+    return JSON.parse(blob);
+  } catch (e: unknown) {
+    const err = e as { stdout?: string; stderr?: string; message?: string };
+    const text = err.stdout || err.stderr || err.message || String(e);
+    try {
+      const start = text.indexOf("{");
+      if (start >= 0) {
+        return JSON.parse(text.slice(start));
+      }
+    } catch {
+      /* fall through */
+    }
+    throw new Error(text.slice(0, 400));
+  }
+}
+
+function unwrapCompile(raw: unknown): EvidencePack {
+  const r = raw as {
+    status?: string;
+    data?: EvidencePack & { code?: string; message?: string; hint?: string };
+    pack?: EvidencePack;
+    meta?: EvidencePack["meta"];
+  };
+  if (r.status && r.status !== "ok") {
+    const d = r.data as { code?: string; message?: string; hint?: string } | undefined;
+    throw new PrismApiError({
+      code: d?.code ?? r.status.toUpperCase(),
+      message: d?.message ?? `compile ${r.status}`,
+      hint: d?.hint,
+    });
+  }
+  if (r.data && (r.data as EvidencePack).meta) {
+    return r.data as EvidencePack;
+  }
+  if (r.pack) return r.pack;
+  if (r.meta) return r as unknown as EvidencePack;
+  throw new Error("Unexpected compile response shape");
+}
+
+function unwrapView(raw: unknown): GraphViewPayload {
+  const r = raw as {
+    view?: GraphViewPayload;
+    code?: string;
+    message?: string;
+    hint?: string;
+    nodes?: unknown[];
+  };
+  if (r.code === "VIEW_TOO_LARGE") {
+    throw new PrismApiError({
+      code: "VIEW_TOO_LARGE",
+      message: r.message ?? "view too large",
+      hint: r.hint,
+    });
+  }
+  if (r.view) return r.view;
+  if (Array.isArray(r.nodes)) return r as GraphViewPayload;
+  throw new Error("Unexpected view response shape");
 }
 
 function createDaemonTransport(cfg: TransportConfig): PrismTransport {
@@ -118,10 +177,17 @@ function createDaemonTransport(cfg: TransportConfig): PrismTransport {
     indexStatus: () => daemonFetch(cfg, "GET", "/v1/index/status"),
     buildIndex: (paths = []) => daemonFetch(cfg, "POST", "/v1/index", { paths }),
     async compile(req) {
-      const raw = (await daemonFetch(cfg, "POST", "/v1/context/compile", req)) as {
-        pack?: EvidencePack;
-      } & EvidencePack;
-      return (raw.pack ?? raw) as EvidencePack;
+      const raw = await daemonFetch(cfg, "POST", "/v1/context/compile", req);
+      const wrapped = raw as { pack?: EvidencePack } & EvidencePack;
+      return (wrapped.pack ?? wrapped) as EvidencePack;
+    },
+    async resolveSymbol(name, limit = 20) {
+      const raw = (await daemonFetch(
+        cfg,
+        "GET",
+        `/v1/symbols?name=${encodeURIComponent(name)}&limit=${limit}`,
+      )) as { symbols?: Array<{ id: string; name?: string; path?: string }> };
+      return raw.symbols ?? (raw as unknown as Array<{ id: string }>);
     },
     impact: (id, opts) =>
       daemonFetch(cfg, "POST", "/v1/impact", {
@@ -136,10 +202,15 @@ function createDaemonTransport(cfg: TransportConfig): PrismTransport {
     entrypoints: (limit = 40) =>
       daemonFetch(cfg, "GET", `/v1/intel/entrypoints?limit=${limit}`),
     async view(body) {
-      const raw = (await daemonFetch(cfg, "POST", "/v1/view", body)) as {
-        view?: GraphViewPayload;
-      } & GraphViewPayload;
-      return (raw.view ?? raw) as GraphViewPayload;
+      const raw = await daemonFetch(cfg, "POST", "/v1/view", body);
+      return unwrapView(raw);
+    },
+    async setup() {
+      // Daemon has no setup route — use CLI for orchestration.
+      return createCliTransport(cfg, "").setup();
+    },
+    async doctorReady() {
+      return createCliTransport(cfg, "").doctorReady();
     },
   };
 }
@@ -162,8 +233,8 @@ function createCliTransport(cfg: TransportConfig, note: string): PrismTransport 
     assertVersionOk() {
       /* CLI path: trust local binary */
     },
-    indexStatus: () => cliJson(bin, ["index-status", root], root),
-    buildIndex: () => cliJson(bin, ["index", root], root),
+    indexStatus: () => cliJson(bin, ["index-status", root, "--json"], root),
+    buildIndex: () => cliJson(bin, ["index", root, "--json"], root),
     async compile(req) {
       const args = ["compile", req.question, root];
       if (req.intent) args.push("--intent", req.intent);
@@ -173,8 +244,15 @@ function createCliTransport(cfg: TransportConfig, note: string): PrismTransport 
       if (req.error_text) args.push("--error", req.error_text);
       for (const p of req.changed_paths ?? []) args.push("--changed", p);
       const raw = await cliJson(bin, args, root);
-      const wrapped = raw as { data?: EvidencePack; pack?: EvidencePack } & EvidencePack;
-      return (wrapped.data ?? wrapped.pack ?? wrapped) as EvidencePack;
+      return unwrapCompile(raw);
+    },
+    async resolveSymbol(name, limit = 20) {
+      const raw = await cliJson(
+        bin,
+        ["query", "resolve", name, root, "--limit", String(limit)],
+        root,
+      );
+      return Array.isArray(raw) ? raw : [];
     },
     impact: (id, opts) => {
       const args = ["query", "impact", id, root, "--depth", String(opts?.depth ?? 2)];
@@ -199,25 +277,43 @@ function createCliTransport(cfg: TransportConfig, note: string): PrismTransport 
       if (body.question) args.push("--question", String(body.question));
       for (const a of (body.anchors as string[]) ?? []) args.push("--anchor", a);
       const raw = await cliJson(bin, args, root);
-      const wrapped = raw as { view?: GraphViewPayload } & GraphViewPayload;
-      return (wrapped.view ?? wrapped) as GraphViewPayload;
+      return unwrapView(raw);
     },
+    setup: (opts) => {
+      const args = ["setup", root, "--json"];
+      if (opts?.skipIndex) args.push("--skip-index");
+      return cliJson(bin, args, root);
+    },
+    doctorReady: () => cliJson(bin, ["doctor", root, "--ready", "--json"], root),
   };
 }
 
 /**
- * Prefer daemon HTTP; on failure return CLI transport with degradation note.
+ * Prefer daemon HTTP after an *authorized* probe; otherwise CLI.
  */
 export async function connectTransport(cfg: TransportConfig): Promise<PrismTransport> {
-  if (!cfg.preferDaemon) {
-    return createCliTransport(cfg, "Daemon preference disabled — using CLI.");
+  if (!cfg.preferDaemon || !cfg.token) {
+    return createCliTransport(
+      cfg,
+      cfg.preferDaemon
+        ? "No daemon token — using CLI."
+        : "Daemon preference disabled — using CLI.",
+    );
   }
   try {
     const daemon = createDaemonTransport(cfg);
     const health = await daemon.health();
     daemon.assertVersionOk(health);
+    // Authorized probe — /health alone is insufficient (caused sticky 401s).
+    await daemonFetch(cfg, "GET", "/v1/index/status");
     return daemon;
   } catch (e) {
+    if (e instanceof PrismApiError && e.code === "UNAUTHORIZED") {
+      return createCliTransport(
+        cfg,
+        "Daemon token rejected (UNAUTHORIZED) — using CLI fallback.",
+      );
+    }
     const msg = e instanceof Error ? e.message : String(e);
     return createCliTransport(
       cfg,
@@ -226,5 +322,10 @@ export async function connectTransport(cfg: TransportConfig): Promise<PrismTrans
   }
 }
 
-/** Pure helpers for unit tests. */
-export const __test = { majorOf, createCliTransport, createDaemonTransport };
+export const __test = {
+  majorOf,
+  createCliTransport,
+  createDaemonTransport,
+  unwrapCompile,
+  unwrapView,
+};

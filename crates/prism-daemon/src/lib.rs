@@ -32,6 +32,16 @@ pub async fn run(cfg: DaemonConfig) -> Result<()> {
     fs::write(&lock, format!("{pid}\n{}", cfg.bind))
         .with_context(|| format!("write {}", lock.display()))?;
 
+    // Persist token so IDE / CLI clients can attach without guessing (P8 fix).
+    let token_path = cfg.workspace.join(".prism/daemon.token");
+    fs::write(&token_path, &cfg.token)
+        .with_context(|| format!("write {}", token_path.display()))?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = fs::set_permissions(&token_path, fs::Permissions::from_mode(0o600));
+    }
+
     let state = AppState::new(&cfg);
     // Ensure an index exists so status/compile have a graph.
     if !cfg.workspace.join(".prism/graph.sqlite").exists() {
@@ -90,6 +100,7 @@ pub async fn run(cfg: DaemonConfig) -> Result<()> {
     watcher_handle.abort();
     idle_handle.abort();
     let _ = fs::remove_file(&lock);
+    let _ = fs::remove_file(cfg.workspace.join(".prism/daemon.token"));
     serve_result
 }
 

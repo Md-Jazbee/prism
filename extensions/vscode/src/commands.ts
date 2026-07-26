@@ -6,7 +6,9 @@ import {
   ensureDaemon,
   downloadOffer,
   extensionManifestPath,
+  tryBuildWorkspaceBinary,
 } from "./lifecycle/binary";
+import { runWorkspaceSetup } from "./lifecycle/setup";
 import { EvidencePanelProvider, GraphPanelProvider } from "./panels/providers";
 import { createDecorations } from "./decorations/gutter";
 import {
@@ -20,6 +22,7 @@ import { PrismApiError } from "./types";
 export interface PrismHost {
   session: PrismSession;
   getTransport(): Promise<PrismTransport>;
+  resetTransport(): void;
   evidence: EvidencePanelProvider;
   graph: GraphPanelProvider;
   decorations: ReturnType<typeof createDecorations>;
@@ -27,6 +30,7 @@ export interface PrismHost {
   output: vscode.OutputChannel;
   workspaceRoot(): string | undefined;
   recordUsage(command: string, refusal?: string): void;
+  context: vscode.ExtensionContext;
 }
 
 function cfg(): vscode.WorkspaceConfiguration {
@@ -41,8 +45,9 @@ export function createHost(
 ): PrismHost {
   const output = vscode.window.createOutputChannel("Prism");
   const status = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 50);
-  status.text = "$(prism) Prism";
+  status.text = "$(graph) Prism";
   status.tooltip = "Prism — idle";
+  status.command = "prism.setupWorkspace";
   status.show();
 
   const decorations = createDecorations(
@@ -53,6 +58,10 @@ export function createHost(
 
   const workspaceRoot = () =>
     vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+
+  const resetTransport = () => {
+    transportPromise = undefined;
+  };
 
   const recordUsage = (command: string, refusal?: string) => {
     if (!cfg().get<boolean>("usageCounters")) return;
@@ -68,26 +77,31 @@ export function createHost(
     transportPromise = (async () => {
       const root = workspaceRoot();
       if (!root) throw new Error("Open a workspace folder to use Prism.");
-      const binary = resolvePrismBinary(root, cfg().get<string>("binaryPath") ?? "");
+      let binary = resolvePrismBinary(root, cfg().get<string>("binaryPath") ?? "");
+      if (!binary) {
+        binary = await tryBuildWorkspaceBinary(root);
+      }
       if (!binary) {
         const offer = downloadOffer(
           cfg().get<string>("downloadBaseUrl") ?? "",
           extensionManifestPath(context),
         );
         throw new Error(
-          `prism binary not found. ${offer.reason} Build with cargo build -p prism-cli or set prism.binaryPath.`,
+          `prism binary not found. ${offer.reason} Or run Prism: Setup Workspace.`,
         );
       }
       const bind = cfg().get<string>("daemonBind") ?? "127.0.0.1:7420";
       let token = "";
       let baseUrl = `http://${bind}`;
-      if (cfg().get<boolean>("preferDaemon") !== false) {
+      let preferDaemon = cfg().get<boolean>("preferDaemon") !== false;
+      if (preferDaemon) {
         try {
           const handle = await ensureDaemon(binary.prismPath, root, bind);
           token = handle.token;
           baseUrl = `http://${handle.bindAddr}`;
         } catch (e) {
           output.appendLine(`daemon ensure failed: ${e}`);
+          preferDaemon = false;
         }
       }
       const tcfg: TransportConfig = {
@@ -95,14 +109,14 @@ export function createHost(
         prismPath: binary.prismPath,
         baseUrl,
         token,
-        preferDaemon: cfg().get<boolean>("preferDaemon") !== false,
+        preferDaemon,
         engineMajor: cfg().get<number>("engineMajor") ?? 0,
       };
       const t = await connectTransport(tcfg);
       session.setTransport(t.mode, t.degradationNote);
       status.text =
-        t.mode === "daemon" ? "$(prism) Prism · daemon" : "$(prism) Prism · CLI";
-      status.tooltip = t.degradationNote ?? `Transport: ${t.mode}`;
+        t.mode === "daemon" ? "$(graph) Prism · daemon" : "$(graph) Prism · CLI";
+      status.tooltip = t.degradationNote ?? `Transport: ${t.mode} · click to Setup`;
       if (t.degradationNote) output.appendLine(t.degradationNote);
       return t;
     })();
@@ -117,6 +131,7 @@ export function createHost(
   return {
     session,
     getTransport,
+    resetTransport,
     evidence,
     graph,
     decorations,
@@ -124,7 +139,31 @@ export function createHost(
     output,
     workspaceRoot,
     recordUsage,
+    context,
   };
+}
+
+async function resolveImpactId(
+  host: PrismHost,
+  sym: string,
+): Promise<string | undefined> {
+  const t = await host.getTransport();
+  try {
+    const hits = await t.resolveSymbol(sym, 20);
+    if (!hits.length) return undefined;
+    if (hits.length === 1) return hits[0].id;
+    const pick = await vscode.window.showQuickPick(
+      hits.map((h) => ({
+        label: h.name ?? h.id,
+        description: h.path ?? h.id,
+        id: h.id,
+      })),
+      { placeHolder: `Multiple symbols named ${sym}` },
+    );
+    return pick?.id;
+  } catch {
+    return undefined;
+  }
 }
 
 export function registerCommands(context: vscode.ExtensionContext, host: PrismHost): void {
@@ -136,6 +175,21 @@ export function registerCommands(context: vscode.ExtensionContext, host: PrismHo
       } catch (e) {
         if (e instanceof PrismApiError) {
           host.recordUsage(id, e.code);
+          if (e.code === "UNAUTHORIZED") {
+            host.resetTransport();
+            host.output.appendLine("UNAUTHORIZED — resetting transport to CLI");
+          }
+          if (e.code === "INDEX_UNAVAILABLE") {
+            const pick = await vscode.window.showWarningMessage(
+              "Index unavailable",
+              "Setup Workspace",
+              "Dismiss",
+            );
+            if (pick === "Setup Workspace") {
+              await vscode.commands.executeCommand("prism.setupWorkspace");
+            }
+            return;
+          }
           await handleRefusal(e);
           return;
         }
@@ -146,6 +200,44 @@ export function registerCommands(context: vscode.ExtensionContext, host: PrismHo
     });
 
   context.subscriptions.push(
+    wrap("prism.setupWorkspace", async () => {
+      const root = host.workspaceRoot();
+      if (!root) return;
+      host.status.text = "$(sync~spin) Prism · setup";
+      try {
+        const result = await vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: "Prism: setting up workspace…",
+            cancellable: false,
+          },
+          async () => runWorkspaceSetup(host.context, root, host.output),
+        );
+        host.resetTransport();
+        host.output.appendLine(result.detail.join("\n"));
+        void vscode.window.showInformationMessage(
+          `Prism ready · ${result.prismPath}`,
+        );
+        // Orient: open graph with architecture map
+        try {
+          const t = await host.getTransport();
+          const view = await t.view({
+            view_kind: "architecture_map",
+            max_nodes: 80,
+          });
+          host.graph.push(view);
+          await vscode.commands.executeCommand("prism.graph.focus");
+        } catch (e) {
+          host.output.appendLine(`orient view: ${e}`);
+        }
+        host.status.text = "$(graph) Prism · ready";
+        await host.context.workspaceState.update("prism.setupDone", true);
+      } catch (e) {
+        host.status.text = "$(graph) Prism · setup failed";
+        throw e;
+      }
+    }),
+
     wrap("prism.compileContext", async () => {
       const ed = vscode.window.activeTextEditor;
       const word = ed?.document.getText(ed.selection) || undefined;
@@ -199,15 +291,18 @@ export function registerCommands(context: vscode.ExtensionContext, host: PrismHo
         const root = host.workspaceRoot();
         const uri = root
           ? vscode.Uri.file(
-              span.path.startsWith("/")
-                ? span.path
-                : `${root}/${span.path}`,
+              span.path.startsWith("/") ? span.path : `${root}/${span.path}`,
             )
           : vscode.Uri.file(span.path);
         const doc = await vscode.workspace.openTextDocument(uri);
         const line = Math.max(0, (span.start_line ?? 1) - 1);
         const editor = await vscode.window.showTextDocument(doc);
-        const range = new vscode.Range(line, 0, span.end_line ? span.end_line - 1 : line, 0);
+        const range = new vscode.Range(
+          line,
+          0,
+          span.end_line ? span.end_line - 1 : line,
+          0,
+        );
         editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
         editor.selection = new vscode.Selection(range.start, range.end);
       }
@@ -232,19 +327,18 @@ export function registerCommands(context: vscode.ExtensionContext, host: PrismHo
         void vscode.window.showWarningMessage("Select a symbol for impact");
         return;
       }
+      const id = (await resolveImpactId(host, sym)) ?? sym;
       const t = await host.getTransport();
-      // Prefer compile with impact intent when id unknown; else impact by id
+      const result = await t.impact(id);
+      host.output.appendLine(JSON.stringify(result, null, 2));
       try {
-        const result = await t.impact(sym);
-        host.output.appendLine(JSON.stringify(result, null, 2));
         const view = await t.view({
           view_kind: "impact_cone",
-          seed_id: sym,
+          seed_id: id,
           max_nodes: 80,
         });
         host.graph.push(view);
-      } catch (e) {
-        if (e instanceof PrismApiError) throw e;
+      } catch {
         const pack = await t.compile({
           question: `Impact of ${sym}`,
           anchors: [sym],
@@ -258,33 +352,56 @@ export function registerCommands(context: vscode.ExtensionContext, host: PrismHo
       const ed = vscode.window.activeTextEditor;
       if (!ed) return;
       const rel = vscode.workspace.asRelativePath(ed.document.uri);
-      const line = ed.selection.active.line + 1;
+      // CLI / API use 0-based lines
+      const line = ed.selection.active.line;
       const t = await host.getTransport();
       const result = (await t.slice({ path: rel, line, max_depth: 2 })) as {
-        slice?: { nodes?: Array<{ path?: string; line?: number }> };
+        slice?: {
+          spans?: Array<{ path?: string; start_line?: number; end_line?: number }>;
+          nodes?: Array<{ path?: string; line?: number; id?: string }>;
+        };
       };
       host.output.appendLine(JSON.stringify(result, null, 2));
       const ranges: vscode.Range[] = [];
+      for (const s of result.slice?.spans ?? []) {
+        if (s.path === rel && s.start_line != null) {
+          ranges.push(
+            new vscode.Range(
+              s.start_line,
+              0,
+              s.end_line ?? s.start_line,
+              0,
+            ),
+          );
+        }
+      }
       for (const n of result.slice?.nodes ?? []) {
-        if (n.path === rel && n.line) {
-          ranges.push(new vscode.Range(n.line - 1, 0, n.line - 1, 0));
+        if (n.path === rel && n.line != null) {
+          ranges.push(new vscode.Range(n.line, 0, n.line, 0));
         }
       }
       host.decorations.setSliceRanges(ranges);
-      const view = await t.view({
-        view_kind: "slice_path",
-        path: rel,
-        max_nodes: 80,
-      });
-      host.graph.push(view);
+      const seed =
+        result.slice?.nodes?.find((n) => n.id)?.id ||
+        `${rel}:${line}`;
+      try {
+        const view = await t.view({
+          view_kind: "slice_path",
+          seed_id: seed,
+          anchors: [rel],
+          path: rel,
+          max_nodes: 80,
+        });
+        host.graph.push(view);
+      } catch (e) {
+        host.output.appendLine(`slice view: ${e}`);
+      }
     }),
 
     wrap("prism.explain", async () => {
       const on = host.session.toggleExplain();
       host.evidence.push();
-      void vscode.window.showInformationMessage(
-        on ? "EXPLAIN on" : "EXPLAIN off",
-      );
+      void vscode.window.showInformationMessage(on ? "EXPLAIN on" : "EXPLAIN off");
     }),
 
     wrap("prism.repoMap", async () => {
@@ -303,7 +420,9 @@ export function registerCommands(context: vscode.ExtensionContext, host: PrismHo
       const t = await host.getTransport();
       const eps = await t.entrypoints();
       host.output.appendLine(JSON.stringify(eps, null, 2));
-      void vscode.window.showInformationMessage("Entrypoints written to Prism output channel");
+      void vscode.window.showInformationMessage(
+        "Entrypoints written to Prism output channel",
+      );
     }),
 
     wrap("prism.buildIndex", async () => {
@@ -312,8 +431,8 @@ export function registerCommands(context: vscode.ExtensionContext, host: PrismHo
       const result = await t.buildIndex([]);
       host.output.appendLine(JSON.stringify(result, null, 2));
       host.status.text =
-        t.mode === "daemon" ? "$(prism) Prism · daemon" : "$(prism) Prism · CLI";
-      void vscode.window.showInformationMessage("Index build requested");
+        t.mode === "daemon" ? "$(graph) Prism · daemon" : "$(graph) Prism · CLI";
+      void vscode.window.showInformationMessage("Index build complete");
     }),
 
     wrap("prism.showEvidence", async () => {
@@ -341,7 +460,7 @@ export function registerCommands(context: vscode.ExtensionContext, host: PrismHo
       const root = host.workspaceRoot();
       if (!root) return;
       const binary = resolvePrismBinary(root, cfg().get<string>("binaryPath") ?? "");
-      if (!binary) throw new Error("prism binary not found");
+      if (!binary) throw new Error("prism binary not found — run Setup Workspace");
       const msg = await registerMcp(root, binary.prismPath, true);
       void vscode.window.showInformationMessage(msg);
     }),
@@ -359,7 +478,8 @@ export function registerCommands(context: vscode.ExtensionContext, host: PrismHo
     wrap("prism.agent.generateAgentsMd", async () => {
       const root = host.workspaceRoot();
       if (!root) return;
-      const out = generateAgentsMd(root);
+      const binary = resolvePrismBinary(root, cfg().get<string>("binaryPath") ?? "");
+      const out = await generateAgentsMd(root, binary?.prismPath);
       void vscode.window.showInformationMessage(`Wrote ${out}`);
     }),
 
@@ -397,40 +517,23 @@ export function registerCommands(context: vscode.ExtensionContext, host: PrismHo
   );
 }
 
-export async function maybeFirstRun(host: PrismHost, context: vscode.ExtensionContext): Promise<void> {
+export async function maybeFirstRun(
+  host: PrismHost,
+  context: vscode.ExtensionContext,
+): Promise<void> {
   const root = host.workspaceRoot();
   if (!root) return;
-  const key = "prism.firstRunDone";
-  if (context.workspaceState.get(key)) return;
+  if (context.workspaceState.get("prism.setupDone")) return;
+  if (cfg().get<boolean>("autoSetupOnOpen") === false) return;
+
   const binary = resolvePrismBinary(root, cfg().get<string>("binaryPath") ?? "");
-  if (!binary) {
-    const pick = await vscode.window.showInformationMessage(
-      "Prism: CLI binary not found. Build the workspace or set prism.binaryPath.",
-      "Open Docs",
-    );
-    if (pick === "Open Docs") {
-      const doc = vscode.Uri.joinPath(
-        context.extensionUri,
-        "..",
-        "..",
-        "docs",
-        "architecture",
-        "EXTENSION-ONBOARDING.md",
-      );
-      try {
-        await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(doc));
-      } catch {
-        /* docs may be outside extension in packaged VSIX */
-      }
-    }
-    return;
-  }
-  if (cfg().get<boolean>("agent.autoRegisterMcp") !== false) {
-    try {
-      await registerMcp(root, binary.prismPath, true);
-    } catch (e) {
-      host.output.appendLine(`MCP auto-register skipped: ${e}`);
-    }
-  }
-  await context.workspaceState.update(key, true);
+  const pick = await vscode.window.showInformationMessage(
+    binary
+      ? "Prism: set up this workspace? (index + AGENTS.md + MCP + daemon)"
+      : "Prism: binary not found. Set up workspace? (will try cargo build if this is the Prism repo)",
+    "Setup Workspace",
+    "Later",
+  );
+  if (pick !== "Setup Workspace") return;
+  await vscode.commands.executeCommand("prism.setupWorkspace");
 }

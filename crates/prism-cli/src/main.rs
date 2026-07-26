@@ -1,5 +1,7 @@
 //! `prism` CLI — Phase 4 (`index` + query + plan + compile + precise + semantic).
 
+mod setup;
+
 use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 use prism_compile::CompileOutcome;
@@ -34,6 +36,42 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
+    /// Print workspace identity (git SHA, dirty, tree fingerprint).
+    Doctor {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        /// Exit non-zero unless binary+index ready for use.
+        #[arg(long)]
+        ready: bool,
+        /// Emit JSON (identity and/or ready checklist).
+        #[arg(long)]
+        json: bool,
+    },
+    /// One-shot Graphify-like setup: index + AGENTS.md/rules + MCP registration.
+    Setup {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        /// Skip indexing (only assets / MCP).
+        #[arg(long)]
+        skip_index: bool,
+        /// Do not write `.cursor/mcp.json` / `.vscode/mcp.json`.
+        #[arg(long)]
+        no_mcp: bool,
+        /// Do not regenerate AGENTS.md / rules / skills.
+        #[arg(long)]
+        no_assets: bool,
+        /// Emit JSON report.
+        #[arg(long)]
+        json: bool,
+    },
+    /// Show index freshness and graph cardinality.
+    #[command(name = "index-status")]
+    IndexStatus {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long)]
+        json: bool,
+    },
     /// Index a workspace (discover → hash → T1 extract → txn → invalidate).
     Index {
         /// Workspace root (default: cwd).
@@ -42,17 +80,9 @@ enum Commands {
         /// Discover and hash without writing meta/graph updates.
         #[arg(long)]
         dry_run: bool,
-    },
-    /// Print workspace identity (git SHA, dirty, tree fingerprint).
-    Doctor {
-        #[arg(default_value = ".")]
-        path: PathBuf,
-    },
-    /// Show index freshness and graph cardinality.
-    #[command(name = "index-status")]
-    IndexStatus {
-        #[arg(default_value = ".")]
-        path: PathBuf,
+        /// Emit JSON stats instead of human text.
+        #[arg(long)]
+        json: bool,
     },
     /// Structural KG queries + plan-only.
     Query {
@@ -425,53 +455,142 @@ fn main() -> Result<()> {
     }
 
     match cli.command {
-        Commands::Index { path, dry_run } => {
+        Commands::Index { path, dry_run, json } => {
             let wm = WorkspaceManager::open(&path)
                 .with_context(|| format!("open workspace {}", path.display()))?;
             let prism_dir = wm.root().join(".prism");
             let mut indexer = IncrementalIndexer::open(wm, &prism_dir)?;
             let result = indexer.run(&IndexOptions { dry_run })?;
-            println!(
-                "indexed: discovered={} hashed={} extracted={} extract_skipped={} skipped_unchanged={} secret_skipped={} nodes={} edges={} unresolved_calls={} wall_ms={} fingerprint={}{}",
-                result.stats.files_discovered,
-                result.stats.files_hashed,
-                result.stats.files_extracted,
-                result.stats.files_extract_skipped,
-                result.stats.files_skipped_unchanged,
-                result.stats.files_secret_skipped,
-                result.stats.nodes_written,
-                result.stats.edges_written,
-                result.stats.unresolved_calls,
-                result.stats.wall_time_ms,
-                &result.tree_fingerprint[..result.tree_fingerprint.len().min(16)],
-                if dry_run { " (dry-run)" } else { "" }
-            );
+            if json {
+                println!(
+                    "{}",
+                    serde_json::json!({
+                        "ok": true,
+                        "dry_run": dry_run,
+                        "files_discovered": result.stats.files_discovered,
+                        "files_hashed": result.stats.files_hashed,
+                        "files_extracted": result.stats.files_extracted,
+                        "nodes_written": result.stats.nodes_written,
+                        "edges_written": result.stats.edges_written,
+                        "wall_time_ms": result.stats.wall_time_ms,
+                        "tree_fingerprint": result.tree_fingerprint,
+                    })
+                );
+            } else {
+                println!(
+                    "indexed: discovered={} hashed={} extracted={} extract_skipped={} skipped_unchanged={} secret_skipped={} nodes={} edges={} unresolved_calls={} wall_ms={} fingerprint={}{}",
+                    result.stats.files_discovered,
+                    result.stats.files_hashed,
+                    result.stats.files_extracted,
+                    result.stats.files_extract_skipped,
+                    result.stats.files_skipped_unchanged,
+                    result.stats.files_secret_skipped,
+                    result.stats.nodes_written,
+                    result.stats.edges_written,
+                    result.stats.unresolved_calls,
+                    result.stats.wall_time_ms,
+                    &result.tree_fingerprint[..result.tree_fingerprint.len().min(16)],
+                    if dry_run { " (dry-run)" } else { "" }
+                );
+            }
         }
-        Commands::Doctor { path } => {
+        Commands::Setup {
+            path,
+            skip_index,
+            no_mcp,
+            no_assets,
+            json,
+        } => {
+            let report = setup::run_setup(
+                &path,
+                setup::SetupOpts {
+                    register_mcp: !no_mcp,
+                    skip_index,
+                    generate_assets: !no_assets,
+                },
+            )?;
+            if json {
+                println!("{}", serde_json::to_string_pretty(&report)?);
+            } else {
+                println!("prism setup — workspace {}", report.workspace);
+                for s in &report.steps {
+                    println!(
+                        "  [{}] {}: {}",
+                        if s.ok { "ok" } else { "!!" },
+                        s.id,
+                        s.detail
+                    );
+                }
+                println!(
+                    "ready: binary={} index={} agents={} mcp={}",
+                    report.ready.binary,
+                    report.ready.index,
+                    report.ready.agents_md,
+                    report.ready.mcp_registered
+                );
+            }
+            if !report.ok {
+                std::process::exit(2);
+            }
+        }
+        Commands::Doctor { path, ready, json } => {
             let wm = WorkspaceManager::open(&path)?;
             let id = wm.identity()?;
-            println!("root: {}", id.repository.root.display());
-            println!(
-                "git_commit: {}",
-                id.snapshot.git_commit.as_deref().unwrap_or("(none)")
-            );
-            println!("dirty: {}", id.snapshot.dirty);
-            println!("tree_fingerprint: {}", id.snapshot.tree_fingerprint);
-            println!(
-                "schema: meta={} fact={} events={} plan={} pack={} precise={}",
-                prism_ir::META_SCHEMA_VERSION,
-                prism_ir::FACT_SCHEMA_VERSION,
-                prism_ir::EVENTS_SCHEMA_VERSION,
-                prism_ir::PLAN_SCHEMA_VERSION,
-                prism_ir::PACK_SCHEMA_VERSION,
-                prism_ir::PRECISE_INDEX_SCHEMA_VERSION
-            );
+            let checklist = setup::doctor_ready(&path)?;
+            if json {
+                println!(
+                    "{}",
+                    serde_json::json!({
+                        "root": id.repository.root.display().to_string(),
+                        "git_commit": id.snapshot.git_commit,
+                        "dirty": id.snapshot.dirty,
+                        "tree_fingerprint": id.snapshot.tree_fingerprint,
+                        "ready": checklist,
+                        "schema": {
+                            "meta": prism_ir::META_SCHEMA_VERSION,
+                            "fact": prism_ir::FACT_SCHEMA_VERSION,
+                            "events": prism_ir::EVENTS_SCHEMA_VERSION,
+                            "plan": prism_ir::PLAN_SCHEMA_VERSION,
+                            "pack": prism_ir::PACK_SCHEMA_VERSION,
+                            "precise": prism_ir::PRECISE_INDEX_SCHEMA_VERSION,
+                        }
+                    })
+                );
+            } else {
+                println!("root: {}", id.repository.root.display());
+                println!(
+                    "git_commit: {}",
+                    id.snapshot.git_commit.as_deref().unwrap_or("(none)")
+                );
+                println!("dirty: {}", id.snapshot.dirty);
+                println!("tree_fingerprint: {}", id.snapshot.tree_fingerprint);
+                println!(
+                    "schema: meta={} fact={} events={} plan={} pack={} precise={}",
+                    prism_ir::META_SCHEMA_VERSION,
+                    prism_ir::FACT_SCHEMA_VERSION,
+                    prism_ir::EVENTS_SCHEMA_VERSION,
+                    prism_ir::PLAN_SCHEMA_VERSION,
+                    prism_ir::PACK_SCHEMA_VERSION,
+                    prism_ir::PRECISE_INDEX_SCHEMA_VERSION
+                );
+                println!(
+                    "ready: binary={} index={} agents_md={} cursor_rule={} mcp={}",
+                    checklist.binary,
+                    checklist.index,
+                    checklist.agents_md,
+                    checklist.cursor_rule,
+                    checklist.mcp_registered
+                );
+            }
+            if ready {
+                setup::assert_ready(&checklist)?;
+            }
         }
-        Commands::IndexStatus { path } => {
+        Commands::IndexStatus { path, json } => {
             let wm = WorkspaceManager::open(&path)?;
             let prism = wm.root().join(".prism");
             if !prism.join("graph.sqlite").exists() {
-                bail!("no index at {} — run `prism index` first", prism.display());
+                bail!("no index at {} — run `prism index` or `prism setup` first", prism.display());
             }
             let meta = SqliteMetaStore::open(prism.join("meta.sqlite"))?;
             let kg = SqliteKgStore::open(prism.join("graph.sqlite"))?;
@@ -484,21 +603,39 @@ fn main() -> Result<()> {
             let meta_bytes = std::fs::metadata(prism.join("meta.sqlite"))
                 .map(|m| m.len())
                 .unwrap_or(0);
-            println!("root: {}", wm.root().display());
-            println!(
-                "git_commit: {}",
-                id.snapshot.git_commit.as_deref().unwrap_or("(none)")
-            );
-            println!("dirty_worktree: {}", id.snapshot.dirty);
-            println!("tree_fingerprint: {}", id.snapshot.tree_fingerprint);
-            println!("files_hashed: {files}");
-            println!(
-                "graph: nodes={} edges={} files_indexed={} graph_sqlite_bytes={} meta_sqlite_bytes={}",
-                stats.nodes, stats.edges, stats.files_indexed, graph_bytes, meta_bytes
-            );
-            println!(
-                "nfr_note: design targets local query P95 <50ms; index size ~3–10% of source (see docs/architecture/INDEX-SIZE-BUDGET.md)"
-            );
+            if json {
+                println!(
+                    "{}",
+                    serde_json::json!({
+                        "root": wm.root().display().to_string(),
+                        "git_commit": id.snapshot.git_commit,
+                        "dirty_worktree": id.snapshot.dirty,
+                        "tree_fingerprint": id.snapshot.tree_fingerprint,
+                        "files_hashed": files,
+                        "nodes": stats.nodes,
+                        "edges": stats.edges,
+                        "files_indexed": stats.files_indexed,
+                        "graph_sqlite_bytes": graph_bytes,
+                        "meta_sqlite_bytes": meta_bytes,
+                    })
+                );
+            } else {
+                println!("root: {}", wm.root().display());
+                println!(
+                    "git_commit: {}",
+                    id.snapshot.git_commit.as_deref().unwrap_or("(none)")
+                );
+                println!("dirty_worktree: {}", id.snapshot.dirty);
+                println!("tree_fingerprint: {}", id.snapshot.tree_fingerprint);
+                println!("files_hashed: {files}");
+                println!(
+                    "graph: nodes={} edges={} files_indexed={} graph_sqlite_bytes={} meta_sqlite_bytes={}",
+                    stats.nodes, stats.edges, stats.files_indexed, graph_bytes, meta_bytes
+                );
+                println!(
+                    "nfr_note: design targets local query P95 <50ms; index size ~3–10% of source (see docs/architecture/INDEX-SIZE-BUDGET.md)"
+                );
+            }
         }
         Commands::Query { query } => match query {
             QueryCmd::Resolve {

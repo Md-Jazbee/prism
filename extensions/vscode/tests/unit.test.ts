@@ -43,6 +43,29 @@ describe("transport version major", () => {
   });
 });
 
+describe("compile unwrap", () => {
+  it("maps scope_unresolved to PrismApiError", () => {
+    expect(() =>
+      __test.unwrapCompile({
+        status: "scope_unresolved",
+        data: { code: "SCOPE_UNRESOLVED", message: "need anchor" },
+      }),
+    ).toThrow(PrismApiError);
+  });
+
+  it("unwraps ok pack", () => {
+    const pack = __test.unwrapCompile({
+      status: "ok",
+      data: {
+        meta: { intent: "repo_qa", budget_tokens: 10, tokens_used: 1, question: "q" },
+        hierarchy: {},
+        fragments: [],
+      },
+    });
+    expect(pack.meta.intent).toBe("repo_qa");
+  });
+});
+
 describe("redact pack", () => {
   it("truncates long fragment text", () => {
     const out = JSON.parse(
@@ -88,7 +111,7 @@ describe("agent assets", () => {
   it("writes AGENTS.md and registers mcp.json", async () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "prism-agent-"));
     fs.mkdirSync(path.join(tmp, ".cursor"), { recursive: true });
-    const agents = generateAgentsMd(tmp);
+    const agents = await generateAgentsMd(tmp);
     expect(fs.existsSync(agents)).toBe(true);
     expect(fs.readFileSync(agents, "utf8")).toContain("compile_context");
     const msg = await registerMcp(tmp, "/usr/bin/prism", true);
@@ -107,7 +130,6 @@ describe("agent assets", () => {
 
 describe("activation contract", () => {
   it("activate module exports activate/deactivate", async () => {
-    // Soft check: source file declares thin activation (no transport at import)
     const src = fs.readFileSync(
       path.join(__dirname, "../src/extension.ts"),
       "utf8",

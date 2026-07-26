@@ -2,7 +2,7 @@
   "name": "prism-vscode",
   "displayName": "Prism",
   "description": "Budgeted Evidence Packs, graph orientation, and impact — without leaving the editor.",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "publisher": "prism",
   "license": "Apache-2.0",
   "repository": {
@@ -22,6 +22,7 @@
   "contributes": {
     "commands": [
       { "command": "prism.compileContext", "title": "Prism: Compile Context", "category": "Prism" },
+      { "command": "prism.setupWorkspace", "title": "Prism: Setup Workspace", "category": "Prism" },
       { "command": "prism.evidencePeek", "title": "Prism: Peek Evidence Citation", "category": "Prism" },
       { "command": "prism.impact", "title": "Prism: Impact", "category": "Prism" },
       { "command": "prism.slice", "title": "Prism: Slice", "category": "Prism" },
@@ -38,9 +39,10 @@
       { "command": "prism.pickAnchor", "title": "Prism: Pick Anchor (resolve SCOPE_UNRESOLVED)", "category": "Prism" }
     ],
     "keybindings": [
-      { "command": "prism.compileContext", "key": "ctrl+shift+p ctrl+shift+c", "mac": "cmd+shift+p cmd+shift+c", "when": "editorTextFocus" },
-      { "command": "prism.impact", "key": "ctrl+shift+p ctrl+shift+i", "mac": "cmd+shift+p cmd+shift+i", "when": "editorTextFocus" },
-      { "command": "prism.slice", "key": "ctrl+shift+p ctrl+shift+s", "mac": "cmd+shift+p cmd+shift+s", "when": "editorTextFocus" }
+      { "command": "prism.compileContext", "key": "ctrl+alt+p c", "mac": "cmd+alt+p c", "when": "editorTextFocus" },
+      { "command": "prism.impact", "key": "ctrl+alt+p i", "mac": "cmd+alt+p i", "when": "editorTextFocus" },
+      { "command": "prism.slice", "key": "ctrl+alt+p s", "mac": "cmd+alt+p s", "when": "editorTextFocus" },
+      { "command": "prism.setupWorkspace", "key": "ctrl+alt+p u", "mac": "cmd+alt+p u" }
     ],
     "menus": {
       "editor/context": [
@@ -49,6 +51,7 @@
         { "command": "prism.slice", "group": "prism@3", "when": "editorTextFocus" }
       ],
       "commandPalette": [
+        { "command": "prism.setupWorkspace" },
         { "command": "prism.compileContext" },
         { "command": "prism.evidencePeek" },
         { "command": "prism.impact" },
@@ -115,8 +118,13 @@
         },
         "prism.agent.autoRegisterMcp": {
           "type": "boolean",
+          "default": false,
+          "description": "Auto-register Prism MCP on first run (prefer Prism: Setup Workspace)."
+        },
+        "prism.autoSetupOnOpen": {
+          "type": "boolean",
           "default": true,
-          "description": "Auto-register Prism as an MCP server in Cursor/VS Code agent config."
+          "description": "Prompt to run Prism: Setup Workspace when the folder is not yet set up."
         },
         "prism.usageCounters": {
           "type": "boolean",

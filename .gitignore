@@ -43,3 +43,4 @@ credentials.json
 # Extension build artifacts
 extensions/*/dist/
 *.vsix
+.cursor/mcp.json

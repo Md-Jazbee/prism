@@ -1,11 +1,14 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { execFileSync, spawn } from "node:child_process";
+import { execFile, execFileSync, spawn } from "node:child_process";
+import { promisify } from "node:util";
 import type { ExtensionContext } from "vscode";
+
+const execFileAsync = promisify(execFile);
 
 export interface BinaryResolution {
   prismPath: string;
-  source: "setting" | "path" | "workspace" | "download";
+  source: "setting" | "path" | "workspace" | "download" | "built";
 }
 
 function existsExecutable(p: string): boolean {
@@ -32,22 +35,27 @@ function which(cmd: string): string | undefined {
 
 function workspaceCandidates(workspaceRoot: string): string[] {
   const base = path.join(workspaceRoot, "target");
-  const names =
-    process.platform === "win32"
-      ? ["prism.exe", "prismd.exe"]
-      : ["prism", "prismd"];
+  const names = process.platform === "win32" ? ["prism.exe"] : ["prism"];
   const out: string[] = [];
   for (const profile of ["release", "debug"]) {
     for (const name of names) {
-      if (name.startsWith("prismd")) continue;
       out.push(path.join(base, profile, name));
     }
   }
   return out;
 }
 
+function isPrismWorkspace(workspaceRoot: string): boolean {
+  return (
+    fs.existsSync(path.join(workspaceRoot, "Cargo.toml")) &&
+    fs.existsSync(path.join(workspaceRoot, "crates", "prism-cli", "Cargo.toml"))
+  );
+}
+
 /**
- * Resolve `prism` binary: setting → PATH → workspace target → download placeholder.
+ * Resolve `prism` binary.
+ * Prefer workspace target when developing this repo (avoids stale PATH binary).
+ * Order: setting → workspace target → PATH → (caller may build).
  */
 export function resolvePrismBinary(
   workspaceRoot: string | undefined,
@@ -56,15 +64,35 @@ export function resolvePrismBinary(
   if (binaryPathSetting && existsExecutable(binaryPathSetting)) {
     return { prismPath: binaryPathSetting, source: "setting" };
   }
-  const onPath = which("prism");
-  if (onPath && existsExecutable(onPath)) {
-    return { prismPath: onPath, source: "path" };
-  }
   if (workspaceRoot) {
     for (const cand of workspaceCandidates(workspaceRoot)) {
       if (existsExecutable(cand)) {
         return { prismPath: cand, source: "workspace" };
       }
+    }
+  }
+  const onPath = which("prism");
+  if (onPath && existsExecutable(onPath)) {
+    return { prismPath: onPath, source: "path" };
+  }
+  return undefined;
+}
+
+/** Try `cargo build -p prism-cli` when this is the Prism source tree. */
+export async function tryBuildWorkspaceBinary(
+  workspaceRoot: string,
+): Promise<BinaryResolution | undefined> {
+  if (!isPrismWorkspace(workspaceRoot)) return undefined;
+  const cargo = which("cargo");
+  if (!cargo) return undefined;
+  await execFileAsync(cargo, ["build", "-p", "prism-cli"], {
+    cwd: workspaceRoot,
+    maxBuffer: 32 * 1024 * 1024,
+    env: process.env,
+  });
+  for (const cand of workspaceCandidates(workspaceRoot)) {
+    if (existsExecutable(cand)) {
+      return { prismPath: cand, source: "built" };
     }
   }
   return undefined;
@@ -75,7 +103,6 @@ export interface DownloadOffer {
   reason: string;
 }
 
-/** Download-on-demand is gated on a configured base URL + manifest entry. */
 export function downloadOffer(
   downloadBaseUrl: string,
   manifestPath: string,
@@ -83,7 +110,8 @@ export function downloadOffer(
   if (!downloadBaseUrl) {
     return {
       enabled: false,
-      reason: "prism.downloadBaseUrl is empty; use PATH or build the workspace binary.",
+      reason:
+        "No download URL configured. Use PATH prism, set prism.binaryPath, or open the Prism source tree (cargo build -p prism-cli).",
     };
   }
   if (!fs.existsSync(manifestPath)) {
@@ -97,7 +125,7 @@ export function downloadOffer(
     if (!raw.binaries || !raw.binaries[key]) {
       return {
         enabled: false,
-        reason: `No manifest entry for ${key}; populate binaries/manifest.json for release.`,
+        reason: `No manifest entry for ${key}.`,
       };
     }
     return { enabled: true, reason: `Download available for ${key}` };
@@ -113,7 +141,9 @@ export interface DaemonHandle {
   mode: "attached" | "spawned";
 }
 
-function readLockfile(workspaceRoot: string): { pid: number; bind: string } | undefined {
+export function readLockfile(
+  workspaceRoot: string,
+): { pid: number; bind: string } | undefined {
   const lock = path.join(workspaceRoot, ".prism", "daemon.lock");
   if (!fs.existsSync(lock)) return undefined;
   const text = fs.readFileSync(lock, "utf8").trim().split(/\r?\n/);
@@ -123,7 +153,7 @@ function readLockfile(workspaceRoot: string): { pid: number; bind: string } | un
   return { pid, bind };
 }
 
-function readTokenFile(workspaceRoot: string): string | undefined {
+export function readTokenFile(workspaceRoot: string): string | undefined {
   const p = path.join(workspaceRoot, ".prism", "daemon.token");
   if (fs.existsSync(p)) {
     return fs.readFileSync(p, "utf8").trim() || undefined;
@@ -131,9 +161,48 @@ function readTokenFile(workspaceRoot: string): string | undefined {
   return undefined;
 }
 
+function writeTokenFile(workspaceRoot: string, token: string): void {
+  const tokenPath = path.join(workspaceRoot, ".prism", "daemon.token");
+  fs.mkdirSync(path.dirname(tokenPath), { recursive: true });
+  fs.writeFileSync(tokenPath, token, { mode: 0o600 });
+}
+
+async function waitForHealth(
+  bindAddr: string,
+  timeoutMs = 15000,
+): Promise<boolean> {
+  const url = `http://${bindAddr.replace(/^https?:\/\//, "")}/health`;
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return true;
+    } catch {
+      /* retry */
+    }
+    await sleep(200);
+  }
+  return false;
+}
+
+async function probeAuthorized(bindAddr: string, token: string): Promise<boolean> {
+  const base = `http://${bindAddr.replace(/^https?:\/\//, "")}`;
+  try {
+    const res = await fetch(`${base}/v1/index/status`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "X-Prism-Token": token,
+      },
+    });
+    return res.ok || res.status === 503; // 503 = auth ok, index missing
+  } catch {
+    return false;
+  }
+}
+
 /**
- * Attach to an existing daemon via lockfile, or spawn `prism daemon`.
- * Token is read from `.prism/daemon.token` when present, else generated and written.
+ * Attach to an existing daemon (token from `.prism/daemon.token` only) or spawn one.
+ * Never invents a token against a live foreign daemon — that caused sticky 401s.
  */
 export async function ensureDaemon(
   prismPath: string,
@@ -142,61 +211,71 @@ export async function ensureDaemon(
   existingToken?: string,
 ): Promise<DaemonHandle> {
   const lock = readLockfile(workspaceRoot);
-  const token =
-    existingToken ||
-    readTokenFile(workspaceRoot) ||
-    `prism-local-ext-${Date.now().toString(16)}`;
-
-  const tokenPath = path.join(workspaceRoot, ".prism", "daemon.token");
-  fs.mkdirSync(path.dirname(tokenPath), { recursive: true });
-  if (!fs.existsSync(tokenPath)) {
-    fs.writeFileSync(tokenPath, token, { mode: 0o600 });
-  }
-  const finalToken = fs.readFileSync(tokenPath, "utf8").trim();
+  const diskToken = readTokenFile(workspaceRoot);
+  const envToken = process.env.PRISM_TOKEN;
 
   if (lock) {
     try {
       process.kill(lock.pid, 0);
-      return {
-        pid: lock.pid,
-        bindAddr: lock.bind,
-        token: finalToken,
-        mode: "attached",
-      };
-    } catch {
-      /* stale lock — spawn */
+      const healthy = await waitForHealth(lock.bind, 3000);
+      if (!healthy) {
+        throw new Error("lock present but /health not responding");
+      }
+      const candidates = [existingToken, diskToken, envToken].filter(
+        (t): t is string => !!t && t.length > 0,
+      );
+      for (const tok of candidates) {
+        if (await probeAuthorized(lock.bind, tok)) {
+          writeTokenFile(workspaceRoot, tok);
+          return {
+            pid: lock.pid,
+            bindAddr: lock.bind,
+            token: tok,
+            mode: "attached",
+          };
+        }
+      }
+      // Live daemon we cannot auth — do not invent a token; let caller fall back to CLI.
+      throw new Error(
+        "Daemon running but token mismatch (check .prism/daemon.token or restart with prism setup).",
+      );
+    } catch (e) {
+      if (String(e).includes("token mismatch")) throw e;
+      /* stale lock — spawn below */
     }
   }
 
+  const token =
+    existingToken ||
+    diskToken ||
+    envToken ||
+    `prism-local-ext-${Date.now().toString(16)}`;
+  writeTokenFile(workspaceRoot, token);
+
   const child = spawn(
     prismPath,
-    ["daemon", workspaceRoot, "--bind", bindAddr, "--token", finalToken],
+    ["daemon", workspaceRoot, "--bind", bindAddr, "--token", token],
     {
       detached: true,
       stdio: "ignore",
-      env: { ...process.env, PRISM_TOKEN: finalToken },
+      env: { ...process.env, PRISM_TOKEN: token },
     },
   );
   child.unref();
 
-  // Wait briefly for lock / health
-  for (let i = 0; i < 30; i++) {
-    await sleep(100);
-    const again = readLockfile(workspaceRoot);
-    if (again) {
-      return {
-        pid: again.pid,
-        bindAddr: again.bind,
-        token: finalToken,
-        mode: "spawned",
-      };
-    }
+  const ok = await waitForHealth(bindAddr, 20000);
+  if (!ok) {
+    throw new Error(`Daemon spawned but /health not ready within timeout (${bindAddr})`);
+  }
+  if (!(await probeAuthorized(bindAddr, token))) {
+    throw new Error("Daemon healthy but authorized probe failed");
   }
 
+  const again = readLockfile(workspaceRoot);
   return {
-    pid: child.pid,
-    bindAddr,
-    token: finalToken,
+    pid: again?.pid ?? child.pid,
+    bindAddr: again?.bind ?? bindAddr,
+    token,
     mode: "spawned",
   };
 }

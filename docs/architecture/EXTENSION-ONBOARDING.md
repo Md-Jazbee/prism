@@ -8,14 +8,14 @@
 
 ## Steps (UI)
 
-1. **Detect binary** — resolve per ADR-0006; if missing, show “Install / locate Prism CLI”.
-2. **Detect index** — `GET /v1/index/status` or `prism index-status`; if empty/missing, offer **Build index**.
-3. **Build** — prefer daemon `POST /v1/index` with SSE `index.updated` for completion; CLI fallback `prism index` with progress in the output channel.
-4. **Orient** — open Graph panel with `architecture_map` / `repo_map`; offer Compile for a starter question.
-5. **Agent (Cursor)** — optionally register MCP (`prism.agent.enableMcp`); generate `AGENTS.md` stub from AGENT-USAGE.
+1. **Prism: Setup Workspace** (or `prism setup .`) — binary → index → AGENTS.md/rules → MCP → daemon.
+2. Open **Graph** panel (architecture map) and/or **Compile Context**.
+3. On refusals, use the offered next action (Pick Anchor / Build Index / SCIP).
 
 ## Never
 
 - Auto-upload repo content
 - Auto-enable telemetry
 - Block the editor during index (background + status bar)
+
+See [PRODUCT-SETUP.md](./PRODUCT-SETUP.md).
