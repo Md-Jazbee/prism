@@ -39,3 +39,7 @@ fixtures/repos/snapshots/
 !.env.example
 *.pem
 credentials.json
+
+# Extension build artifacts
+extensions/*/dist/
+*.vsix

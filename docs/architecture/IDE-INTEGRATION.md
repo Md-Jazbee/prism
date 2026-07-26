@@ -38,9 +38,10 @@
 
 | Mode | Use |
 |---|---|
-| MCP stdio | Preferred for agents inside Cursor |
-| `prism compile` / `query` CLI | Extension fallback without MCP |
-| Future `prism-lsp` | Native LSP commands when crate lands |
+| Daemon HTTP/SSE (`prismd`) | Preferred for IDE panels (P8) |
+| `prism compile` / `query` CLI | Extension fallback without daemon |
+| MCP stdio | Preferred for agents inside Cursor (auto-registered in P8) |
+| `prism lsp` | Native LSP commands (augments; does not replace language servers) |
 
 ---
 

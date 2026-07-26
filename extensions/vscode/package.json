@@ -1,0 +1,158 @@
+{
+  "name": "prism-vscode",
+  "displayName": "Prism",
+  "description": "Budgeted Evidence Packs, graph orientation, and impact — without leaving the editor.",
+  "version": "0.8.0",
+  "publisher": "prism",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/prism-ai/prism"
+  },
+  "engines": {
+    "vscode": "^1.85.0",
+    "node": ">=20"
+  },
+  "categories": ["Other", "Programming Languages"],
+  "activationEvents": [
+    "onStartupFinished",
+    "workspaceContains:.prism/**"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "prism.compileContext", "title": "Prism: Compile Context", "category": "Prism" },
+      { "command": "prism.evidencePeek", "title": "Prism: Peek Evidence Citation", "category": "Prism" },
+      { "command": "prism.impact", "title": "Prism: Impact", "category": "Prism" },
+      { "command": "prism.slice", "title": "Prism: Slice", "category": "Prism" },
+      { "command": "prism.explain", "title": "Prism: Toggle EXPLAIN", "category": "Prism" },
+      { "command": "prism.repoMap", "title": "Prism: Repo Map", "category": "Prism" },
+      { "command": "prism.entrypoints", "title": "Prism: Entrypoints", "category": "Prism" },
+      { "command": "prism.buildIndex", "title": "Prism: Build Index", "category": "Prism" },
+      { "command": "prism.showEvidence", "title": "Prism: Show Evidence Panel", "category": "Prism" },
+      { "command": "prism.showGraph", "title": "Prism: Show Graph Panel", "category": "Prism" },
+      { "command": "prism.copyForLlm", "title": "Prism: Copy Pack for LLM", "category": "Prism" },
+      { "command": "prism.agent.enableMcp", "title": "Prism: Enable Cursor MCP Registration", "category": "Prism" },
+      { "command": "prism.agent.disableMcp", "title": "Prism: Disable Cursor MCP Registration", "category": "Prism" },
+      { "command": "prism.agent.generateAgentsMd", "title": "Prism: Generate AGENTS.md", "category": "Prism" },
+      { "command": "prism.pickAnchor", "title": "Prism: Pick Anchor (resolve SCOPE_UNRESOLVED)", "category": "Prism" }
+    ],
+    "keybindings": [
+      { "command": "prism.compileContext", "key": "ctrl+shift+p ctrl+shift+c", "mac": "cmd+shift+p cmd+shift+c", "when": "editorTextFocus" },
+      { "command": "prism.impact", "key": "ctrl+shift+p ctrl+shift+i", "mac": "cmd+shift+p cmd+shift+i", "when": "editorTextFocus" },
+      { "command": "prism.slice", "key": "ctrl+shift+p ctrl+shift+s", "mac": "cmd+shift+p cmd+shift+s", "when": "editorTextFocus" }
+    ],
+    "menus": {
+      "editor/context": [
+        { "command": "prism.compileContext", "group": "prism@1", "when": "editorTextFocus" },
+        { "command": "prism.impact", "group": "prism@2", "when": "editorTextFocus" },
+        { "command": "prism.slice", "group": "prism@3", "when": "editorTextFocus" }
+      ],
+      "commandPalette": [
+        { "command": "prism.compileContext" },
+        { "command": "prism.evidencePeek" },
+        { "command": "prism.impact" },
+        { "command": "prism.slice" },
+        { "command": "prism.explain" },
+        { "command": "prism.repoMap" },
+        { "command": "prism.entrypoints" },
+        { "command": "prism.buildIndex" },
+        { "command": "prism.agent.enableMcp" },
+        { "command": "prism.agent.disableMcp" },
+        { "command": "prism.agent.generateAgentsMd" }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "prism",
+          "title": "Prism",
+          "icon": "media/prism.svg"
+        }
+      ]
+    },
+    "views": {
+      "prism": [
+        {
+          "type": "webview",
+          "id": "prism.evidence",
+          "name": "Evidence"
+        },
+        {
+          "type": "webview",
+          "id": "prism.graph",
+          "name": "Graph"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Prism",
+      "properties": {
+        "prism.binaryPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to the prism CLI binary. Empty = PATH then workspace target/."
+        },
+        "prism.daemonBind": {
+          "type": "string",
+          "default": "127.0.0.1:7420",
+          "description": "Loopback bind address for prismd."
+        },
+        "prism.preferDaemon": {
+          "type": "boolean",
+          "default": true,
+          "description": "Prefer daemon HTTP; fall back to CLI when daemon is unavailable."
+        },
+        "prism.engineMajor": {
+          "type": "number",
+          "default": 0,
+          "description": "Expected API major version (handshake). Mismatch refuses."
+        },
+        "prism.decorations.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show ambiguity/hotspot/slice decorations (off by default to avoid noise)."
+        },
+        "prism.agent.autoRegisterMcp": {
+          "type": "boolean",
+          "default": true,
+          "description": "Auto-register Prism as an MCP server in Cursor/VS Code agent config."
+        },
+        "prism.usageCounters": {
+          "type": "boolean",
+          "default": false,
+          "description": "Opt-in local-only counters (command ids + refusal codes; never content)."
+        },
+        "prism.downloadBaseUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Base URL for verified binary download-on-demand (empty disables download)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs && node scripts/build-webview.mjs",
+    "build:ext": "node esbuild.mjs",
+    "build:webview": "node scripts/build-webview.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p webview/tsconfig.json --noEmit",
+    "test": "vitest run",
+    "package": "pnpm run build && vsce package --no-dependencies --allow-missing-repository",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@prism/graph-view": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.2.2",
+    "esbuild": "^0.25.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "schema_version": "1",
+  "note": "Placeholder checksum manifest for verified download-on-demand (ADR-0006). Populate when release artifacts exist.",
+  "binaries": {}
+}

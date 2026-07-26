@@ -736,7 +736,7 @@ schemas/
 |---|---|---|
 | Intel | Entrypoints, hubs, layering, hotspots (git history) | ✅ shipped in `prism-store::intel` |
 | Plugin SDK | Public docs + native ABI conformance; WASM host **deferred** (not proven) | ⚠️ claim amended — [ADR-0001](./adr/0001-wasm-plugin-host-deferred.md) |
-| IDE | VS Code extension (peek evidence, impact, slice, compile) | ⚠️ **design only** (gap G-14 → P8) |
+| IDE | VS Code extension (peek evidence, impact, slice, compile) | ✅ `extensions/vscode` (P8) |
 | Security | Secret redaction, pack audit logs | ✅ policies written |
 | Public eval | Four-arm scorecard published | ⚠️ **proxy metrics only**; real four-arm run moves to P9 Stage C |
 
@@ -748,7 +748,7 @@ crates/
 ├── prism-plugin-host/             # ❌ not built — deferred to P6 Stage A
 ├── prism-lsp/                     # ✅ P6 Stage C — stdio LSP (hover/symbols/codelens/commands)
 plugins/examples/hello-extractor/  # ❌ not built
-extensions/vscode/                 # ❌ not built — deferred to P8
+extensions/vscode/                 # ✅ P8 — thin host, thick daemon
 eval/reports/                      # ✅ p1…p5 scorecard JSON
 docs/
 ├── contributing/plugin-guide.md   # ✅
@@ -1060,7 +1060,7 @@ deploy/
 | **Incremental edit + query P95 bench gate** | P6 | ✅ smoke job (numeric fail thresholds TBD) |
 | **View-model golden fixtures** | P6 | ⬜ planned |
 | **Screenshot-diff render suite** | P7 | ⬜ planned |
-| **Extension lint / unit / e2e / VSIX** | P8 (was P5) | ⬜ planned |
+| **Extension lint / unit / e2e / VSIX** | P8 (was P5) | ✅ `extension.yml` (vitest; electron e2e deferred) |
 | **Workflow trace conformance** | P9 | ⬜ planned |
 | **Four-arm eval run** (scheduled, not per-PR) | P9 | ⬜ planned |
 

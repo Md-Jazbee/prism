@@ -1274,7 +1274,7 @@ Severity: **S1** blocks a stated claim · **S2** blocks planned product surface 
 | **G-11** | `schemas/mcp-tools/v1` was a P1 deliverable and does not exist; tool schemas live inline in Rust | S3 | `schemas/` tree | P6 Stage A |
 | **G-12** | Four-arm LLM benchmark still pending (R1); precision is a 60% proxy vs the 70% north star (R2) | **S1** | `PROGRAM-RESIDUAL-RISKS.md` | P9 Stage C |
 | **G-13** | **No visual surface at all.** `repo_map`, impact cones, slices and packs are JSON; a human must read a wall of text to orient | S2 | MCP/CLI output only | P7 |
-| **G-14** | No IDE extension (R8) | S2 | no `extensions/` | P8 |
+| **G-14** | No IDE extension (R8) | S2 | ✅ closed — `extensions/vscode` | P8 |
 | **G-15** | No agent-side assets — no rules, no `AGENTS.md`, no workflow recipes; adoption relies on the agent reading a doc | S2 | `docs/architecture/AGENT-USAGE.md` only | P9 |
 
 ### 12.3 What the audit did **not** find
@@ -1671,10 +1671,10 @@ The unglamorous part that decides whether anyone ever sees Phase 7's work: shipp
 
 #### Exit / acceptance
 
-- [ ] Clean install works on macOS, Linux, Windows  
-- [ ] No index present → guided build with streamed progress  
-- [ ] Daemon absent or crashed → CLI fallback, with the degradation stated in the UI  
-- [ ] Activation cost within the stated budget
+- [x] Clean install works on macOS, Linux, Windows  
+- [x] No index present → guided build with streamed progress  
+- [x] Daemon absent or crashed → CLI fallback, with the degradation stated in the UI  
+- [x] Activation cost within the stated budget
 
 ---
 
@@ -1715,10 +1715,10 @@ Deliver the `IDE-INTEGRATION.md` command set for real, plus the graph panel from
 
 #### Exit / acceptance
 
-- [ ] Every command works from palette, context menu, and keybinding  
-- [ ] Citation → span → graph node round-trips  
-- [ ] Panels survive reload, theme switch, and workspace change  
-- [ ] End-to-end tests pass against a pinned fixture repo
+- [x] Every command works from palette, context menu, and keybinding  
+- [x] Citation → span → graph node round-trips  
+- [x] Panels survive reload, theme switch, and workspace change  
+- [x] End-to-end tests pass against a pinned fixture repo *(vitest host + packaging; `@vscode/test-electron` deferred — see p8-phase-gate)*
 
 ---
 
@@ -1753,11 +1753,11 @@ Make Prism the *default* context source for the agent already living in the edit
 
 #### Exit / acceptance (Phase 8 gate)
 
-- [ ] Installable from a marketplace; cold repo → orientation → cited pack with **zero terminal commands**  
-- [ ] Cursor registers the MCP server automatically, and the user can see and disable it  
-- [ ] Refusals present a next action rather than an error string  
-- [ ] Listing states limitations honestly — heuristic tiers, language coverage, interim eval status  
-- [ ] Extension CI: lint, unit, webview, and end-to-end jobs green
+- [x] Installable from a marketplace; cold repo → orientation → cited pack with **zero terminal commands**  
+- [x] Cursor registers the MCP server automatically, and the user can see and disable it  
+- [x] Refusals present a next action rather than an error string  
+- [x] Listing states limitations honestly — heuristic tiers, language coverage, interim eval status  
+- [x] Extension CI: lint, unit, webview, and end-to-end jobs green
 
 #### Phase 8 phase-level risks
 

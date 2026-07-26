@@ -3,7 +3,7 @@
 **Date:** 2026-07-26  
 **Status:** Accepted  
 **Gaps:** G-05  
-**Expiry:** Phase 8 (revisit when IDE extension + multi-transport clients need `rmcp`)
+**Status:** Expiry reached at P8. **Reaffirmed:** keep hand-rolled stdio for MCP agent path; the VS Code extension uses daemon HTTP / CLI for panels and does not require `rmcp`. Revisit only if multi-transport MCP clients need the SDK.
 
 ## Context
 

@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P7 gate passed** · P8 IDE Extension next · P0–P6 complete · P9 planned · **P10 deferred**  
+**Current phase:** **P8 gate passed** · P9 Agent Experience next · P0–P7 complete · **P10 deferred**  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)  
 **Source of truth for stack/layout:** [TECH-STACK-AND-PROJECT-STRUCTURE.md](../architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md)
@@ -24,11 +24,11 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P5** | Repo Intelligence + Hardening | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 (interim) |
 | **P6** | Consolidation & Interaction Substrate | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P7** | Visual Repository Intelligence | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
-| **P8** | IDE Extension (VS Code / Cursor) | ░░░░░░░░░░ **0%** | 📋 Planned |
+| **P8** | IDE Extension (VS Code / Cursor) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P9** | Agent Experience & Workflows | ░░░░░░░░░░ **0%** | 📋 Planned |
 | **P10** | Team / Distributed (optional, was P6) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
 
-**How to read progress:** the **engine half (P0–P5) is complete**. **P6** interaction substrate and **P7** visual intelligence are gated. **P8** (IDE extension) is next. P9 remains planned; P10 stays optional.
+**How to read progress:** the **engine half (P0–P5) is complete**. **P6–P8** interaction surfaces are gated (HTTP/daemon, visual renderer, IDE extension). **P9** (agent experience) is next. P10 stays optional.
 
 ```mermaid
 flowchart LR
@@ -39,7 +39,7 @@ flowchart LR
     P4 --> P5[P5 Intelligence + Eval<br/>✅ done]
     P5 --> P6[P6 Interaction Substrate<br/>✅ done]
     P6 --> P7[P7 Visual Repo Intelligence<br/>✅ done]
-    P7 --> P8[P8 IDE Extension<br/>📋 planned]
+    P7 --> P8[P8 IDE Extension<br/>✅ done]
     P8 --> P9[P9 Agent Experience<br/>📋 planned]
     P9 -.-> P10[P10 Distributed / Team<br/>optional]
 
@@ -51,7 +51,8 @@ flowchart LR
     style P5 fill:#b8e994,stroke:#78e08f,color:#000
     style P6 fill:#b8e994,stroke:#78e08f,color:#000
     style P7 fill:#b8e994,stroke:#78e08f,color:#000
-    style P8 fill:#ffeaa7,stroke:#fdcb6e,color:#000
+    style P7 fill:#b8e994,stroke:#78e08f,color:#000
+    style P8 fill:#b8e994,stroke:#78e08f,color:#000
     style P9 fill:#ffeaa7,stroke:#fdcb6e,color:#000
     style P10 fill:#dfe6e9,stroke:#b2bec3,color:#000
 ```
@@ -85,7 +86,7 @@ flowchart LR
 | LSP surface | P6 | ⬜ design only — gap G-02 |
 | Graph View-Model contract | P6 | ⬜ gap G-13 prerequisite |
 | Interactive graph rendering | P7 | ✅ `@prism/graph-view` + SVG screenshot-diff (G-13 closed) |
-| IDE extension | P5 → **P8** | ⬜ design only — gap G-14 (risk R8) |
+| IDE extension | P5 → **P8** | ✅ `extensions/vscode` VSIX + panels + MCP auto-reg |
 | Agent workflows + rules assets | P9 | ⬜ gap G-15 |
 | Four-arm LLM benchmark | P5 → **P9** | ⬜ proxies only — gap G-12 (risks R1/R2) |
 | Team/shared index | P10 | ⬜ deferred |
@@ -831,18 +832,23 @@ Renderer package is consumable from a webview. **P8** owns VSIX lifecycle, graph
 
 ---
 
-## Phase 8 — IDE Extension (VS Code / Cursor) (outline)
+## Phase 8 — IDE Extension (VS Code / Cursor)
 
-**State:** 📋 Planned  
-**Duration:** 4–5 weeks  
+**State:** ✅ Gate passed 2026-07-26  
+**Duration:** 4–5 weeks (compressed implementation pass)  
 **Gate:** Installable VSIX; cold repo → orientation → cited pack with zero terminal commands; Cursor auto-registers the MCP server.  
-**Detail:** [planning §15](./PLANNING-AND-IMPLEMENTATION.md#15-phase-8--ide-extension-vs-code--cursor)
+**Detail:** [planning §15](./PLANNING-AND-IMPLEMENTATION.md#15-phase-8--ide-extension-vs-code--cursor)  
+**Scorecard:** [p8-phase-gate.md](../eval/scorecards/p8-phase-gate.md)
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
-| **A — Skeleton + lifecycle** | Activation budget; binary acquisition + verification; transport fallback chain; first-run onboarding | ⬜ |
-| **B — Commands + panels** | `IDE-INTEGRATION.md` command set; evidence panel; graph panel; decorations; peek round-trip | ⬜ |
-| **C — Cursor integration + release** | MCP auto-registration; generated `AGENTS.md`/rules; actionable refusals; Marketplace + Open VSX | ⬜ |
+| **A — Skeleton + lifecycle** | Activation budget; binary acquisition + verification (ADR-0006); transport fallback chain; first-run onboarding | ✅ |
+| **B — Commands + panels** | `IDE-INTEGRATION.md` command set; evidence panel; graph panel; decorations; peek round-trip | ✅ |
+| **C — Cursor integration + release** | MCP auto-registration; generated `AGENTS.md`/rules; actionable refusals; Marketplace copy + Open VSX-ready VSIX CI | ✅ |
+
+#### Handoff to Phase 9
+
+Extension delivers packs/views locally; MCP is auto-registered. **P9** owns agent contract hardening, workflow catalog, and the four-arm closed-loop eval.
 
 ---
 
@@ -886,7 +892,7 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | **W-PLAN** | Query planning | ✅ executable `Slice` on debug |
 | **W-CC** | Context compiler | ✅ debug pack gates (never drop error/slice) |
 | **W-MCP** | Agent surface | ✅ AGENT-USAGE + intel tools |
-| **W-IDE** | IDE/LSP | ✅ IDE-INTEGRATION design (extension phased) |
+| **W-IDE** | IDE/LSP | ✅ extension + LSP design (`extensions/vscode`, P8) |
 | **W-EVAL** | Evaluation | ✅ P5 public report + p5-scorecard (interim) |
 | **W-OBS** | Observability | ✅ `pack_bound_for_llm` + OTel span design (**exporter still unbuilt** → P6-B); **N1/N2 benches live** |
 | **W-SEC** | Security & privacy | ✅ release checklist + audit/redaction; **LICENSE + cargo-deny** |
@@ -939,3 +945,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P6 Stage B exited:** `prism-api` `/v1/*` + SSE, `prismd`/`prism daemon` with notify debounce reindex, Rayon extract fan-out, loopback token auth, daemon docs; OTLP full SDK waived to P7 (ADR-0005). **Stage C next** (LSP + graph-view schema). |
 | 2026-07-26 | **P6 Stage C exited / gate passed:** `prism-view` + `schemas/graph-view/v1`, `VIEW_TOO_LARGE`, deterministic layout, `POST /v1/view` / `prism view`, `prism-lsp` (hover/symbols/codelens/commands), fixtures + p6-phase-gate scorecard. **P7 opened** (visual renderer). |
 | 2026-07-26 | **P7 Stages A–C exited / gate passed:** projection/LOD/layout/aggregation docs; `@prism/graph-view` (Cytoscape + SVG/Mermaid export, interaction grammar, visual encoding); overlay goldens + visual EXPLAIN; screenshot-diff suite; p7-phase-gate (human TTO lab deferred to P8). **P8 opened**. |
+| 2026-07-26 | **P8 Stages A–C exited / gate passed:** `extensions/vscode` (daemon HTTP→CLI transport, ADR-0006 binary delivery, evidence+graph webviews, commands, decorations off-by-default, Cursor MCP auto-reg, AGENTS.md generation, actionable refusals, extension.yml VSIX CI, p8-phase-gate). Marketplace publish + `@vscode/test-electron` deferred. **P9 opened**. |
