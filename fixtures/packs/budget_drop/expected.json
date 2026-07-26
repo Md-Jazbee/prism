@@ -124,6 +124,7 @@
       ],
       "notes": [
         "must-include fragments cannot be budget-evicted",
+        "error/stack + criterion slice never dropped under budget pressure",
         "extractive default; no abstractive code summaries"
       ]
     }

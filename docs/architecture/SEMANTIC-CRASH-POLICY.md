@@ -10,4 +10,4 @@
 | Criterion outside any function | Empty slice + `notes: ["criterion_not_in_function"]` |
 | Panic in analyzer | Caught at CLI boundary → `SEMANTIC_PARTIAL` JSON error, non-zero only if `--strict` |
 
-Agent-facing tools should treat missing semantic shards as a **gap**, not a hard failure — fall back to T1 neighborhood until Stage C debug recipes require slices.
+Agent-facing tools should treat missing semantic shards as a **gap**, not a hard failure — fall back to T1 neighborhood. Debug recipes prefer Slice when available ([DEBUG-RECIPES.md](./DEBUG-RECIPES.md)).

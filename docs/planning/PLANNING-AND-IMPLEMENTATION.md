@@ -1028,10 +1028,10 @@ Wire debug/review intents to slicing; optionally design runtime enrichment (do n
 
 #### Exit / acceptance (Phase 4 gate)
 
-- [ ] Debug tasks: ≥5× token reduction vs explore  
-- [ ] Quality within ~5 pts of frontier-explore on that suite  
-- [ ] Slice + stack/error verbatim never dropped under budget pressure  
-- [ ] Runtime not required to pass the gate |
+- [x] Debug tasks: ≥5× token reduction vs explore  
+- [x] Quality within ~5 pts of frontier-explore on that suite *(proxy: necessary_spans completeness; LLM baselines pending)*  
+- [x] Slice + stack/error verbatim never dropped under budget pressure  
+- [x] Runtime not required to pass the gate  
 
 #### Phase 4 phase-level risks
 

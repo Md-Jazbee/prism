@@ -73,7 +73,7 @@ pub type PlanRefuse = ScopeUnresolved;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use prism_plan::{plan_query, Intent, PlanHints};
+    use prism_plan::{plan_query, Intent, Operator, PlanHints, PlanOutcome};
     use std::fs;
     use std::path::PathBuf;
 
@@ -121,6 +121,88 @@ mod tests {
                 assert!(
                     pack.drops.iter().any(|d| d.fragment_id == "frag:noise"),
                     "optional noise should be dropped under tight budget"
+                );
+            }
+            other => panic!("expected Ok pack, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn debug_error_and_slice_never_dropped_under_budget() {
+        let hints = PlanHints {
+            intent_override: Some(Intent::Debug),
+            anchors: vec![
+                "pkg/chain.py:2 in leaf".into(),
+                "AttributeError: boom".into(),
+            ],
+            stack_frames: vec!["pkg/chain.py:2 in leaf".into()],
+            error_text: Some("AttributeError: boom".into()),
+            budget_tokens: Some(120),
+            ..Default::default()
+        };
+        let plan = match plan_query("why crash?", &hints).unwrap() {
+            PlanOutcome::Ok(p) => p,
+            other => panic!("{other:?}"),
+        };
+        assert!(
+            plan.steps.iter().any(|s| matches!(s.op, Operator::Slice) && s.executable),
+            "Slice must be executable"
+        );
+        let mut cands = select_candidates(&plan);
+        cands.push(CandidateFragment {
+            id: "frag:error:manual".into(),
+            kind: FragmentKind::ErrorVerbatim,
+            layer: PackLayer::Core,
+            text: "AttributeError: boom".into(),
+            token_estimate: 20,
+            provenance: Provenance::synthetic("error"),
+            confidence: "extracted".into(),
+            why_included: "error_or_stack_verbatim".into(),
+            drop_priority: 99, // would drop if not protected
+            roles: vec!["error_or_stack_verbatim".into()],
+            must_include: false,
+        });
+        cands.push(CandidateFragment {
+            id: "frag:slice:manual".into(),
+            kind: FragmentKind::Slice,
+            layer: PackLayer::Core,
+            text: "// criterion slice leaf\n".into(),
+            token_estimate: 30,
+            provenance: Provenance::synthetic("slice"),
+            confidence: "extracted".into(),
+            why_included: "criterion_slice".into(),
+            drop_priority: 99,
+            roles: vec!["criterion_slice".into(), "primary_frame_body".into()],
+            must_include: false,
+        });
+        cands.push(CandidateFragment {
+            id: "frag:noise:huge".into(),
+            kind: FragmentKind::Signature,
+            layer: PackLayer::Nbr,
+            text: "n".repeat(2000),
+            token_estimate: 500,
+            provenance: Provenance::synthetic("noise"),
+            confidence: "heuristic".into(),
+            why_included: "neighbor_bodies".into(),
+            drop_priority: 1,
+            roles: vec!["neighbor_bodies".into()],
+            must_include: false,
+        });
+        match compile_from_candidates(&plan, cands) {
+            CompileOutcome::Ok(pack) => {
+                assert!(
+                    pack.fragments.iter().any(|f| f.id == "frag:error:manual"),
+                    "error verbatim must survive: {:?}",
+                    pack.drops
+                );
+                assert!(
+                    pack.fragments.iter().any(|f| f.id == "frag:slice:manual"),
+                    "criterion slice must survive: {:?}",
+                    pack.drops
+                );
+                assert!(
+                    pack.drops.iter().any(|d| d.fragment_id == "frag:noise:huge"),
+                    "noise should drop under pressure"
                 );
             }
             other => panic!("expected Ok pack, got {other:?}"),

@@ -605,8 +605,12 @@ fn fragments_from_slice(report: &prism_semantic::InterprocSliceReport) -> Vec<Ca
             confidence: "extracted".into(),
             why_included: "primary_frame_body".into(),
             drop_priority: 0,
-            roles: vec!["primary_frame_body".into(), "seed_symbols".into()],
-            must_include: i == 0,
+            roles: vec![
+                "primary_frame_body".into(),
+                "criterion_slice".into(),
+                "seed_symbols".into(),
+            ],
+            must_include: true,
         });
     }
     if !report.cfg_summary.is_empty() {

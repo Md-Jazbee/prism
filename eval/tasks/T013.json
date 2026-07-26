@@ -1,25 +1,31 @@
 {
   "id": "T013",
-  "version": "0.0.1",
-  "type": "debug_stub",
+  "version": "0.0.2",
+  "type": "debug",
   "repo": "httpx",
   "snapshot_ref": "fixtures/repos/httpx.md",
   "commit_sha": "b5addb64f0161ff6bfe94c124ef76f6a1fba5254",
-  "question": "Stub: debug a timeout failure path",
+  "question": "Why does Client.send raise when the stream is already closed?",
   "accepted_answer_criteria": [
     "Names the primary symbol(s) or modules involved",
     "Does not contradict repo source at pinned SHA",
-    "Cites evidence spans or graph nodes when Prism is used"
+    "Cites evidence spans or graph nodes when Prism is used",
+    "Keeps stack/error locus in the Evidence Pack"
   ],
-  "necessary_spans": [],
-  "gold_hints": [],
+  "necessary_spans": [
+    "httpx/_client.py:Client.send"
+  ],
+  "gold_hints": [
+    "httpx/_client.py — Client.send: redirect/auth handling; failure paths around closed streams / transport",
+    "Prefer compile_context(debug) + Slice over whole-file explore"
+  ],
   "preferred_future_tools": [
-    "slice",
-    "compile_context"
+    "compile_context",
+    "slice"
   ],
   "baseline_protocols": [
     "frontier+explore",
     "medium+explore"
   ],
-  "notes": "SHA frozen 2026-07-25; gold hints in progress."
+  "notes": "P4 Stage C debug gold; SHA frozen 2026-07-25."
 }

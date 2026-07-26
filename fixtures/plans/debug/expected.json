@@ -105,6 +105,7 @@
       }
     ],
     "must_include": [
+      "criterion_slice",
       "error_or_stack_verbatim",
       "primary_frame_body"
     ],
@@ -120,7 +121,7 @@
       "Slice: backward, max_depth=2, memoized",
       "UpgradePrecision: mandatory, critical_path_only, ≤200ms",
       "expand: backward interproc slice + recent diff + callee signatures",
-      "never drop error/stack under budget pressure",
+      "never drop error/stack or criterion slice under budget pressure",
       "seeds: stack frames + error text"
     ]
   }

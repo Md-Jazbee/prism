@@ -5,7 +5,7 @@ Deterministic `PlanOutcome` JSON for `prism-plan` conformance.
 | Case | Intent / outcome | Input |
 |---|---|---|
 | `repo_qa` | repo_qa plan | named symbol question |
-| `debug` | debug plan (placeholders) | stack + error hints |
+| `debug` | debug plan (Slice executable) | stack + error hints |
 | `impact` | impact plan | “impact of …” |
 | `refactor` | refactor plan | rename / references |
 | `generate` | generate plan | generate near symbol |

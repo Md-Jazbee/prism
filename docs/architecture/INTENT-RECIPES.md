@@ -9,7 +9,7 @@ Recipes are **deterministic**. Each produces a plan without an LLM.
 | Intent | Seeds | Expand | Must-include | Min tier notes |
 |---|---|---|---|---|
 | `repo_qa` | named symbols / paths | def + 1-hop signatures | primary definition + signature | T1 |
-| `debug` | stack + error | backward slice + recent diff | error/stack verbatim + primary frame body | T1 now; Slice→P4 |
+| `debug` | stack + error | backward slice + recent diff | error/stack + frame + criterion slice | T3/T4 Slice live |
 | `impact` | changed / named symbols | forward IMPACTS depth 1–3 | seed symbols + depth-1 cone | T1 heuristic |
 | `refactor` | target symbol | all REFERENCES (T2+) | target def + reference list | warn without T2 |
 | `generate` | target file locus | types + one exemplar | insertion neighborhood + type sigs | T1 |
@@ -25,7 +25,7 @@ Recipes are **deterministic**. Each produces a plan without an LLM.
 5. Architecture prose  
 6. **Never drop** primary criterion slice or error/stack verbatim  
 
-Per-intent `drop_order` strings in the Plan IR name these priorities for Stage B enforcement.
+Per-intent `drop_order` strings in the Plan IR name these priorities for Stage B enforcement. Debug pack gates: [DEBUG-PACK-GATES.md](./DEBUG-PACK-GATES.md).
 
 ## Classification heuristics
 
@@ -40,7 +40,7 @@ Questions with **no anchors** (and intent ≠ `architecture`) → `SCOPE_UNRESOL
 | Case | Path |
 |---|---|
 | Repo-QA | `fixtures/plans/repo_qa/` |
-| Debug | `fixtures/plans/debug/` |
+| Debug | `fixtures/plans/debug/` (Slice executable) |
 | Impact | `fixtures/plans/impact/` |
 | Refactor | `fixtures/plans/refactor/` |
 | Generate | `fixtures/plans/generate/` |

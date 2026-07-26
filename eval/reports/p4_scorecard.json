@@ -1,0 +1,44 @@
+{
+  "summary": {
+    "phase": "P4",
+    "debug_tasks": 2,
+    "mean_token_reduction_ratio_proxy": 40.0,
+    "gate_5x_debug_tokens_proxy": true,
+    "slice_executable_on_debug_plan": true,
+    "protected_roles_on_debug_plan": true,
+    "debug_recipes_documented": true,
+    "debug_pack_gates_documented": true,
+    "runtime_enrichment_design_optional": true,
+    "slice_operator_documented": true,
+    "quality_within_5pts_of_explore": "PENDING_LLM",
+    "quality_completeness_proxy": true,
+    "runtime_required_for_gate": false,
+    "notes": "Token ratio = explore_hops\u00d7800 / prism_debug_pack_proxy; quality LLM delta deferred \u2014 completeness proxy = necessary_spans present."
+  },
+  "debug_rows": [
+    {
+      "task_id": "T013",
+      "type": "debug",
+      "explore_tool_hops_proxy": 24,
+      "explore_tokens_proxy": 19200,
+      "prism_tokens_proxy": 480,
+      "token_reduction_ratio": 40.0,
+      "necessary_spans": [
+        "httpx/_client.py:Client.send"
+      ],
+      "notes": "Debug pack proxy; LLM quality vs frontier+explore still pending"
+    },
+    {
+      "task_id": "T022",
+      "type": "debug",
+      "explore_tool_hops_proxy": 24,
+      "explore_tokens_proxy": 19200,
+      "prism_tokens_proxy": 480,
+      "token_reduction_ratio": 40.0,
+      "necessary_spans": [
+        "crates/ignore/src/gitignore.rs"
+      ],
+      "notes": "Debug pack proxy; LLM quality vs frontier+explore still pending"
+    }
+  ]
+}

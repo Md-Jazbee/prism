@@ -1,25 +1,31 @@
 {
   "id": "T022",
-  "version": "0.0.1",
-  "type": "debug_stub",
+  "version": "0.0.2",
+  "type": "debug",
   "repo": "ripgrep",
   "snapshot_ref": "fixtures/repos/ripgrep.md",
   "commit_sha": "f9c05a949d1a0dc8e16dee28ca9605d38611faeb",
-  "question": "Stub: debug a false positive ignore",
+  "question": "Why does ignore matching treat this path as a false positive?",
   "accepted_answer_criteria": [
     "Names the primary symbol(s) or modules involved",
     "Does not contradict repo source at pinned SHA",
-    "Cites evidence spans or graph nodes when Prism is used"
+    "Cites evidence spans or graph nodes when Prism is used",
+    "Keeps stack/error locus in the Evidence Pack"
   ],
-  "necessary_spans": [],
-  "gold_hints": [],
+  "necessary_spans": [
+    "crates/ignore/src/gitignore.rs"
+  ],
+  "gold_hints": [
+    "ignore crate gitignore matching — path classification / globs",
+    "Prefer compile_context(debug) + Slice over whole-crate explore"
+  ],
   "preferred_future_tools": [
-    "slice",
-    "compile_context"
+    "compile_context",
+    "slice"
   ],
   "baseline_protocols": [
     "frontier+explore",
     "medium+explore"
   ],
-  "notes": "SHA frozen 2026-07-25; gold hints in progress."
+  "notes": "P4 Stage C debug gold; SHA frozen 2026-07-25."
 }

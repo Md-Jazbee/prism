@@ -1,11 +1,18 @@
 //! Budget packing with hard must-include invariant (ADD §18.1).
 
 use crate::explain::{DropRecord, ExplainFragment, ExplainReport};
-use crate::fragment::{CandidateFragment, EvidenceFragment};
+use crate::fragment::{CandidateFragment, EvidenceFragment, FragmentKind};
 use crate::pack::{Citation, EvidencePack, PackHierarchy, PackMeta};
 use prism_ir::PACK_SCHEMA_VERSION;
 use prism_plan::Plan;
 use serde::{Deserialize, Serialize};
+
+/// Roles that must never be budget-evicted on debug (and related) packs.
+const PROTECTED_ROLES: &[&str] = &[
+    "error_or_stack_verbatim",
+    "primary_frame_body",
+    "criterion_slice",
+];
 
 /// Must-include cannot fit under budget — refuse soft truncation of truth.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -22,13 +29,18 @@ pub struct BudgetExceeded {
 ///
 /// Invariant: every `must_include` candidate is kept, or this returns [`BudgetExceeded`].
 /// Optional fragments are filled lowest `drop_priority` first; remainder recorded in `drops`.
+///
+/// Debug pack gates (P4 Stage C): `ErrorVerbatim` and protected roles are forced must-include.
 pub fn pack_under_budget(
     plan: &Plan,
     mut candidates: Vec<CandidateFragment>,
 ) -> Result<EvidencePack, BudgetExceeded> {
-    // Tag must-include from roles ∩ plan.must_include
+    // Tag must-include from roles ∩ plan.must_include + hard protected kinds/roles
     for c in &mut candidates {
-        if plan.must_include.iter().any(|r| c.roles.contains(r)) {
+        let protected = matches!(c.kind, FragmentKind::ErrorVerbatim)
+            || c.roles.iter().any(|r| PROTECTED_ROLES.contains(&r.as_str()))
+            || plan.must_include.iter().any(|r| c.roles.contains(r));
+        if protected {
             c.must_include = true;
             c.drop_priority = 0;
         }
@@ -133,6 +145,7 @@ pub fn pack_under_budget(
         drops: drops.clone(),
         notes: vec![
             "must-include fragments cannot be budget-evicted".into(),
+            "error/stack + criterion slice never dropped under budget pressure".into(),
             "extractive default; no abstractive code summaries".into(),
         ],
     };

@@ -40,7 +40,7 @@ pub fn recipe_for(intent: Intent) -> IntentRecipe {
             intent,
             seed_description: "stack frames + error text",
             expand_description: "backward interproc slice + recent diff + callee signatures",
-            must_include: &["error_or_stack_verbatim", "primary_frame_body"],
+            must_include: &["error_or_stack_verbatim", "primary_frame_body", "criterion_slice"],
             drop_order: &[
                 "embedding_fallback_seeds",
                 "depth_3_plus_impact",
@@ -51,7 +51,7 @@ pub fn recipe_for(intent: Intent) -> IntentRecipe {
             notes: &[
                 "Slice: backward, max_depth=2, memoized",
                 "UpgradePrecision: mandatory, critical_path_only, ≤200ms",
-                "never drop error/stack under budget pressure",
+                "never drop error/stack or criterion slice under budget pressure",
             ],
         },
         Intent::Impact => IntentRecipe {

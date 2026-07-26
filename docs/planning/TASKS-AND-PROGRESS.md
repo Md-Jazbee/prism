@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P4 Stage C open** · Stage B (T4 Slice) exited · LLM quality / dual-review labels still pending  
+**Current phase:** **P4 gate passed** · P5 Stage A open · LLM quality / dual-review labels still pending  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)
 
@@ -17,27 +17,27 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P1** | Syntactic KG + MCP | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-25 (proxies) |
 | **P2** | Context Compiler | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 (proxies) |
 | **P3** | Precise Tier (T2) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
-| **P4** | Semantic Slicing | ▓▓▓▓▓▓░░░░ **67%** | 🟡 Stage C open |
-| **P5** | Repo Intelligence + Hardening | ░░░░░░░░░░ **0%** | ⚪ Not started |
+| **P4** | Semantic Slicing | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
+| **P5** | Repo Intelligence + Hardening | ░░░░░░░░░░ **0%** | 🟡 Stage A open |
 | **P6** | Team / Distributed (optional) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
 
-**How to read progress:** P4 % ≈ stages done ÷ 3 (A/B/C). Later phases stay at 0% until their entry gate passes.
+**How to read progress:** P5 % ≈ stages done ÷ 3 (A/B/C). Later phases stay at 0% until their entry gate passes.
 
 ```mermaid
 flowchart LR
     P0[P0 Foundations<br/>✅ done] --> P1[P1 Syntactic KG + MCP<br/>✅ done]
     P1 --> P2[P2 Context Compiler<br/>✅ done]
     P2 --> P3[P3 Precise Tier<br/>✅ done]
-    P3 --> P4[P4 Semantic Slicing<br/>🟡 Stage C]
-    P4 --> P5[P5 Intelligence + Eval]
+    P3 --> P4[P4 Semantic Slicing<br/>✅ done]
+    P4 --> P5[P5 Intelligence + Eval<br/>🟡 Stage A]
     P5 --> P6[P6 Distributed / Team<br/>optional]
 
     style P0 fill:#b8e994,stroke:#78e08f,color:#000
     style P1 fill:#b8e994,stroke:#78e08f,color:#000
     style P2 fill:#b8e994,stroke:#78e08f,color:#000
     style P3 fill:#b8e994,stroke:#78e08f,color:#000
-    style P4 fill:#f6e58d,stroke:#f9ca24,color:#000
-    style P5 fill:#dfe6e9,stroke:#b2bec3,color:#000
+    style P4 fill:#b8e994,stroke:#78e08f,color:#000
+    style P5 fill:#f6e58d,stroke:#f9ca24,color:#000
     style P6 fill:#dfe6e9,stroke:#b2bec3,color:#000
 ```
 
@@ -62,7 +62,7 @@ flowchart LR
 | MCP graph tools | ○ | ● | ● | ● | ● | ● | ● | ✅ prism-mcp stdio tools |
 | Query plan + Evidence Pack | ○ | ○ | ● | ● | ● | ● | ● | ✅ plan + pack + EXPLAIN + MCP `compile_context` |
 | Precise symbol (T2) | ○ | ○ | ○ | ● | ● | ● | ● | ✅ gated product path |
-| Semantic slice (T3/T4) | ○ | ○ | ○ | ○ | ● | ● | ● | 🟡 T3+T4 Slice op executable; debug gate pending |
+| Semantic slice (T3/T4) | ○ | ○ | ○ | ○ | ● | ● | ● | ✅ debug packs slice-minimal (gate proxies) |
 | Architecture intelligence | ○ | ◐ | ◐ | ◐ | ◐ | ● | ● | ◐ path-prefix communities + hubs |
 | Team/shared index | ○ | ○ | ○ | ○ | ○ | ○ | ● | ⬜ |
 
@@ -481,15 +481,15 @@ Precise IDs and gated claims are live. Next: semantic slicing (T3 CFG/DFG) for d
 
 ## Phase 4 — Semantic Slicing
 
-**State:** 🟡 **Stage C open** (Stage B exited 2026-07-26)  
+**State:** ✅ **Gate passed 2026-07-26** (debug token↓ proxy; pack gates; runtime optional)  
 **Duration:** 5–8 weeks  
-**Gate:** Debug tasks token↓ ≥5× with quality within ~5 pts of frontier-explore.
+**Gate evidence:** [eval/scorecards/p4-phase-gate.md](../../eval/scorecards/p4-phase-gate.md)
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
 | **A — Intra-procedural (T3)** | CFG/DFG shards; criteria for local slices | ✅ exited 2026-07-26 |
 | **B — Inter-procedural (T4)** | CPG shards; slice operator; shard budgets | ✅ exited 2026-07-26 |
-| **C — Debug recipes + gate** | Wire debug intents; optional runtime enrichment; Phase 4 scorecard | 🟡 open |
+| **C — Debug recipes + gate** | Wire debug intents; optional runtime enrichment; Phase 4 scorecard | ✅ exited 2026-07-26 |
 
 ### Stage A — Intra-procedural control/data flow (T3) ✅
 
@@ -536,17 +536,39 @@ Intra-proc Python slices land under `.prism/semantic/` (not hot `graph.sqlite`).
 
 `Slice` is live on the debug recipe path. Next: tighten debug/security recipes, optional runtime enrichment design, and Phase 4 scorecard (≥5× debug token↓).
 
+### Stage C — Debug recipes + Phase 4 gate ✅
+
+#### Deliverables
+
+- [x] Debug / security recipes — [DEBUG-RECIPES.md](../architecture/DEBUG-RECIPES.md)
+- [x] Debug pack quality gates — [DEBUG-PACK-GATES.md](../architecture/DEBUG-PACK-GATES.md) + budget protected roles
+- [x] Optional runtime enrichment design — [RUNTIME-ENRICHMENT.md](../architecture/RUNTIME-ENRICHMENT.md)
+- [x] Debug gold tasks — `eval/tasks/T013.json`, `T022.json`
+- [x] Phase 4 scorecard — [p4-phase-gate.md](../../eval/scorecards/p4-phase-gate.md) + `prism-eval p4-scorecard`
+- [x] AGENT-USAGE updated for debug/slice primary path
+
+#### Exit / acceptance (phase gate)
+
+- [x] Debug token↓ ≥5× vs explore (proxy **40×**)
+- [x] Quality proxy (necessary_spans); LLM within-5pts pending
+- [x] Slice + error/stack never dropped under budget pressure
+- [x] Runtime not required
+
+#### Handoff to Phase 5
+
+Debug packs are slice-minimal on the agent path. Next: repository intelligence products (hubs, entrypoints, hotspots) and hardening/SDK.
+
 ---
 
-## Phase 5 — Repository Intelligence + Hardening (outline)
+## Phase 5 — Repository Intelligence + Hardening
 
-**State:** ⚪ Not started  
+**State:** 🟡 **Stage A open** (entry: P4 gate passed)  
 **Duration:** ~4 weeks  
 **Gate:** Published benchmark; medium+Prism ≈ frontier+explore within 3 pts; external plugin SDK usable.
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
-| **A — Repo intelligence** | Architecture maps, communities productized, orientation answers | ⬜ |
+| **A — Repo intelligence** | Architecture maps, communities productized, orientation answers | 🟡 open |
 | **B — Hardening + SDK + IDE** | Security checklist, plugin SDK polish, LSP/IDE commands | ⬜ |
 | **C — Public eval** | Published scorecard; release readiness | ⬜ |
 
@@ -569,18 +591,18 @@ Intra-proc Python slices land under `.prism/semantic/` (not hot `graph.sqlite`).
 
 Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 
-| ID | Workstream | P3 gate exit status |
+| ID | Workstream | P4 gate exit status |
 |---|---|---|
-| **W-STORE** | Storage & identity | ✅ + `.prism/scip/` overlay |
-| **W-PLUGIN** | Plugin ABI | ✅ + PreciseImporter card |
-| **W-KG** | Knowledge graph | ✅ + hybrid resolve |
-| **W-PLAN** | Query planning | ✅ + executable `UpgradePrecision` |
-| **W-CC** | Context compiler | ✅ prefer precise + uncertainty notes |
-| **W-MCP** | Agent surface | ✅ + `require_precise` gating |
+| **W-STORE** | Storage & identity | ✅ + `.prism/semantic/` shards/memo |
+| **W-PLUGIN** | Plugin ABI | ✅ + semantic backend contract |
+| **W-KG** | Knowledge graph | ✅ + overlay DATA_FLOW/CONTROL_DEP |
+| **W-PLAN** | Query planning | ✅ executable `Slice` on debug |
+| **W-CC** | Context compiler | ✅ debug pack gates (never drop error/slice) |
+| **W-MCP** | Agent surface | ✅ AGENT-USAGE debug path |
 | **W-IDE** | IDE/LSP | 🟡 evidence-peek stub; LSP hybrid later |
-| **W-EVAL** | Evaluation | ✅ P3 scorecard (oracle uplift) |
-| **W-OBS** | Observability | ✅ `precision_upgrade` |
-| **W-SEC** | Security & privacy | ✅ no write/rename apply; dry-run only |
+| **W-EVAL** | Evaluation | ✅ P4 scorecard (debug token proxy) |
+| **W-OBS** | Observability | ✅ `slice_finished` |
+| **W-SEC** | Security & privacy | ✅ sink/source hooks design; runtime optional |
 
 ---
 
@@ -609,3 +631,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P3 Stage C exited / gate passed:** gating matrix, safe-rename dry-run, `require_precise`, p3-scorecard (+50pp call precision). **P4 Stage A opened** |
 | 2026-07-26 | **P4 Stage A exited:** T3 Python CFG/DFG (`prism-semantic`), `.prism/semantic/` artifacts, crash policy, local slice CLI + property tests. **Stage B opened** (inter-proc / Slice operator) |
 | 2026-07-26 | **P4 Stage B exited:** T4 shards + executable `Slice`, memo keys, overlay DATA_FLOW/CONTROL_DEP, compile/obs wiring, sink/source hooks design. **Stage C opened** (debug recipes + P4 gate) |
+| 2026-07-26 | **P4 Stage C exited / gate passed:** debug recipes + pack gates, runtime enrichment design-only, p4-scorecard (40× debug token proxy). **P5 Stage A opened** |
