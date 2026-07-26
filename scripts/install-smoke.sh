@@ -17,8 +17,50 @@ if [[ -z "$PRISM_BIN" ]]; then
   fi
 fi
 
+sha256_file() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  else
+    shasum -a 256 "$1" | awk '{print $1}'
+  fi
+}
+
+detect_triple() {
+  case "$(uname -s)/$(uname -m)" in
+    Darwin/arm64|Darwin/aarch64) echo "aarch64-apple-darwin" ;;
+    Darwin/x86_64) echo "x86_64-apple-darwin" ;;
+    Linux/x86_64|Linux/amd64) echo "x86_64-unknown-linux-gnu" ;;
+    Linux/aarch64|Linux/arm64) echo "aarch64-unknown-linux-gnu" ;;
+    *) echo "unsupported: $(uname -s)/$(uname -m)" >&2; exit 1 ;;
+  esac
+}
+
 echo "== install.sh --dry-run =="
 "$ROOT/scripts/install.sh" --dry-run --version 0.0.1
+
+echo "== simulated release: full download → verify → install (file:// base) =="
+REL_V="0.0.1"
+TRIPLE="$(detect_triple)"
+REL_TMP="$(mktemp -d)"
+REL_ASSET="prism-${REL_V}-${TRIPLE}.tar.gz"
+STAGE="$(mktemp -d)"
+cp "$PRISM_BIN" "$STAGE/prism"
+tar -C "$STAGE" -czf "$REL_TMP/$REL_ASSET" prism
+(cd "$REL_TMP" && printf '%s  %s\n' "$(sha256_file "$REL_ASSET")" "$REL_ASSET" > SHA256SUMS)
+PRISM_DOWNLOAD_BASE="file://$REL_TMP" "$ROOT/scripts/install.sh" \
+  --version "$REL_V" --bin-dir "$REL_TMP/bin"
+"$REL_TMP/bin/prism" --version >/dev/null
+echo "installed binary runs OK"
+
+echo "== tamper test: corrupted checksum must fail closed =="
+printf '%s  %s\n' "0000000000000000000000000000000000000000000000000000000000000000" "$REL_ASSET" > "$REL_TMP/SHA256SUMS"
+if PRISM_DOWNLOAD_BASE="file://$REL_TMP" "$ROOT/scripts/install.sh" \
+  --version "$REL_V" --bin-dir "$REL_TMP/bin2" 2>/dev/null; then
+  echo "ERROR: tampered checksum was accepted" >&2
+  exit 1
+fi
+echo "tampered checksum rejected (fail-closed) OK"
+rm -rf "$REL_TMP" "$STAGE"
 
 echo "== host adapters =="
 TMP="$(mktemp -d)"

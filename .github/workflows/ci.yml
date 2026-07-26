@@ -45,6 +45,15 @@ jobs:
           --warm-up-time 1
           --measurement-time 1
 
+  install-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: P11 install smoke (simulated release + adapters + hooks)
+        run: ./scripts/install-smoke.sh
+
   graph-view:
     runs-on: ubuntu-latest
     steps:

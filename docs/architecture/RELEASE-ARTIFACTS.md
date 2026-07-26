@@ -49,6 +49,10 @@ https://github.com/${PRISM_GITHUB_REPO}/releases/download/v{version}/{asset}
 
 Default `PRISM_GITHUB_REPO` for scripts: value of `PRISM_GITHUB_REPO` env, else `example/prism` until the public org is set. CI always uploads to the repository that runs the workflow (`github.repository`).
 
+### Mirror / air-gapped override
+
+`PRISM_DOWNLOAD_BASE` (env, or `-DownloadBase` on Windows) replaces the GitHub base URL with any mirror — an internal HTTP server or a local `file://` directory holding the archives and `SHA256SUMS`. Requires an explicit `--version`; checksum verification still applies. This is also how `scripts/install-smoke.sh` exercises the full install path in CI without a published release.
+
 ## Install destinations (scripts)
 
 | OS | Default bindir |

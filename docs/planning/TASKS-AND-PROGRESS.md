@@ -29,7 +29,7 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P8** | IDE Extension (VS Code / Cursor) | ░░░░░░░░░░ **—** | ✂️ **Cut** 2026-07-26 — superseded by CLI + MCP ([ADR-0007](../architecture/adr/0007-extension-cut-cli-mcp.md)) |
 | **P9** | Agent Experience & Workflows | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P10** | Team / Distributed (optional, was P6) | ░░░░░░░░░░ **0%** | ⚪ Deferred / skipped for now |
-| **P11** | Install & Distribution (any system) | ▓▓▓▓▓▓▓▓░░ **~80%** | 🟡 Stage A+B done; Stage C cold-VM pending release |
+| **P11** | Install & Distribution (any system) | ▓▓▓▓▓▓▓▓▓░ **~90%** | 🟡 Stage A+B done; Stage C proven on simulated release — cold-VM pending public tag |
 
 **How to read progress:** **P0–P7 and P9 are gated**. **P8 was cut** — agent/IDE needs are met by `prism setup` + MCP, not a VSIX. **P10** stays optional/skipped. **P11** is the active distribution track.
 
@@ -959,7 +959,9 @@ flowchart LR
 | Task | Status | Notes |
 |---|---|---|
 | Cold-machine matrix (3 OS) | ⬜ | needs published release artifacts |
-| Local install smoke (no release) | ✅ | `scripts/install-smoke.sh` |
+| Local install smoke (no release) | ✅ | `scripts/install-smoke.sh` + CI `install-smoke` job |
+| Simulated-release e2e (verify + tamper fail-closed) | ✅ | `PRISM_DOWNLOAD_BASE=file://…` in smoke |
+| Mirror / air-gapped install override | ✅ | `PRISM_DOWNLOAD_BASE` in both installers |
 | P11 scorecard | ✅ | `eval/scorecards/p11-phase-gate.md` (PARTIAL) |
 | Time-to-ready metric | ⬜ | after cold-VM run |
 
@@ -1037,3 +1039,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P11 planned** in PLANNING-AND-IMPLEMENTATION (§18): Install & Distribution; P10 skipped. |
 | 2026-07-26 | **P11 Stage A + Stage B start:** `scripts/install.sh` / `install.ps1`, `release.yml`, Homebrew/Scoop drafts, RELEASE-ARTIFACTS + PRODUCT-SETUP rewrite, `prism host` + `self-update`, doctor checklist v2. Cold-VM gate (Stage C) blocked on first public release tag. |
 | 2026-07-26 | **P11 Stage B complete + Stage C partial:** ensure-install in generated AGENTS/skills, `prism hook`, HOST-ADAPTERS/BOOTSTRAP docs, `install-smoke.sh`, p11-phase-gate PARTIAL. Cold-VM matrix still blocked on public release. |
+| 2026-07-26 | **P11 Stage C hardened:** `PRISM_DOWNLOAD_BASE` mirror override in both installers; smoke now does simulated-release e2e (download → checksum verify → install → run) + tamper fail-closed test; `install-smoke` job added to CI. Only cold-VM matrix + real tag remain. |

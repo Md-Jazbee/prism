@@ -7,9 +7,11 @@
 #   ./scripts/install.sh [--version VERSION] [--dry-run] [--uninstall] [--bin-dir DIR]
 #
 # Env:
-#   PRISM_GITHUB_REPO   owner/repo (default: example/prism)
-#   PRISM_VERSION       override version (without leading v)
-#   PRISM_BIN_DIR       override install directory
+#   PRISM_GITHUB_REPO    owner/repo (default: example/prism)
+#   PRISM_VERSION        override version (without leading v)
+#   PRISM_BIN_DIR        override install directory
+#   PRISM_DOWNLOAD_BASE  override asset base URL (e.g. file:///tmp/rel or an
+#                        internal mirror); skips GitHub. Requires --version.
 
 set -euo pipefail
 
@@ -130,8 +132,13 @@ need_cmd mktemp
 
 TRIPLE="$(detect_triple)"
 API="https://api.github.com/repos/${PRISM_GITHUB_REPO}/releases"
+DOWNLOAD_BASE="${PRISM_DOWNLOAD_BASE:-}"
 
 if [[ -z "$VERSION" ]]; then
+  if [[ -n "$DOWNLOAD_BASE" ]]; then
+    echo "error: PRISM_DOWNLOAD_BASE requires an explicit --version" >&2
+    exit 2
+  fi
   echo "resolving latest release from ${PRISM_GITHUB_REPO}…"
   TAG="$(curl -fsSL "${API}/latest" | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)"
   if [[ -z "$TAG" ]]; then
@@ -146,7 +153,7 @@ else
 fi
 
 ASSET="prism-${VERSION}-${TRIPLE}.tar.gz"
-BASE="https://github.com/${PRISM_GITHUB_REPO}/releases/download/${TAG}"
+BASE="${DOWNLOAD_BASE:-https://github.com/${PRISM_GITHUB_REPO}/releases/download/${TAG}}"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 

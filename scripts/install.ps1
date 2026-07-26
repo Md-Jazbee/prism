@@ -6,14 +6,16 @@
 #   ./scripts/install.ps1 [-Version 0.0.1] [-DryRun] [-Uninstall] [-BinDir path]
 #
 # Env:
-#   PRISM_GITHUB_REPO   owner/repo (default: example/prism)
-#   PRISM_VERSION       override version (without leading v)
+#   PRISM_GITHUB_REPO     owner/repo (default: example/prism)
+#   PRISM_VERSION         override version (without leading v)
+#   PRISM_DOWNLOAD_BASE   override asset base URL (mirror / local); requires -Version
 
 [CmdletBinding()]
 param(
     [string]$Version = $env:PRISM_VERSION,
     [string]$BinDir = $(if ($env:PRISM_BIN_DIR) { $env:PRISM_BIN_DIR } else { Join-Path $env:LOCALAPPDATA "Prism\bin" }),
     [string]$Repo = $(if ($env:PRISM_GITHUB_REPO) { $env:PRISM_GITHUB_REPO } else { "example/prism" }),
+    [string]$DownloadBase = $env:PRISM_DOWNLOAD_BASE,
     [switch]$DryRun,
     [switch]$Uninstall
 )
@@ -54,6 +56,9 @@ $triple = Get-Triple
 $api = "https://api.github.com/repos/$Repo/releases"
 
 if ([string]::IsNullOrWhiteSpace($Version)) {
+    if (-not [string]::IsNullOrWhiteSpace($DownloadBase)) {
+        Write-Error "PRISM_DOWNLOAD_BASE requires an explicit -Version"
+    }
     Write-Host "resolving latest release from $Repo…"
     $latest = Invoke-RestMethod -Uri "$api/latest"
     $tag = $latest.tag_name
@@ -67,7 +72,7 @@ if ([string]::IsNullOrWhiteSpace($Version)) {
 $tag = "v$Version"
 
 $asset = "prism-$Version-$triple.zip"
-$base = "https://github.com/$Repo/releases/download/$tag"
+$base = if ([string]::IsNullOrWhiteSpace($DownloadBase)) { "https://github.com/$Repo/releases/download/$tag" } else { $DownloadBase.TrimEnd("/") }
 $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("prism-install-" + [guid]::NewGuid().ToString("n"))
 New-Item -ItemType Directory -Path $tmp | Out-Null
 

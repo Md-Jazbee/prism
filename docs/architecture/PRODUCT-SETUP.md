@@ -20,7 +20,7 @@ curl -fsSL "https://raw.githubusercontent.com/${PRISM_GITHUB_REPO:-example/prism
 #   ./scripts/install.sh --uninstall
 ```
 
-Installs to `~/.local/bin/prism` (override with `PRISM_BIN_DIR` / `--bin-dir`). Checksums are verified against release `SHA256SUMS`.
+Installs to `~/.local/bin/prism` (override with `PRISM_BIN_DIR` / `--bin-dir`). Checksums are verified against release `SHA256SUMS` and fail closed on mismatch. Air-gapped or mirrored environments can point `PRISM_DOWNLOAD_BASE` at any URL (or `file://` directory) that serves the archives + `SHA256SUMS`.
 
 ### Windows (PowerShell)
 
