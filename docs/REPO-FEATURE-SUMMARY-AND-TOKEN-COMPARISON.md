@@ -1,9 +1,22 @@
 # Prism Repo — Feature Summary & Token Comparison
 
-**Generated:** 2026-07-26  
-**Method:** Prism MCP (`compile_context`, `repo_map`, `index_status`) + Graphify query + documented four-arm baseline  
+**Generated:** 2026-07-27 (re-run after accuracy improvements)  
+**Prior run:** 2026-07-26 (thin T1 stubs / prose gap)  
+**Method:** Prism MCP (`compile_context`, `repo_map`, `index_status`) + CLI `./target/release/prism` + Graphify query + documented four-arm baseline  
 **Workspace:** `/Users/jasbeermohammad/AllFiles/AI-lenarning/AI-P2`  
-**Index:** T1 · 375 files · **1,629 nodes** · **8,676 edges** · `.prism/graph.sqlite` ≈ 10.3 MB
+**Index:** T1 · **519 files** · **3,351 nodes** · **12,839 edges** · `.prism/graph.sqlite` ≈ **17.5 MB**  
+**Binary:** MCP + measurements use `target/release/prism` (2026-07-27). `~/.cargo/bin/prism` was stale (pre–markdown-pack); do not use PATH CLI for this comparison.
+
+### Delta vs prior run (headline)
+
+| Signal | 2026-07-26 | 2026-07-27 | Change |
+|---|---:|---:|---|
+| Index nodes / edges | 1,629 / 8,676 | **3,351 / 12,839** | +docs + Louvain communities |
+| MCP `architecture` pack | 279 (map-only) | **2,207** (README/ADD/MCP prose + map) | Prose gap closed |
+| MCP `repo_qa` pack | 149 (stubs) | **1,898** (asserted markdown slices) | No placeholder fragments |
+| Doc gap-fill needed? | ≈7,500 tokens | **0** for this task | Packs sufficient |
+| Task grand total (Prism path) | ≈10.5–11k | **≈2.3–3.5k** | **~3–5× fewer** than prior Prism path |
+| Accuracy ranking (features/use cases) | Graphify ≳ Prism+docs | **Prism packs alone ≥ Graphify** | Ranking flip |
 
 ---
 
@@ -36,9 +49,10 @@ It is **local-first** (indexing needs no API key), **agent-native** (MCP + CLI +
 |---|---|
 | **Indexing** | Incremental local index into `.prism/graph.sqlite`; fingerprint + dirty-path reindex |
 | **Evidence Packs** | `compile_context` → budgeted fragments + citations + EXPLAIN (why kept / drops) |
+| **Markdown / architecture prose** | `prism-extract-markdown` packs README, ADD, MCP catalog, setup docs as asserted slices (`product_thesis`, `architecture_prose`) |
 | **Query planner** | Intent → operator DAG (`query_plan`); recipes for repo_qa / architecture / debug / review / refactor |
 | **KG queries** | `resolve_symbol`, `neighbors`, `impact` (heuristic at T1; gated when `require_precise`) |
-| **Orientation** | `repo_map` (path-prefix communities + degree hubs), `entrypoints`, `detect_changes` |
+| **Orientation** | `repo_map` (Louvain communities + resolved-degree hubs), `entrypoints`, `detect_changes` |
 | **Precision tiers** | T1 tree-sitter (shipped) → T2 precise overlays → T3/T4 semantic/CPG (crates present) |
 | **MCP** | Read-only stdio tools; primary tool is `compile_context` |
 | **CLI** | `setup`, `doctor`, `index`, `compile`, `query`, `mcp`, `daemon`, `lsp`, `view`, `agent`, `host`, `hook`, `self-update` |
@@ -67,20 +81,22 @@ It is **local-first** (indexing needs no API key), **agent-native** (MCP + CLI +
 
 ### 2.5 Workspace layout (from Prism `repo_map`)
 
-**24 path-prefix communities** (top crates by file count):
+**Louvain communities** (`louvain_v1+resolved_degree_hubs`; fixtures under `fixtures/repos/` excluded from rollup). Top by file count:
 
 | Community | Files (approx) | Nodes (approx) |
 |---|---:|---:|
+| `docs/architecture/` | 21 | 180 |
+| `eval/scorecards/` | 11 | 46 |
+| `prism-compile` | 9 | 108 |
 | `prism-semantic` | 9 | 91 |
 | `prism-precise` | 8 | 77 |
-| `prism-agent` | 7 | 56 |
-| `prism-view` | 7 | 51 |
-| `prism-api` / `prism-compile` / `prism-store` | 6 each | 67–93 |
-| `prism-core` / `prism-ir` / `prism-mcp` / `prism-plan` | 5 each | 39–59 |
+| `prism-agent` / `prism-store` / `prism-view` | 7 each | 56–128 |
+| `prism-api` | 6 | 74 |
+| `prism-core` / `prism-ir` / `prism-mcp` / `prism-plan` | 5 each | 46–59 |
 | `prism-cli` | 4 | 65 |
-| Extractors (`python` / `rust` / ABI) + `daemon` / `lsp` / `bench` / eval / fixtures | smaller | — |
+| Extractors (`markdown` / languages) + `daemon` / `lsp` / `bench` / eval | smaller | — |
 
-Notable structural hubs (degree; T1 heuristic — do not treat as architectural gospel): `main` (CLI), `select_from_kg`, `interproc_slice`.
+Notable structural hubs (resolved degree; T1 heuristic — orientation only): `main` (CLI), `select_from_kg`, `extract` (markdown), `interproc_slice`, `pack_under_budget_with_gaps`.
 
 ### 2.6 CLI surface (product)
 
@@ -115,43 +131,43 @@ Notable structural hubs (degree; T1 heuristic — do not treat as architectural 
 
 ---
 
-## 4. Tokens consumed — **this task** (measured)
+## 4. Tokens consumed — **this task** (measured, 2026-07-27)
+
+Task: “Summarize this repo’s features and use cases.”
 
 ### 4.1 Prism Evidence Pack / tool tokens (measured)
 
 | Call | Intent / tool | `tokens_used` (or estimate) | Notes |
 |---|---|---:|---|
-| MCP `compile_context` #1 | `architecture` · budget 6000 | **279** | Communities + hubs (most useful pack) |
-| MCP `compile_context` #2 | `repo_qa` · budget 8000 | **149** | Thin T1 stubs (docs not deeply sliced) |
-| CLI `prism compile` | `repo_qa` · budget 4000 | **92** | Same thin product-narrative gap |
-| MCP `repo_map` | orientation | **~900** | Estimated from JSON payload size |
+| MCP `compile_context` #1 | `architecture` · budget 6000 | **2,207** | README + AGENTS + ADD + MCP catalog/error/setup + Louvain `repo_map` fragment |
+| MCP `compile_context` #2 | `repo_qa` · budget 8000 | **1,898** | Same asserted markdown slices (no stubs) |
+| CLI `./target/release/prism compile` | `repo_qa` · budget 4000 | **777** | Markdown packs under tighter CLI packing |
+| CLI `./target/release/prism compile` | `architecture` · budget 6000 | **973** | Prose + community_map |
+| MCP `repo_map` | orientation | **~1,100–2,600** | Full JSON larger; architecture pack already embeds a ~309-token map slice |
 | MCP `index_status` | metadata | **~80** | Estimated |
-| **Subtotal — Prism tools** | | **≈ 1,500** | Pack + orientation payloads |
+| **Subtotal — Prism tools (answer path)** | | **≈ 2,300–3,500** | One architecture pack + status is enough; second pack optional |
 
-### 4.2 Follow-up reads used to finish the product narrative
+**Pack quality (architecture EXPLAIN):** roles `product_thesis`, `architecture_prose`, `community_map`; confidence mostly **asserted** (`prism-extract-markdown`); drops `[]`; P12 gaps for unresolved NL seeds (`Prism`/`MCP`/`Summarize`) — honest, not placeholder fragments.
 
-Because T1 `compile_context` returns **code-graph fragments**, not README prose, this task also read:
+### 4.2 Follow-up reads
 
-| Source | ~Tokens (chars÷4) |
-|---|---:|
-| `README.md` | ~1,721 |
-| ADD §1–3 (exec summary + goals) | ~3,500 |
-| `MCP-TOOL-CATALOG.md` | ~701 |
-| Workflow `catalog.json` | ~737 |
-| Benchmark report skim | ~800 |
-| **Subtotal — targeted docs** | **≈ 7,500** |
+| Source | ~Tokens | Needed? |
+|---|---:|---|
+| Manual README / ADD / MCP catalog / workflow catalog | 0 | **No** — covered by pack fragments |
+| Graphify arm (comparison only) | ≈1,552 output | Comparison arm only |
 
 ### 4.3 Total for this task (actual)
 
 | Bucket | Tokens |
 |---|---:|
-| Prism tools / Evidence Packs | ≈ **1,500** |
-| Targeted doc reads (gap-fill) | ≈ **7,500** |
-| Graphify query (comparison arm) | ≈ **1,573** output (budget 2,000) |
-| **Grand total this session (approx.)** | **≈ 10,500–11,000** |
+| Prism tools / Evidence Packs (primary path) | ≈ **2,300–3,500** |
+| Targeted doc reads (gap-fill) | **0** |
+| Graphify query (comparison arm) | ≈ **1,552** output (budget 2,000) |
+| **Grand total this session (Prism answer path)** | **≈ 2.3–3.5k** |
+| Prior Prism path (2026-07-26, with gap-fill) | ≈ 10.5–11k |
 
-> **Ideal Prism-only path for structural orientation:** architecture pack + `repo_map` alone ≈ **1,200 tokens**, then answer.  
-> Product-marketing narrative still benefits from README/ADD until markdown/architecture prose extraction improves.
+> **Ideal Prism-only path:** one `architecture` `compile_context` (≈2.2k MCP / ≈1.0k CLI) → answer features + use cases + structure.  
+> Product-marketing narrative no longer requires separate README/ADD opens for this question class.
 
 ---
 
@@ -164,9 +180,9 @@ Estimates for the **same task**: “Summarize this repo’s features and use cas
 | Approach | Typical context loaded | Est. tokens | vs naive |
 |---|---|---:|---:|
 | **A — Without Prism** (grep/read explore) | README + ADD + tech stack skim + MCP docs + CLI/MCP crate samples + multi-hop greps | **≈ 30,000** | 1× (baseline) |
-| **B — With Graphify** (existing `graphify-out/`) | `graphify query --budget 2000` + report skim + follow-up node sources | **≈ 8,000–13,000** | ~2–4× fewer |
-| **C — With Prism** (MCP Evidence Packs) | Measured packs + orientation (~1,500) + small doc gap-fill if needed | **≈ 1,500–9,000** | **~3–20× fewer** |
-| **C′ — Prism structural-only** (no gap-fill) | `repo_map` + architecture `compile_context` | **≈ 1,200** | **~25× fewer** |
+| **B — With Graphify** (existing `graphify-out/`) | `graphify query --budget 2000` (~1.5k node list) + follow-up node source reads | **≈ 8,000–13,000** | ~2–4× fewer |
+| **C — With Prism** (MCP Evidence Packs) | Measured architecture/repo_qa packs; **no doc gap-fill** | **≈ 2,300–3,500** | **~9–13× fewer** |
+| **C′ — Prism single-pack** | One architecture `compile_context` | **≈ 1,000–2,200** | **~14–30× fewer** |
 
 **Published four-arm proxy** (`docs/eval/PUBLIC-BENCHMARK-REPORT-V2.md`) on structural tasks:
 
@@ -183,32 +199,34 @@ Estimates for the **same task**: “Summarize this repo’s features and use cas
 
 | Dimension | Without Prism | With Graphify | With Prism |
 |---|---|---|---|
-| **Product / thesis narrative** | High if you open README/ADD; easy to miss crates | **Strong** — doc nodes from ADD/README appear in BFS (this run hit Product Goals, MCP, tiers) | Medium at T1 for prose questions; **strong** once README/ADD anchors are read or architecture prose is packed |
-| **Structural truth** (crates, hubs, entrypoints) | Medium — depends on which files agent opens | Medium — AST + communities; edges labeled EXTRACTED/INFERRED/AMBIGUOUS | **Strong** — `repo_map` + index cardinality + EXPLAIN provenance |
+| **Product / thesis narrative** | High if you open README/ADD; easy to miss crates | **Strong** — doc nodes from ADD/README appear in BFS; this run also hit the comparison doc itself (noise) | **Strong** — asserted markdown slices (`product_thesis`, `architecture_prose`) with citations |
+| **Structural truth** (crates, hubs, entrypoints) | Medium — depends on which files agent opens | Medium — AST + communities; edges labeled EXTRACTED/INFERRED/AMBIGUOUS | **Strong** — Louvain `repo_map` + index cardinality + EXPLAIN provenance |
 | **Provenance / confidence** | Weak (no labels) | Good (edge honesty labels) | **Best** — per-fragment confidence + tier + analyzer |
-| **Token discipline** | Weak (explore loops grow) | Good (`--budget`) | **Best** (hard budget + must-include + drops) |
+| **Token discipline** | Weak (explore loops grow) | Good (`--budget`) | **Best** (hard budget + must-include + drops; P12 gaps not stubs) |
 | **Precise rename / impact claims** | Risky | Risky | Gated (`PRECISION_REQUIRED` / T2) — honest refusals |
-| **Hop count** | Many (10–12+) | Few–moderate (BFS) | **One** primary tool for structural Q&A |
-| **Risk of wrong context** | High (wrong files, fixture noise) | Medium (community mix; may surface unrelated nodes) | Lower for code tasks; T1 CALLS still **heuristic** |
+| **Hop count** | Many (10–12+) | Few–moderate (BFS) | **One** primary tool for structural / product Q&A |
+| **Risk of wrong context** | High (wrong files, fixture noise) | Medium (community mix; may surface unrelated nodes) | Lower for code + prose tasks; T1 CALLS still **heuristic** |
 
 **Verdict for this task type (features + use cases):**
 
-1. **Graphify** surfaced product-oriented nodes fastest from an already-built graph (good for “what is this product?”).  
-2. **Prism** was best for **repo structure, MCP contracts, workflows, and token-bounded agent UX**, and matches published **~22× token↓** on structural benchmarks.  
+1. **Prism** now ships product-oriented markdown inside the Evidence Pack — one `compile_context` answers thesis, MCP surface, setup, and community map without extra reads.  
+2. **Graphify** still surfaces a broad doc-node neighborhood fast (~1.5k under budget) but returns a truncated node *list*; finishing the narrative still needs source opens (or accepting thinner answers).  
 3. **Without either**, expect ~30k+ tokens and higher chance of fixture/noise pollution (this repo contains large `fixtures/repos/snapshots/` trees).
 
-**Accuracy ranking (this task):** Graphify ≳ Prism+docs gap-fill > Prism-packs-alone (T1 prose gap) > naive explore.  
-**Accuracy ranking (code/debug/impact tasks):** Prism > Graphify > naive explore (per design goals G1–G5 and four-arm proxy).
+**Accuracy ranking (this task):** **Prism packs alone ≥ Graphify+follow-ups > naive explore.**  
+*(Prior run: Graphify ≳ Prism+docs gap-fill > Prism-packs-alone.)*  
+**Accuracy ranking (code/debug/impact tasks):** Prism > Graphify > naive explore (per design goals G1–G5 and four-arm proxy) — unchanged.
 
 ---
 
 ## 6. Caveats (honest)
 
-1. **T1 Evidence Packs are extractive code/KG slices**, not abstractive README summaries. Asking “what are product features?” without reading docs can yield stub fragments — as seen in `repo_qa` packs (149 / 92 tokens of placeholders).  
-2. **Graphify cost.json** for this repo shows prior build semantic tokens = 0 (code-heavy AST path); query-time tokens are the budgeted traversal output (~1.5–2k).  
-3. Four-arm **quality** numbers are **scripted proxies** until `PRISM_FOUR_ARM_LLM=1` live judges run. Token/hop advantages are the firmer claim today.  
-4. `repo_map` hubs include unresolved symbols (`into`, `clone`, `unwrap`) — orientation only; not architectural truth.  
-5. Token estimates use ≈4 characters ≈ 1 token; exact billing tokens vary by tokenizer.
+1. **Markdown packing closed the product-prose gap for this question**, but fragments are still **extractive slices** (truncated heads of docs), not abstractive summaries. Deeper ADD sections may still need a follow-up compile with path anchors.  
+2. **Stale CLI on PATH** (`~/.cargo/bin/prism`, Jul 26) still emitted synthetic placeholders; MCP/`target/release/prism` is the accurate binary. Reinstall or `cargo install --path` before CLI comparisons.  
+3. **Graphify cost.json** for this repo shows prior build semantic tokens = 0 (code-heavy AST path); query-time tokens are the budgeted traversal output (~1.5–2k).  
+4. Four-arm **quality** numbers are **scripted proxies** until `PRISM_FOUR_ARM_LLM=1` live judges run. Token/hop advantages are the firmer claim today.  
+5. `repo_map` hubs are resolved-degree only (ACC-4 denylist) — orientation, not architectural gospel; CALLS remain heuristic at T1.  
+6. Token estimates use ≈4 characters ≈ 1 token; exact billing tokens vary by tokenizer. MCP vs CLI packing densities differ (~2.2k vs ~1.0k for architecture) — both beat the prior stub packs.
 
 ---
 
@@ -217,20 +235,20 @@ Estimates for the **same task**: “Summarize this repo’s features and use cas
 | Question | Answer |
 |---|---|
 | What is this repo? | **Prism** — local-first repository intelligence that compiles Evidence Packs for AI agents |
-| Main features? | Index → KG → query plan → budgeted Evidence Pack; MCP/CLI; workflows; precision ladder; install/host adapters |
+| Main features? | Index → KG → query plan → budgeted Evidence Pack (incl. markdown prose); MCP/CLI; workflows; precision ladder; install/host adapters |
 | Main use cases? | Agent onboarding, structural Q&A, debug, review, refactor prep, private local indexing, eval |
-| **Tokens this task (Prism tools)** | **≈ 1,500** measured |
-| **Tokens this task (all sources)** | **≈ 10.5k–11k** including doc gap-fill + Graphify arm |
+| **Tokens this task (Prism path)** | **≈ 2.3–3.5k** measured (was ≈10.5–11k with gap-fill) |
+| **Tokens — single architecture pack** | **≈ 1.0–2.2k** |
 | Without Prism (est.) | **≈ 30,000** |
 | With Graphify (est.) | **≈ 8,000–13,000** |
-| With Prism ideal structural | **≈ 1,200** |
-| Accuracy | Prism wins on structural/agent tasks + provenance; Graphify competitive on product-doc narrative; both beat naive explore |
+| Accuracy | **Prism wins this task class after markdown packing**; still wins structural/agent tasks + provenance; both beat naive explore |
 
 ---
 
 ## 8. Sources used
 
-- Prism MCP: `compile_context` (architecture + repo_qa), `repo_map`, `index_status`
-- Prism CLI: `prism compile`
+- Prism MCP (`target/release/prism mcp`): `compile_context` (architecture + repo_qa), `repo_map`, `index_status`
+- Prism CLI: `./target/release/prism compile` (architecture + repo_qa)
 - Graphify: `graphify query "…" --budget 2000` against `graphify-out/graph.json`
-- Docs: `README.md`, `docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md` (§1–3), `MCP-TOOL-CATALOG.md`, `schemas/agent-workflow/v1/catalog.json`, `docs/eval/PUBLIC-BENCHMARK-REPORT-V2.md`
+- Docs embedded in packs: `README.md`, `AGENTS.md`, `ARCHITECTURE-DESIGN-DOCUMENT.md`, `MCP-TOOL-CATALOG.md`, `MCP-ERROR-MODEL.md`, `PRODUCT-SETUP.md` (+ CLI also surfaced `AGENT-USAGE.md`)
+- Benchmark: `docs/eval/PUBLIC-BENCHMARK-REPORT-V2.md`
