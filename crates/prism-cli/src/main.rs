@@ -1,6 +1,7 @@
 //! `prism` CLI — Phase 4 (`index` + query + plan + compile + precise + semantic).
 
 mod host;
+mod hook;
 mod setup;
 
 use anyhow::{bail, Context, Result};
@@ -193,6 +194,11 @@ enum Commands {
         #[arg(long)]
         dry_run: bool,
     },
+    /// Git hooks for incremental re-index (P11).
+    Hook {
+        #[command(subcommand)]
+        cmd: HookCmd,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -259,6 +265,31 @@ enum HostCmd {
         /// Optional single host filter.
         #[arg(long)]
         host: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+enum HookCmd {
+    /// Append a post-commit reindex section (does not replace foreign hooks).
+    Install {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long)]
+        json: bool,
+    },
+    /// Remove only the Prism-managed hook section.
+    Uninstall {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long)]
+        json: bool,
+    },
+    /// Report whether the Prism post-commit section is present.
+    Status {
+        #[arg(default_value = ".")]
+        path: PathBuf,
         #[arg(long)]
         json: bool,
     },
@@ -710,6 +741,7 @@ fn main() -> Result<()> {
                     checklist.mcp_registered
                 );
                 println!("binary_path: {}", checklist.binary_path);
+                println!("hook_installed: {}", checklist.hook_installed);
                 for h in &checklist.hosts {
                     println!(
                         "host {}: registered={} ({})",
@@ -771,6 +803,45 @@ fn main() -> Result<()> {
         Commands::SelfUpdate { version, dry_run } => {
             run_self_update(version.as_deref(), dry_run)?;
         }
+        Commands::Hook { cmd } => match cmd {
+            HookCmd::Install { path, json } => {
+                let report = hook::hook_install(&path)?;
+                if json {
+                    println!("{}", serde_json::to_string_pretty(&report)?);
+                } else {
+                    println!(
+                        "hook install: {} — {} ({})",
+                        if report.ok { "ok" } else { "!!" },
+                        report.detail,
+                        report.path
+                    );
+                }
+            }
+            HookCmd::Uninstall { path, json } => {
+                let report = hook::hook_uninstall(&path)?;
+                if json {
+                    println!("{}", serde_json::to_string_pretty(&report)?);
+                } else {
+                    println!(
+                        "hook uninstall: {} — {} ({})",
+                        if report.ok { "ok" } else { "!!" },
+                        report.detail,
+                        report.path
+                    );
+                }
+            }
+            HookCmd::Status { path, json } => {
+                let status = hook::hook_status(&path)?;
+                if json {
+                    println!("{}", serde_json::to_string_pretty(&status)?);
+                } else {
+                    println!(
+                        "hook: installed={} — {} ({})",
+                        status.installed, status.detail, status.path
+                    );
+                }
+            }
+        },
         Commands::IndexStatus { path, json } => {
             let wm = WorkspaceManager::open(&path)?;
             let prism = wm.root().join(".prism");

@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P11 Stage A+B in progress** · P8 **cut** (CLI+MCP) · P0–P7+P9 complete · **P10 deferred/skipped**  
+**Current phase:** **P11 Stage B complete · Stage C partial** · P8 **cut** (CLI+MCP) · P0–P7+P9 complete · **P10 deferred/skipped**  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)  
 **Source of truth for stack/layout:** [TECH-STACK-AND-PROJECT-STRUCTURE.md](../architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md)
@@ -29,7 +29,7 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P8** | IDE Extension (VS Code / Cursor) | ░░░░░░░░░░ **—** | ✂️ **Cut** 2026-07-26 — superseded by CLI + MCP ([ADR-0007](../architecture/adr/0007-extension-cut-cli-mcp.md)) |
 | **P9** | Agent Experience & Workflows | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P10** | Team / Distributed (optional, was P6) | ░░░░░░░░░░ **0%** | ⚪ Deferred / skipped for now |
-| **P11** | Install & Distribution (any system) | ▓▓▓▓▓░░░░░ **~45%** | 🟡 Stage A delivered; Stage B started |
+| **P11** | Install & Distribution (any system) | ▓▓▓▓▓▓▓▓░░ **~80%** | 🟡 Stage A+B done; Stage C cold-VM pending release |
 
 **How to read progress:** **P0–P7 and P9 are gated**. **P8 was cut** — agent/IDE needs are met by `prism setup` + MCP, not a VSIX. **P10** stays optional/skipped. **P11** is the active distribution track.
 
@@ -94,8 +94,9 @@ flowchart LR
 | Agent workflows + rules assets | P9 | ✅ `prism-agent` + catalog → AGENTS.md (G-15 closed) |
 | Four-arm LLM benchmark | P5 → **P9** | ✅ report v2 scripted-proxy + dual-review 70% (live LLM opt-in) |
 | Team/shared index | P10 | ⬜ deferred / skipped |
-| Cross-platform binary install | P11 | 🟡 installers + release.yml + packaging drafts |
-| Host adapters (`prism host`) | P11 | 🟡 cursor/vscode/claude/generic |
+| Cross-platform binary install | P11 | ✅ installers + release.yml + packaging drafts |
+| Host adapters (`prism host`) | P11 | ✅ cursor/vscode/claude/generic |
+| Ensure-install assets + hooks | P11 | ✅ generated skills + `prism hook` |
 | N1/N2 criterion benches | P6-A | 🟡 `crates/prism-bench` + CI smoke (hard P95 TBD) |
 | `schemas/mcp-tools/v1` | P6-A | ✅ catalog + per-tool JSON + conformance test |
 | `LICENSE` + `deny.toml` | P6-A | ✅ |
@@ -945,18 +946,22 @@ flowchart LR
 | Task | Status | Notes |
 |---|---|---|
 | `prism host install/uninstall/status` | ✅ | cursor · vscode · claude · generic |
-| Doctor checklist v2 (binary path/version + hosts) | ✅ | `prism doctor --json` |
-| Ensure-install sequence documented | ✅ | PRODUCT-SETUP agent section |
-| Generated skills mention install bootstrap | ⬜ | catalog / AGENTS fragment |
-| Optional `prism hook install` | ⬜ | post-commit reindex |
+| Doctor checklist v2 (binary path/version + hosts) | ✅ | + `hook_installed` |
+| Ensure-install sequence documented | ✅ | PRODUCT-SETUP + BOOTSTRAP.md |
+| Generated skills mention install bootstrap | ✅ | `/prism-ensure-install` + AGENTS section |
+| Optional `prism hook install` | ✅ | append-only post-commit |
+| Host adapter matrix doc | ✅ | HOST-ADAPTERS.md |
+
+**Stage B exit:** local smoke green via `scripts/install-smoke.sh`.
 
 ### Stage C — Install UX gate
 
 | Task | Status | Notes |
 |---|---|---|
 | Cold-machine matrix (3 OS) | ⬜ | needs published release artifacts |
-| P11 scorecard | ⬜ | |
-| Time-to-ready metric | ⬜ | |
+| Local install smoke (no release) | ✅ | `scripts/install-smoke.sh` |
+| P11 scorecard | ✅ | `eval/scorecards/p11-phase-gate.md` (PARTIAL) |
+| Time-to-ready metric | ⬜ | after cold-VM run |
 
 ---
 
@@ -1031,3 +1036,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P9 Stages A–C exited / gate passed:** `prism-agent` (refusal repair, budget negotiation, progressive packs, traces); workflow catalog + CLI/HTTP; generated AGENTS.md/rules/skills; four-arm report v2 (scripted proxy + dual-review 70%); R1 restated, R2/R8/R15 closed. **P0–P9 program complete**; P10 remains optional. |
 | 2026-07-26 | **P11 planned** in PLANNING-AND-IMPLEMENTATION (§18): Install & Distribution; P10 skipped. |
 | 2026-07-26 | **P11 Stage A + Stage B start:** `scripts/install.sh` / `install.ps1`, `release.yml`, Homebrew/Scoop drafts, RELEASE-ARTIFACTS + PRODUCT-SETUP rewrite, `prism host` + `self-update`, doctor checklist v2. Cold-VM gate (Stage C) blocked on first public release tag. |
+| 2026-07-26 | **P11 Stage B complete + Stage C partial:** ensure-install in generated AGENTS/skills, `prism hook`, HOST-ADAPTERS/BOOTSTRAP docs, `install-smoke.sh`, p11-phase-gate PARTIAL. Cold-VM matrix still blocked on public release. |

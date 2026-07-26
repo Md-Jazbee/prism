@@ -2044,7 +2044,7 @@ Memoize **deterministic** artifacts (slices, packs) freely; LLM answer reuse onl
 
 ## 18. Phase 11 — Install & Distribution (any system)
 
-> **Planning only (2026-07-26).** ~~This phase is specified here for execution later. **Do not implement until this phase is opened.**~~ **Opened 2026-07-26.** Phase 10 remains deferred/skipped; P11 follows P9 on the critical path. Stage A+B implementation in progress.
+> **Opened 2026-07-26.** Phase 10 remains deferred/skipped; P11 follows P9 on the critical path. **Stage A+B complete;** Stage C cold-VM gate deferred until a public release tag.
 
 **Phase goal:** Make Prism installable on any common developer machine — macOS, Linux, Windows — without requiring a Rust toolchain or cloning this monorepo. Borrow Graphify’s “ensure installed → one-shot project bootstrap → host adapters” pattern, adapted to Prism’s **single Rust binary + MCP** product surface ([PRODUCT-SETUP.md](../architecture/PRODUCT-SETUP.md), [ADR-0007](../architecture/adr/0007-extension-cut-cli-mcp.md)).
 
@@ -2163,7 +2163,7 @@ Graphify’s power is not only the pip package — it is that an **agent skill**
 
 - [x] Documented ensure-install sequence works without a Rust toolchain *(documented; live path needs release)*  
 - [x] ≥3 host adapters specified; Cursor + one other implemented-in-plan with merge/uninstall rules *(cursor/vscode/claude/generic)*  
-- [ ] Generated agent assets mention install bootstrap (catalog-driven, not hand-edited forever)  
+- [x] Generated agent assets mention install bootstrap (catalog-driven, not hand-edited forever)  
 - [x] `doctor --ready --json` reports install + host + index readiness
 
 ---

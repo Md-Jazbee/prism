@@ -97,7 +97,14 @@ cargo build -p prism-cli --release
 
 `@prism/graph-view` remains for SVG/Mermaid export and tests. There is no in-editor webview host in-tree.
 
+## Related
+
+- [BOOTSTRAP.md](./BOOTSTRAP.md) — ordered ensure-install → setup → doctor
+- [HOST-ADAPTERS.md](./HOST-ADAPTERS.md) — `prism host` matrix
+- [RELEASE-ARTIFACTS.md](./RELEASE-ARTIFACTS.md) — archive / checksum contract
+
 ## Honest limits
+
 
 - Releases require a real GitHub repo + tag; until then installers resolve against `PRISM_GITHUB_REPO`.
 - Homebrew/Scoop are **drafts** until sha256s are filled from a release.

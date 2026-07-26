@@ -1,6 +1,7 @@
 //! Graphify-like one-shot workspace setup (`prism setup`).
 
 use crate::host;
+use crate::hook;
 use anyhow::{bail, Context, Result};
 use prism_core::{IncrementalIndexer, IndexOptions, WorkspaceManager};
 use serde::Serialize;
@@ -21,7 +22,7 @@ pub struct SetupStep {
     pub detail: String,
 }
 
-/// Doctor readiness checklist v2 (P11) — install + host + index.
+/// Doctor readiness checklist v2 (P11) — install + host + index + hook.
 #[derive(Debug, Serialize)]
 pub struct ReadyChecklist {
     pub binary: bool,
@@ -31,6 +32,7 @@ pub struct ReadyChecklist {
     pub agents_md: bool,
     pub cursor_rule: bool,
     pub mcp_registered: bool,
+    pub hook_installed: bool,
     pub hosts: Vec<host::HostStatus>,
 }
 
@@ -166,6 +168,9 @@ fn build_ready_checklist(
 ) -> ReadyChecklist {
     let (binary_path, binary_version) = binary_meta();
     let hosts = host::host_status(root, None).unwrap_or_default();
+    let hook_installed = hook::hook_status(root)
+        .map(|s| s.installed)
+        .unwrap_or(false);
     ReadyChecklist {
         binary: true,
         binary_path,
@@ -174,6 +179,7 @@ fn build_ready_checklist(
         agents_md: agents_ok,
         cursor_rule: rule_ok,
         mcp_registered: mcp_ok,
+        hook_installed,
         hosts,
     }
 }
