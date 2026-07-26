@@ -1,0 +1,82 @@
+Traversal: BFS depth=2 | Start: ['Install', 'Prism', 'Bootstrap a workspace', 'BOOTSTRAP.md', 'Rust T1 extractor', 'End-user install (no Rust toolchain)', 'workspace'] | 64 nodes found
+
+NODE TASKS-AND-PROGRESS.md [src=docs/planning/TASKS-AND-PROGRESS.md loc=L1 community=]
+NODE README.md [src=README.md loc=L1 community=]
+NODE MCP-TOOL-CATALOG.md [src=docs/architecture/MCP-TOOL-CATALOG.md loc=L1 community=]
+NODE PRODUCT-SETUP.md [src=docs/architecture/PRODUCT-SETUP.md loc=L1 community=]
+NODE Prism — Repository Intelligence Platform [src=README.md loc=L1 community=]
+NODE AGENT-USAGE.md [src=docs/architecture/AGENT-USAGE.md loc=L1 community=]
+NODE Release artifact contract (P11 Stage A) [src=docs/architecture/RELEASE-ARTIFACTS.md loc=L1 community=]
+NODE Product setup — cold machine → indexed + agent-ready [src=docs/architecture/PRODUCT-SETUP.md loc=L1 community=]
+NODE plugin-guide.md [src=docs/contributing/plugin-guide.md loc=L1 community=]
+NODE RELEASE-CHECKLIST.md [src=docs/security/RELEASE-CHECKLIST.md loc=L1 community=]
+NODE Install [src=README.md loc=L11 community=]
+NODE 0007-extension-cut-cli-mcp.md [src=docs/architecture/adr/0007-extension-cut-cli-mcp.md loc=L1 community=]
+NODE IDE-INTEGRATION.md [src=docs/architecture/IDE-INTEGRATION.md loc=L1 community=]
+NODE RELEASE-ARTIFACTS.md [src=docs/architecture/RELEASE-ARTIFACTS.md loc=L1 community=]
+NODE BOOTSTRAP.md [src=docs/architecture/BOOTSTRAP.md loc=L1 community=]
+NODE KG-QUERY-API.md [src=docs/architecture/KG-QUERY-API.md loc=L1 community=]
+NODE End-user install (no Rust toolchain) [src=docs/architecture/PRODUCT-SETUP.md loc=L9 community=]
+NODE Rust T1 extractor [src=docs/architecture/extractors/rust.md loc=L1 community=]
+NODE PUBLIC-BENCHMARK-REPORT-V2.md [src=docs/eval/PUBLIC-BENCHMARK-REPORT-V2.md loc=L1 community=]
+NODE LanguageExtractor.md [src=schemas/plugins/LanguageExtractor.md loc=L1 community=]
+NODE HOST-ADAPTERS.md [src=docs/architecture/HOST-ADAPTERS.md loc=L1 community=]
+NODE lib.rs [src=crates/prism-core/src/lib.rs loc=L1 community=]
+NODE Bootstrap a workspace [src=README.md loc=L65 community=]
+NODE users_jasbeermohammad_allfiles_ai_lenarning_ai_p2_docs_planning_planning_and_implementation_md [src= loc= community=]
+NODE Workspace bootstrap [src=docs/architecture/PRODUCT-SETUP.md loc=L54 community=]
+NODE rust.md [src=docs/architecture/extractors/rust.md loc=L1 community=]
+NODE Prism [src=packaging/homebrew/prism.rb loc=L9 community=]
+NODE Host adapter matrix (P11 Stage B) [src=docs/architecture/HOST-ADAPTERS.md loc=L1 community=]
+NODE users_jasbeermohammad_allfiles_ai_lenarning_ai_p2_docs_architecture_architecture_design_document_md [src= loc= community=]
+NODE users_jasbeermohammad_allfiles_ai_lenarning_ai_p2_docs_architecture_tech_stack_and_project_structure_md [src= loc= community=]
+NODE fingerprint [src= loc= community=]
+NODE CLI surface [src=README.md loc=L122 community=]
+NODE workspace [src= loc= community=]
+NODE Upgrade [src=docs/architecture/PRODUCT-SETUP.md loc=L46 community=]
+NODE macOS / Linux [src=docs/architecture/PRODUCT-SETUP.md loc=L13 community=]
+NODE Windows (PowerShell) [src=docs/architecture/PRODUCT-SETUP.md loc=L25 community=]
+NODE Formula [src= loc= community=]
+NODE Installer options [src=README.md loc=L33 community=]
+NODE Workspace crates [src=README.md loc=L153 community=]
+NODE Known failure modes (not claimed precise) [src=docs/architecture/extractors/rust.md loc=L24 community=]
+NODE .install() [src=packaging/homebrew/prism.rb loc=L37 community=]
+NODE Register other agent hosts [src=README.md loc=L75 community=]
+NODE Package managers (draft) [src=README.md loc=L49 community=]
+NODE Renderer (no IDE host) [src=docs/architecture/PRODUCT-SETUP.md loc=L96 community=]
+NODE incremental [src= loc= community=]
+NODE Optional: re-index after every commit [src=README.md loc=L87 community=]
+NODE Package managers (draft) [src=docs/architecture/PRODUCT-SETUP.md loc=L37 community=]
+NODE prism.rb [src=packaging/homebrew/prism.rb loc=L1 community=]
+NODE First query [src=README.md loc=L94 community=]
+NODE ignore_policy [src= loc= community=]
+NODE Contributor build (from this repo) [src=docs/architecture/PRODUCT-SETUP.md loc=L88 community=]
+NODE Windows (PowerShell) [src=README.md loc=L24 community=]
+NODE Docs [src=README.md loc=L137 community=]
+NODE Bootstrap runbook (P11) [src=docs/architecture/BOOTSTRAP.md loc=L1 community=]
+NODE License [src=README.md loc=L176 community=]
+NODE Upgrade [src=README.md loc=L53 community=]
+NODE Related [src=docs/architecture/PRODUCT-SETUP.md loc=L100 community=]
+NODE Honest limits [src=docs/architecture/PRODUCT-SETUP.md loc=L106 community=]
+NODE Build from source (contributors) [src=README.md loc=L105 community=]
+NODE Golden fixture [src=docs/architecture/extractors/rust.md loc=L33 community=]
+NODE macOS / Linux [src=README.md loc=L15 community=]
+NODE What is extracted [src=docs/architecture/extractors/rust.md loc=L8 community=]
+NODE users_jasbeermohammad_allfiles_ai_lenarning_ai_p2_license_md [src= loc= community=]
+NODE Resolution-cheap policy [src=docs/architecture/extractors/rust.md loc=L18 community=]
+EDGE Rust T1 extractor --contains [EXTRACTED]--> rust.md
+EDGE Rust T1 extractor --contains [EXTRACTED]--> What is extracted
+EDGE Rust T1 extractor --contains [EXTRACTED]--> Resolution-cheap policy
+EDGE Rust T1 extractor --contains [EXTRACTED]--> Known failure modes (not claimed precise)
+EDGE Rust T1 extractor --contains [EXTRACTED]--> Golden fixture
+EDGE Install --contains [EXTRACTED]--> Prism — Repository Intelligence Platform
+EDGE Install --contains [EXTRACTED]--> macOS / Linux
+EDGE Install --contains [EXTRACTED]--> Windows (PowerShell)
+EDGE Install --contains [EXTRACTED]--> Installer options
+EDGE Install --contains [EXTRACTED]--> Package managers (draft)
+EDGE Install --contains [EXTRACTED]--> Upgrade
+EDGE Bootstrap a workspace --contains [EXTRACTED]--> Prism — Repository Intelligence Platform
+EDGE Bootstrap a workspace --contains [EXTRACTED]--> Register other agent hosts
+EDGE Bootstrap a workspace --contains [EXTRACTED]--> Optional: re-index after every commit
+EDGE Bootstrap a workspace --contains [EXTRACTED]--> First query
+... (truncated — 0 more nodes cut by ~2000-token budget. Narrow with context_filter=['call'] or use get_node for a specific symbol)

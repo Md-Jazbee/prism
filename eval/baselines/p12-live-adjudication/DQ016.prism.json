@@ -1,0 +1,77 @@
+{
+  "task": "DQ016",
+  "pack": {
+    "status": "budget_exceeded",
+    "data": {
+      "code": "BUDGET_EXCEEDED",
+      "reason": "must-include fragments need 930 tokens but budget is 850",
+      "budget_tokens": 850,
+      "must_include_tokens": 930,
+      "must_include_ids": [
+        "frag:doc:doc:README.md:1",
+        "frag:kg:def:sym:crates/prism-api/src/routes.rs:function:repo_map:12177:0",
+        "frag:kg:def:sym:crates/prism-store/src/communities.rs:method:repo_map:3810:1",
+        "frag:kg:repo_map",
+        "frag:kg:sig:sym:crates/prism-api/src/routes.rs:function:repo_map:12177:0",
+        "frag:kg:sig:sym:crates/prism-store/src/communities.rs:method:repo_map:3810:1",
+        "frag:kg:sig:unresolved:repo_map:2"
+      ],
+      "plan_id": "plan:architecture:75572dc8ddd242d0"
+    }
+  },
+  "judge": {
+    "refusal": "budget_exceeded",
+    "tokens": null,
+    "quality_r1": 0.0,
+    "quality_r2": 0.0,
+    "judge_r1": {
+      "pass_id": "R1",
+      "quality": 0.0,
+      "criteria": [
+        {
+          "criterion": "impact for blast-radius / change analysis",
+          "pass": false
+        },
+        {
+          "criterion": "neighbors for 1-hop graph hops",
+          "pass": false
+        },
+        {
+          "criterion": "repo_map for orientation / communities",
+          "pass": false
+        }
+      ]
+    },
+    "judge_r2": {
+      "pass_id": "R2",
+      "quality": 0.0,
+      "criteria": [
+        {
+          "criterion": "impact for blast-radius / change analysis",
+          "pass": false
+        },
+        {
+          "criterion": "neighbors for 1-hop graph hops",
+          "pass": false
+        },
+        {
+          "criterion": "repo_map for orientation / communities",
+          "pass": false
+        }
+      ]
+    },
+    "citation": {
+      "rate": 0.0,
+      "hits": [],
+      "misses": [
+        "docs/architecture/MCP-TOOL-CATALOG.md",
+        "AGENTS.md"
+      ],
+      "forbidden_hits": [],
+      "valid": false
+    },
+    "answerable": false,
+    "n_fragments": 0,
+    "fragment_labels": []
+  }
+}

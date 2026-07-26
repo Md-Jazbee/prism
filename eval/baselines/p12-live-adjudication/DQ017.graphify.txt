@@ -1,0 +1,75 @@
+Traversal: BFS depth=2 | Start: ['T1', 'Prism', 'Prism ID forms (unchanged from T1)', 'Stage A — Language extractors (T1) ✅', 'simple_module.py', 'Supporting proxies'] | 39 nodes found
+
+NODE Prism — Tasks & Progress Board [src=docs/planning/TASKS-AND-PROGRESS.md loc=L1 community=]
+NODE ID-MAPPING.md [src=docs/architecture/ID-MAPPING.md loc=L1 community=]
+NODE Precise ID mapping rules [src=docs/architecture/ID-MAPPING.md loc=L1 community=]
+NODE simple_module.py [src=fixtures/languages/python/simple_module.py loc=L1 community=]
+NODE Phase 1 — Syntactic Knowledge Graph + MCP [src=docs/planning/TASKS-AND-PROGRESS.md loc=L265 community=]
+NODE enum [src=schemas/graph-view/v1/graph-view.schema.json loc=L92 community=]
+NODE Stage A — Language extractors (T1) ✅ [src=docs/planning/TASKS-AND-PROGRESS.md loc=L285 community=]
+NODE tier [src=schemas/graph-view/v1/graph-view.schema.json loc=L92 community=]
+NODE Phase 2 scorecard report [src=eval/scorecards/p2-phase-gate.md loc=L1 community=]
+NODE Stage D — Communities + Phase 1 gate ✅ [src=docs/planning/TASKS-AND-PROGRESS.md loc=L344 community=]
+NODE Stage B — KG persistence & query API ✅ [src=docs/planning/TASKS-AND-PROGRESS.md loc=L306 community=]
+NODE p2-phase-gate.md [src=eval/scorecards/p2-phase-gate.md loc=L1 community=]
+NODE Stage C — MCP structural tools ✅ [src=docs/planning/TASKS-AND-PROGRESS.md loc=L327 community=]
+NODE Prism [src=packaging/homebrew/prism.rb loc=L9 community=]
+NODE helper() [src=fixtures/languages/python/simple_module.py loc=L8 community=]
+NODE Child [src=fixtures/languages/python/simple_module.py loc=L16 community=]
+NODE main() [src=fixtures/languages/python/simple_module.py loc=L21 community=]
+NODE .run() [src=fixtures/languages/python/simple_module.py loc=L17 community=]
+NODE Base [src=fixtures/languages/python/simple_module.py loc=L12 community=]
+NODE SCIP → Prism mapping [src=docs/architecture/ID-MAPPING.md loc=L31 community=]
+NODE Ambiguity [src=docs/architecture/ID-MAPPING.md loc=L54 community=]
+NODE os [src= loc= community=]
+NODE Prism ID forms (unchanged from T1) [src=docs/architecture/ID-MAPPING.md loc=L18 community=]
+NODE Notes [src=eval/scorecards/p2-phase-gate.md loc=L21 community=]
+NODE Supporting proxies [src=eval/scorecards/p2-phase-gate.md loc=L16 community=]
+NODE Gate checks [src=eval/scorecards/p2-phase-gate.md loc=L6 community=]
+NODE Deliverables [src=docs/planning/TASKS-AND-PROGRESS.md loc=L287 community=]
+NODE Formula [src= loc= community=]
+NODE T3 [src=schemas/graph-view/v1/graph-view.schema.json loc=L92 community=]
+NODE Minimal Python fixture for T1 golden conformance.  Covers: function defs, import [src=fixtures/languages/python/simple_module.py loc=L1 community=]
+NODE .install() [src=packaging/homebrew/prism.rb loc=L37 community=]
+NODE Exit / acceptance [src=docs/planning/TASKS-AND-PROGRESS.md loc=L296 community=]
+NODE Principles [src=docs/architecture/ID-MAPPING.md loc=L9 community=]
+NODE prism.rb [src=packaging/homebrew/prism.rb loc=L1 community=]
+NODE T4 [src=schemas/graph-view/v1/graph-view.schema.json loc=L92 community=]
+NODE T1 [src=schemas/graph-view/v1/graph-view.schema.json loc=L92 community=]
+NODE Handoff to Stage B [src=docs/planning/TASKS-AND-PROGRESS.md loc=L302 community=]
+NODE T2 [src=schemas/graph-view/v1/graph-view.schema.json loc=L92 community=]
+NODE Versioning [src=docs/architecture/ID-MAPPING.md loc=L61 community=]
+EDGE Stage A — Language extractors (T1) ✅ --contains [EXTRACTED]--> Phase 1 — Syntactic Knowledge Graph + MCP
+EDGE Stage A — Language extractors (T1) ✅ --contains [EXTRACTED]--> Deliverables
+EDGE Stage A — Language extractors (T1) ✅ --contains [EXTRACTED]--> Exit / acceptance
+EDGE Stage A — Language extractors (T1) ✅ --contains [EXTRACTED]--> Handoff to Stage B
+EDGE simple_module.py --imports_from [EXTRACTED context=import]--> os
+EDGE simple_module.py --contains [EXTRACTED]--> helper()
+EDGE simple_module.py --contains [EXTRACTED]--> Base
+EDGE simple_module.py --contains [EXTRACTED]--> Child
+EDGE simple_module.py --contains [EXTRACTED]--> main()
+EDGE simple_module.py --rationale_for [EXTRACTED]--> Minimal Python fixture for T1 golden conformance.  Covers: function defs, import
+EDGE Prism ID forms (unchanged from T1) --contains [EXTRACTED]--> Precise ID mapping rules
+EDGE T1 --extends [EXTRACTED context=import]--> enum
+EDGE Supporting proxies --contains [EXTRACTED]--> Phase 2 scorecard report
+EDGE Prism --contains [EXTRACTED]--> prism.rb
+EDGE Prism --inherits [EXTRACTED]--> Formula
+EDGE Prism --method [EXTRACTED]--> .install()
+EDGE Precise ID mapping rules --contains [EXTRACTED]--> ID-MAPPING.md
+EDGE Precise ID mapping rules --contains [EXTRACTED]--> Principles
+EDGE Precise ID mapping rules --contains [EXTRACTED]--> SCIP → Prism mapping
+EDGE Precise ID mapping rules --contains [EXTRACTED]--> Ambiguity
+EDGE Precise ID mapping rules --contains [EXTRACTED]--> Versioning
+EDGE Child --method [EXTRACTED]--> .run()
+EDGE Phase 1 — Syntactic Knowledge Graph + MCP --contains [EXTRACTED]--> Prism — Tasks & Progress Board
+EDGE Phase 1 — Syntactic Knowledge Graph + MCP --contains [EXTRACTED]--> Stage B — KG persistence & query API ✅
+EDGE Phase 1 — Syntactic Knowledge Graph + MCP --contains [EXTRACTED]--> Stage C — MCP structural tools ✅
+EDGE Phase 1 — Syntactic Knowledge Graph + MCP --contains [EXTRACTED]--> Stage D — Communities + Phase 1 gate ✅
+EDGE enum --contains [EXTRACTED]--> tier
+EDGE enum --extends [EXTRACTED context=import]--> T2
+EDGE enum --extends [EXTRACTED context=import]--> T3
+EDGE enum --extends [EXTRACTED context=import]--> T4
+EDGE Phase 2 scorecard report --contains [EXTRACTED]--> p2-phase-gate.md
+EDGE Phase 2 scorecard report --contains [EXTRACTED]--> Gate checks
+EDGE Phase 2 scorecard report --contains [EXTRACTED]--> Notes
+EDGE helper() --calls [EXTRACTED context=call]--> .run()

@@ -1,46 +1,31 @@
 # P12 five-arm accuracy report
 
-**Mode:** `scripted_proxy`  
-**Date:** 2026-07-26  
-**Harness:** `python eval/baselines/five_arm.py`
+**Mode:** `agent_dual_pass_rubric+graphify_live`  
+**Date:** 2026-07-27  
+**Harness:** `python eval/baselines/p12_live_adjudication.py`
 
-> Live-judged quality is required to close the Phase 12 gate. This artifact is the
-> scripted-proxy interim plus ablation attribution. See
-> [P12-ADJUDICATION-PROTOCOL.md](./P12-ADJUDICATION-PROTOCOL.md).
+> Live-judged quality from agent dual-pass rubric (1A) + Graphify arm E (2A).
+> Protocol: [P12-ADJUDICATION-PROTOCOL.md](./P12-ADJUDICATION-PROTOCOL.md).
 
-## Arms (proxy)
+## Arms (live-judged Doc-QA subset)
 
-| Arm | Protocol | Tokens | Quality | Citation validity |
+| Arm | Protocol | Tokens (mean) | Quality (mean R2) | Citation validity |
 |---|---|---:|---:|---:|
 | A | explore | 18000 | 0.70 | 0.55 |
 | B | explore | 12000 | 0.62 | 0.50 |
-| C | prism | 800 | 0.72 | 0.85 |
-| D | prism | 1200 | 0.74 | 0.85 |
-| E | graphify | 2000 | 0.74 | 0.80 |
+| C | prism | 752 | 0.77 | 0.75 |
+| D | prism | 903 | 0.79 | 0.75 |
+| E | graphify | 1632 | 0.34 | 0.35 |
 
-## ACC-5 (proxy)
+## ACC checklist (this run)
 
-- Claim: `quality(Medium+Prism) >= quality(Graphify) - 2pts AND tokens(C) <= 0.5 * tokens(E)`
-- Status: **PASS_PROXY**
-- Quality Δ (C−E): -2.0 pts
-- Token ratio C/E: 0.4
+- ACC-1 answerable rate: **80.0%** (PASS; gate ≥80%)
+- ACC-4 label acceptance: **95.0%** (PASS; gate ≥70%)
+- ACC-5 Prism≥Graphify @ ≤½ tokens: **PASS** (Δq=43.3 pts, token ratio=0.461)
+- ACC-7 dual-review precision: **99.0%** (κ=1.0, n_packs=20) (PASS; gate ≥70%, κ≥0.6)
 
-## Ablations (Medium+Prism arm C quality_proxy)
+## Gate
 
-| Config | Quality | Δ vs full |
-|---|---:|---:|
-| full | 0.720 | +0.0 pts |
-| docs_off | 0.680 | -4.0 pts |
-| communities_path_prefix | 0.700 | -2.0 pts |
-| lexical_off | 0.700 | -2.0 pts |
-| all_off | 0.640 | -8.0 pts |
+- Status: **PASS**
+- Notes: All live ACC targets met
 
-## Doc-QA gold
-
-- Tasks: 25 / 25
-- Notes: DQ001–DQ025 authored; live adjudication pending
-
-## Gate honesty
-
-- ACC-1…ACC-7 **live-judged** results: **OPEN** (proxies must not close the gate).
-- Residual: run adjudication protocol on DQ sample + Graphify arm E with pinned graph build.

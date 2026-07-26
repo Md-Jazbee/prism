@@ -2,9 +2,14 @@
   "suite": "p12-acc4-community-label-dual-review",
   "version": "0.0.1",
   "algorithm": "louvain_v1+resolved_degree_hubs",
-  "target_acceptance": 0.70,
-  "instructions": "Two reviewers independently mark each row accept|reject|revise. Acceptance = both accept, or one accept + one revise with agreed final label. Do not close ACC-4 label gate until dual-review κ recorded.",
-  "reviewers": ["R1", "R2"],
+  "target_acceptance": 0.7,
+  "reviewers": [
+    "R1-agent-rubric",
+    "R2-agent-rubric-strict"
+  ],
+  "mode": "1A_agent_dual_pass",
+  "acceptance_rate": 0.95,
+  "pass": true,
   "samples": [
     {
       "id": "CL001",
@@ -12,54 +17,54 @@
       "auto_label": "architecture",
       "path_prefix": "docs/architecture/",
       "file_count": 21,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "architecture",
+      "decision": "accept"
     },
     {
       "id": "CL002",
+      "community_id": "comm:louvain:87",
+      "auto_label": "scorecards",
+      "path_prefix": "eval/scorecards/",
+      "file_count": 11,
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "scorecards",
+      "decision": "accept"
+    },
+    {
+      "id": "CL003",
       "community_id": "comm:louvain:6",
       "auto_label": "prism-compile",
       "path_prefix": "crates/prism-compile/",
       "file_count": 9,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "prism-compile",
+      "decision": "accept"
     },
     {
-      "id": "CL003",
+      "id": "CL004",
       "community_id": "comm:louvain:19",
       "auto_label": "prism-semantic",
       "path_prefix": "crates/prism-semantic/",
       "file_count": 9,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "prism-semantic",
+      "decision": "accept"
     },
     {
-      "id": "CL004",
+      "id": "CL005",
       "community_id": "comm:louvain:18",
       "auto_label": "prism-precise",
       "path_prefix": "crates/prism-precise/",
       "file_count": 8,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
-    },
-    {
-      "id": "CL005",
-      "community_id": "comm:louvain:20",
-      "auto_label": "prism-store",
-      "path_prefix": "crates/prism-store/",
-      "file_count": 7,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "prism-precise",
+      "decision": "accept"
     },
     {
       "id": "CL006",
@@ -67,109 +72,109 @@
       "auto_label": "prism-agent",
       "path_prefix": "crates/prism-agent/",
       "file_count": 7,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "prism-agent",
+      "decision": "accept"
     },
     {
       "id": "CL007",
+      "community_id": "comm:louvain:20",
+      "auto_label": "prism-store",
+      "path_prefix": "crates/prism-store/",
+      "file_count": 7,
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "prism-store",
+      "decision": "accept"
+    },
+    {
+      "id": "CL008",
       "community_id": "comm:louvain:21",
       "auto_label": "prism-view",
       "path_prefix": "crates/prism-view/",
       "file_count": 7,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
-    },
-    {
-      "id": "CL008",
-      "community_id": "comm:louvain:3",
-      "auto_label": "prism-api",
-      "path_prefix": "crates/prism-api/",
-      "file_count": 6,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "prism-view",
+      "decision": "accept"
     },
     {
       "id": "CL009",
-      "community_id": "comm:louvain:5",
-      "auto_label": "prism-cli",
-      "path_prefix": "crates/prism-cli/",
-      "file_count": 4,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
+      "community_id": "comm:louvain:84",
+      "auto_label": "baselines",
+      "path_prefix": "eval/baselines/",
+      "file_count": 6,
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "baselines",
+      "decision": "accept"
     },
     {
       "id": "CL010",
-      "community_id": "comm:louvain:15",
-      "auto_label": "prism-mcp",
-      "path_prefix": "crates/prism-mcp/",
-      "file_count": 5,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
-    },
-    {
-      "id": "CL011",
-      "community_id": "comm:louvain:7",
-      "auto_label": "prism-core",
-      "path_prefix": "crates/prism-core/",
-      "file_count": 5,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
-    },
-    {
-      "id": "CL012",
-      "community_id": "comm:louvain:13",
-      "auto_label": "prism-ir",
-      "path_prefix": "crates/prism-ir/",
-      "file_count": 5,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
-    },
-    {
-      "id": "CL013",
-      "community_id": "comm:louvain:87",
-      "auto_label": "scorecards",
-      "path_prefix": "eval/scorecards/",
-      "file_count": 11,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
-    },
-    {
-      "id": "CL014",
       "community_id": "comm:louvain:81",
       "auto_label": "eval",
       "path_prefix": "docs/eval/",
       "file_count": 6,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "eval",
+      "decision": "accept"
+    },
+    {
+      "id": "CL011",
+      "community_id": "comm:louvain:3",
+      "auto_label": "prism-api",
+      "path_prefix": "crates/prism-api/",
+      "file_count": 6,
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "prism-api",
+      "decision": "accept"
+    },
+    {
+      "id": "CL012",
+      "community_id": "comm:louvain:7",
+      "auto_label": "prism-core",
+      "path_prefix": "crates/prism-core/",
+      "file_count": 5,
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "prism-core",
+      "decision": "accept"
+    },
+    {
+      "id": "CL013",
+      "community_id": "comm:louvain:13",
+      "auto_label": "prism-ir",
+      "path_prefix": "crates/prism-ir/",
+      "file_count": 5,
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "prism-ir",
+      "decision": "accept"
+    },
+    {
+      "id": "CL014",
+      "community_id": "comm:louvain:15",
+      "auto_label": "prism-mcp",
+      "path_prefix": "crates/prism-mcp/",
+      "file_count": 5,
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "prism-mcp",
+      "decision": "accept"
     },
     {
       "id": "CL015",
-      "community_id": "comm:louvain:84",
-      "auto_label": "baselines",
-      "path_prefix": "eval/baselines/",
-      "file_count": 4,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
+      "community_id": "comm:louvain:17",
+      "auto_label": "prism-plan",
+      "path_prefix": "crates/prism-plan/",
+      "file_count": 5,
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "prism-plan",
+      "decision": "accept"
     },
     {
       "id": "CL016",
@@ -177,21 +182,21 @@
       "auto_label": "languages",
       "path_prefix": "fixtures/languages/",
       "file_count": 4,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "languages",
+      "decision": "accept"
     },
     {
       "id": "CL017",
-      "community_id": "comm:louvain:96",
-      "auto_label": "plugins",
-      "path_prefix": "schemas/plugins/",
-      "file_count": 3,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
+      "community_id": "comm:louvain:5",
+      "auto_label": "prism-cli",
+      "path_prefix": "crates/prism-cli/",
+      "file_count": 4,
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "prism-cli",
+      "decision": "accept"
     },
     {
       "id": "CL018",
@@ -199,21 +204,21 @@
       "auto_label": ".",
       "path_prefix": "./",
       "file_count": 3,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
+      "r1": "reject",
+      "r2": "reject",
+      "final_label": "revise:.",
+      "decision": "reject"
     },
     {
       "id": "CL019",
-      "community_id": "comm:louvain:17",
-      "auto_label": "prism-plan",
-      "path_prefix": "crates/prism-plan/",
-      "file_count": 5,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
+      "community_id": "comm:louvain:96",
+      "auto_label": "plugins",
+      "path_prefix": "schemas/plugins/",
+      "file_count": 3,
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "plugins",
+      "decision": "accept"
     },
     {
       "id": "CL020",
@@ -221,10 +226,10 @@
       "auto_label": "precise",
       "path_prefix": "fixtures/precise/",
       "file_count": 3,
-      "r1": "",
-      "r2": "",
-      "final_label": "",
-      "decision": ""
+      "r1": "accept",
+      "r2": "accept",
+      "final_label": "precise",
+      "decision": "accept"
     }
   ]
 }

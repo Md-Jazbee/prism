@@ -1,0 +1,10 @@
+Traversal: BFS depth=2 | Start: ['refusal', 'repair', 'Prism', 'depth_reached', 'Return (haystack text, provenance paths, refusal code).', 'suggested_anchors()'] | Context: return_type (heuristic) | 7 nodes found
+
+NODE Vec [src= loc= community=]
+NODE suggested_anchors() [src=crates/prism-view/src/project.rs loc=L159 community=]
+NODE Prism [src=packaging/homebrew/prism.rb loc=L9 community=]
+NODE refusal [src=schemas/agent-trace/v1/agent-trace.schema.json loc=L45 community=]
+NODE repair [src=schemas/agent-trace/v1/agent-trace.schema.json loc=L45 community=]
+NODE depth_reached [src=schemas/events/v0/events.schema.json loc=L39 community=]
+NODE Return (haystack text, provenance paths, refusal code). [src=eval/baselines/doc_qa_pack_answerability.py loc=L59 community=]
+EDGE suggested_anchors() --references [EXTRACTED context=return_type]--> Vec

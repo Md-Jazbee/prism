@@ -67,6 +67,17 @@ pub fn ground_plan_seeds(kg: &SqliteKgStore, plan: &Plan) -> anyhow::Result<Grou
         return Ok(GroundingOutcome::Ok { notes });
     }
 
+    // Architecture orientation packs should still emit docs + communities even
+    // when backtick phrases in the question look like anchors but don't ground
+    // (e.g. `prism setup .`). RepoQa / debug keep hard refusal (ACC-3).
+    if matches!(intent, Intent::Architecture) {
+        notes.push(
+            "architecture: planner anchors did not ground; continuing with docs/communities"
+                .into(),
+        );
+        return Ok(GroundingOutcome::Ok { notes });
+    }
+
     // No strong ground — lexical expand from question + failed anchors.
     let mut terms = tokenize_seed_terms(&plan.question);
     for a in &anchors {

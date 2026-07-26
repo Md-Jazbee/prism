@@ -1,0 +1,8 @@
+Traversal: BFS depth=2 | Start: ['precision_required()', 'Prism', 'AGENTS.md — Prism guidance (generated)', 'AgentTrace'] | Context: return_type (heuristic) | 5 nodes found
+
+NODE precision_required() [src=crates/prism-precise/src/require.rs loc=L39 community=]
+NODE Result [src= loc= community=]
+NODE Prism [src=packaging/homebrew/prism.rb loc=L9 community=]
+NODE AgentTrace [src=crates/prism-agent/src/trace.rs loc=L45 community=]
+NODE AGENTS.md — Prism guidance (generated) [src=AGENTS.md loc=L2 community=]
+EDGE precision_required() --references [EXTRACTED context=return_type]--> Result

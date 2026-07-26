@@ -1,0 +1,43 @@
+Traversal: BFS depth=2 | Start: ['asserted', 'heuristic', 'extracted', 'Confidence', 'dirty_differs_from_clean()', 'precise'] | 21 nodes found
+
+NODE super [src= loc= community=]
+NODE serde [src= loc= community=]
+NODE fact.schema.json [src=schemas/fact-schema/v0/fact.schema.json loc=L1 community=]
+NODE identity.rs [src=crates/prism-ir/src/identity.rs loc=L1 community=]
+NODE confidence [src=schemas/fact-schema/v0/fact.schema.json loc=L8 community=]
+NODE confidence.rs [src=crates/prism-ir/src/confidence.rs loc=L1 community=]
+NODE RepositoryId [src=crates/prism-ir/src/identity.rs loc=L8 community=]
+NODE SnapshotId [src=crates/prism-ir/src/identity.rs loc=L21 community=]
+NODE FileId [src=crates/prism-ir/src/identity.rs loc=L32 community=]
+NODE PathBuf [src= loc= community=]
+NODE Confidence [src=crates/prism-ir/src/confidence.rs loc=L8 community=]
+NODE serde_roundtrip() [src=crates/prism-ir/src/confidence.rs loc=L45 community=]
+NODE .as_str() [src=crates/prism-ir/src/confidence.rs loc=L23 community=]
+NODE extracted [src=schemas/fact-schema/v0/fact.schema.json loc=L8 community=]
+NODE asserted [src=schemas/fact-schema/v0/fact.schema.json loc=L8 community=]
+NODE precise [src=schemas/fact-schema/v0/fact.schema.json loc=L8 community=]
+NODE asserted_roundtrips_and_is_not_precise() [src=crates/prism-ir/src/confidence.rs loc=L54 community=]
+NODE .is_precise() [src=crates/prism-ir/src/confidence.rs loc=L35 community=]
+NODE observed [src=schemas/fact-schema/v0/fact.schema.json loc=L8 community=]
+NODE heuristic [src=schemas/fact-schema/v0/fact.schema.json loc=L8 community=]
+NODE dirty_differs_from_clean() [src=crates/prism-ir/src/identity.rs loc=L44 community=]
+EDGE precise --extends [EXTRACTED context=import]--> confidence
+EDGE extracted --extends [EXTRACTED context=import]--> confidence
+EDGE Confidence --contains [EXTRACTED]--> confidence.rs
+EDGE Confidence --method [EXTRACTED]--> .as_str()
+EDGE Confidence --method [EXTRACTED]--> .is_precise()
+EDGE asserted --extends [EXTRACTED context=import]--> confidence
+EDGE heuristic --extends [EXTRACTED context=import]--> confidence
+EDGE dirty_differs_from_clean() --contains [EXTRACTED]--> identity.rs
+EDGE identity.rs --imports_from [EXTRACTED context=import]--> serde
+EDGE identity.rs --imports_from [EXTRACTED context=import]--> PathBuf
+EDGE identity.rs --contains [EXTRACTED]--> RepositoryId
+EDGE identity.rs --contains [EXTRACTED]--> SnapshotId
+EDGE identity.rs --contains [EXTRACTED]--> FileId
+EDGE identity.rs --imports_from [EXTRACTED context=import]--> super
+EDGE confidence --contains [EXTRACTED]--> fact.schema.json
+EDGE confidence --extends [EXTRACTED context=import]--> observed
+EDGE confidence.rs --imports_from [EXTRACTED context=import]--> serde
+EDGE confidence.rs --imports_from [EXTRACTED context=import]--> super
+EDGE confidence.rs --contains [EXTRACTED]--> serde_roundtrip()
+EDGE confidence.rs --contains [EXTRACTED]--> asserted_roundtrips_and_is_not_precise()

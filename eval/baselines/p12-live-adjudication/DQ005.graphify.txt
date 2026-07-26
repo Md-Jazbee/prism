@@ -1,0 +1,9 @@
+Traversal: BFS depth=2 | Start: ['Prism'] | 4 nodes found
+
+NODE Prism [src=packaging/homebrew/prism.rb loc=L9 community=]
+NODE Formula [src= loc= community=]
+NODE prism.rb [src=packaging/homebrew/prism.rb loc=L1 community=]
+NODE .install() [src=packaging/homebrew/prism.rb loc=L37 community=]
+EDGE Prism --contains [EXTRACTED]--> prism.rb
+EDGE Prism --inherits [EXTRACTED]--> Formula
+EDGE Prism --method [EXTRACTED]--> .install()

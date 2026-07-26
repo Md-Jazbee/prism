@@ -1,0 +1,3200 @@
+{
+  "suite": "p12-live-adjudication",
+  "mode": "agent_dual_pass_rubric+graphify_live",
+  "date": "2026-07-27",
+  "elapsed_s": 6.96,
+  "prism_binary": "/Users/jasbeermohammad/AllFiles/AI-lenarning/AI-P2/target/release/prism",
+  "graphify_binary": "/Users/jasbeermohammad/.local/bin/graphify",
+  "repo_map_algorithm": "louvain_v1+resolved_degree_hubs",
+  "tasks": [
+    {
+      "id": "DQ001",
+      "question": "What is Prism and what problem does it solve for AI coding agents?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 770,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "States repository intelligence / Evidence Pack thesis",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions local-first indexing without API keys",
+              "pass": true
+            },
+            {
+              "criterion": "Contrasts with grep/read explore loops",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "States repository intelligence / Evidence Pack thesis",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions local-first indexing without API keys",
+              "pass": true
+            },
+            {
+              "criterion": "Contrasts with grep/read explore loops",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.5,
+          "hits": [
+            "README.md"
+          ],
+          "misses": [
+            "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+          ],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/AGENT-USAGE.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 1.0,
+        "quality_r2": 0.6667,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.6667,
+          "criteria": [
+            {
+              "criterion": "States repository intelligence / Evidence Pack thesis",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions local-first indexing without API keys",
+              "pass": true
+            },
+            {
+              "criterion": "Contrasts with grep/read explore loops",
+              "pass": false
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "README.md",
+            "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "DQ002",
+      "question": "What MCP tools does Prism expose and which is primary?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 782,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Names compile_context as primary",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions at least resolve_symbol, neighbors, impact, or repo_map",
+              "pass": true
+            },
+            {
+              "criterion": "Notes read-only / confidence labels",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Names compile_context as primary",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions at least resolve_symbol, neighbors, impact, or repo_map",
+              "pass": true
+            },
+            {
+              "criterion": "Notes read-only / confidence labels",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "docs/architecture/MCP-TOOL-CATALOG.md",
+            "README.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/AGENT-USAGE.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/MCP-TOOL-CATALOG.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 1.0,
+        "quality_r2": 0.3333,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.3333,
+          "criteria": [
+            {
+              "criterion": "Names compile_context as primary",
+              "pass": false
+            },
+            {
+              "criterion": "Mentions at least resolve_symbol, neighbors, impact, or repo_map",
+              "pass": false
+            },
+            {
+              "criterion": "Notes read-only / confidence labels",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "docs/architecture/MCP-TOOL-CATALOG.md",
+            "README.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "DQ003",
+      "question": "What named agent workflows does Prism ship and when should each be used?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 770,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Lists onboarding, review, debug, refactor_prep",
+              "pass": true
+            },
+            {
+              "criterion": "Ties each to a trigger (newcomer, PR, stack, rename)",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Lists onboarding, review, debug, refactor_prep",
+              "pass": true
+            },
+            {
+              "criterion": "Ties each to a trigger (newcomer, PR, stack, rename)",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "schemas/agent-workflow/v1/catalog.json",
+            "AGENTS.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/AGENT-USAGE.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Lists onboarding, review, debug, refactor_prep",
+              "pass": true
+            },
+            {
+              "criterion": "Ties each to a trigger (newcomer, PR, stack, rename)",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.5,
+          "hits": [
+            "AGENTS.md"
+          ],
+          "misses": [
+            "schemas/agent-workflow/v1/catalog.json"
+          ],
+          "forbidden_hits": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "DQ004",
+      "question": "How does a cold machine get to a working compile_context without a Rust toolchain?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 850,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions install script or release binary",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions prism setup and doctor --ready",
+              "pass": true
+            },
+            {
+              "criterion": "Does not require API keys for indexing",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions install script or release binary",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions prism setup and doctor --ready",
+              "pass": true
+            },
+            {
+              "criterion": "Does not require API keys for indexing",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.5,
+          "hits": [
+            "README.md"
+          ],
+          "misses": [
+            "docs/architecture/PRODUCT-SETUP.md"
+          ],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 10,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:def:sym:crates/prism-compile/src/lib.rs:function:compile_context:1655:0",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:nbr:sym:crates/prism-api/src/routes.rs:function:context_compile:5203:0",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:nbr:sym:crates/prism-cli/src/main.rs:function:main:18553:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:nbr:sym:crates/prism-lsp/src/server.rs:function:execute_command:7932:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:nbr:sym:crates/prism-lsp/src/server.rs:function:hover:3809:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:nbr:unresolved:Ok:1",
+            "r1": "unnecessary",
+            "r2": "unnecessary",
+            "label": "unnecessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:sig:sym:crates/prism-compile/src/lib.rs:function:compile_context:1655:0",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:sig:unresolved:compile_context:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 1.0,
+        "quality_r2": 0.6667,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.6667,
+          "criteria": [
+            {
+              "criterion": "Mentions install script or release binary",
+              "pass": false
+            },
+            {
+              "criterion": "Mentions prism setup and doctor --ready",
+              "pass": true
+            },
+            {
+              "criterion": "Does not require API keys for indexing",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "README.md",
+            "docs/architecture/PRODUCT-SETUP.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "DQ005",
+      "question": "What is Prism explicitly not trying to be?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 779,
+        "quality_r1": 1.0,
+        "quality_r2": 0.6667,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Not primarily a vector RAG wrapper or answer cache",
+              "pass": true
+            },
+            {
+              "criterion": "Not replacing general code search products",
+              "pass": true
+            },
+            {
+              "criterion": "Embeddings are fallback not spine",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.6667,
+          "criteria": [
+            {
+              "criterion": "Not primarily a vector RAG wrapper or answer cache",
+              "pass": true
+            },
+            {
+              "criterion": "Not replacing general code search products",
+              "pass": true
+            },
+            {
+              "criterion": "Embeddings are fallback not spine",
+              "pass": false
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 107,
+        "quality_r1": 0.0,
+        "quality_r2": 0.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.0,
+          "criteria": [
+            {
+              "criterion": "Not primarily a vector RAG wrapper or answer cache",
+              "pass": false
+            },
+            {
+              "criterion": "Not replacing general code search products",
+              "pass": false
+            },
+            {
+              "criterion": "Embeddings are fallback not spine",
+              "pass": false
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.0,
+          "hits": [],
+          "misses": [
+            "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+          ],
+          "forbidden_hits": [],
+          "valid": false
+        }
+      }
+    },
+    {
+      "id": "DQ006",
+      "question": "What should an agent do when Prism returns PRECISION_REQUIRED?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 778,
+        "quality_r1": 1.0,
+        "quality_r2": 0.5,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions precise import or continuing labeled heuristic",
+              "pass": true
+            },
+            {
+              "criterion": "Does not silently upgrade confidence",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.5,
+          "criteria": [
+            {
+              "criterion": "Mentions precise import or continuing labeled heuristic",
+              "pass": false
+            },
+            {
+              "criterion": "Does not silently upgrade confidence",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.5,
+          "hits": [
+            "AGENTS.md"
+          ],
+          "misses": [
+            "docs/architecture/MCP-TOOL-CATALOG.md"
+          ],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": false,
+        "n_fragments": 5,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/AGENT-USAGE.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:sig:unresolved:PRECISION_REQUIRED:0",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 147,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions precise import or continuing labeled heuristic",
+              "pass": true
+            },
+            {
+              "criterion": "Does not silently upgrade confidence",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.5,
+          "hits": [
+            "AGENTS.md"
+          ],
+          "misses": [
+            "docs/architecture/MCP-TOOL-CATALOG.md"
+          ],
+          "forbidden_hits": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "DQ007",
+      "question": "What precision tiers does Prism use and what does T1 include today?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 783,
+        "quality_r1": 1.0,
+        "quality_r2": 0.6667,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions T1 syntactic / tree-sitter",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions T2 precise and T3/T4 semantic as later tiers",
+              "pass": true
+            },
+            {
+              "criterion": "Honest about heuristic CALLS at T1",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.6667,
+          "criteria": [
+            {
+              "criterion": "Mentions T1 syntactic / tree-sitter",
+              "pass": false
+            },
+            {
+              "criterion": "Mentions T2 precise and T3/T4 semantic as later tiers",
+              "pass": true
+            },
+            {
+              "criterion": "Honest about heuristic CALLS at T1",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "README.md",
+            "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 5,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:sig:unresolved:T1:0",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 1.0,
+        "quality_r2": 0.6667,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.6667,
+          "criteria": [
+            {
+              "criterion": "Mentions T1 syntactic / tree-sitter",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions T2 precise and T3/T4 semantic as later tiers",
+              "pass": true
+            },
+            {
+              "criterion": "Honest about heuristic CALLS at T1",
+              "pass": false
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.5,
+          "hits": [
+            "README.md"
+          ],
+          "misses": [
+            "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+          ],
+          "forbidden_hits": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "DQ008",
+      "question": "If documentation claims a feature the code does not implement, how should Evidence Packs label that claim?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 779,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions asserted confidence for doc claims",
+              "pass": true
+            },
+            {
+              "criterion": "Asserted never satisfies a precision gate",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions asserted confidence for doc claims",
+              "pass": true
+            },
+            {
+              "criterion": "Asserted never satisfies a precision gate",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 1.0,
+        "quality_r2": 0.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions asserted confidence for doc claims",
+              "pass": true
+            },
+            {
+              "criterion": "Asserted never satisfies a precision gate",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.0,
+          "hits": [],
+          "misses": [
+            "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+          ],
+          "forbidden_hits": [],
+          "valid": false
+        }
+      }
+    },
+    {
+      "id": "DQ009",
+      "question": "How do I install Prism without a Rust toolchain and bootstrap a workspace?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 782,
+        "quality_r1": 1.0,
+        "quality_r2": 0.6667,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions install.sh or install.ps1 / curl installer",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions prism setup .",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions doctor --ready or MCP readiness",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.6667,
+          "criteria": [
+            {
+              "criterion": "Mentions install.sh or install.ps1 / curl installer",
+              "pass": false
+            },
+            {
+              "criterion": "Mentions prism setup .",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions doctor --ready or MCP readiness",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.5,
+          "hits": [
+            "README.md"
+          ],
+          "misses": [
+            "docs/architecture/PRODUCT-SETUP.md"
+          ],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/AGENT-USAGE.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/MCP-TOOL-CATALOG.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions install.sh or install.ps1 / curl installer",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions prism setup .",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions doctor --ready or MCP readiness",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "README.md",
+            "docs/architecture/PRODUCT-SETUP.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "DQ010",
+      "question": "What does `prism setup .` do in one shot?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 780,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Builds or refreshes local index / .prism graph",
+              "pass": true
+            },
+            {
+              "criterion": "Generates agent assets (AGENTS.md / rules)",
+              "pass": true
+            },
+            {
+              "criterion": "Registers MCP host config",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Builds or refreshes local index / .prism graph",
+              "pass": true
+            },
+            {
+              "criterion": "Generates agent assets (AGENTS.md / rules)",
+              "pass": true
+            },
+            {
+              "criterion": "Registers MCP host config",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "README.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/PRODUCT-SETUP.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 0.3333,
+        "quality_r2": 0.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.3333,
+          "criteria": [
+            {
+              "criterion": "Builds or refreshes local index / .prism graph",
+              "pass": true
+            },
+            {
+              "criterion": "Generates agent assets (AGENTS.md / rules)",
+              "pass": false
+            },
+            {
+              "criterion": "Registers MCP host config",
+              "pass": false
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.0,
+          "hits": [],
+          "misses": [
+            "README.md"
+          ],
+          "forbidden_hits": [],
+          "valid": false
+        }
+      }
+    },
+    {
+      "id": "DQ011",
+      "question": "Which Prism workflows exist for agents and when is each used?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 770,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Names onboarding / review / debug / refactor_prep (or equivalents)",
+              "pass": true
+            },
+            {
+              "criterion": "Ties each to a trigger situation",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions compile_context as primary tool",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Names onboarding / review / debug / refactor_prep (or equivalents)",
+              "pass": true
+            },
+            {
+              "criterion": "Ties each to a trigger situation",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions compile_context as primary tool",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.5,
+          "hits": [
+            "AGENTS.md"
+          ],
+          "misses": [
+            "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+          ],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/AGENT-USAGE.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 1.0,
+        "quality_r2": 0.6667,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.6667,
+          "criteria": [
+            {
+              "criterion": "Names onboarding / review / debug / refactor_prep (or equivalents)",
+              "pass": true
+            },
+            {
+              "criterion": "Ties each to a trigger situation",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions compile_context as primary tool",
+              "pass": false
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.5,
+          "hits": [
+            "AGENTS.md"
+          ],
+          "misses": [
+            "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+          ],
+          "forbidden_hits": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "DQ012",
+      "question": "What should an agent do when compile_context returns SCOPE_UNRESOLVED?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 845,
+        "quality_r1": 1.0,
+        "quality_r2": 0.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Ask for / pick symbol, path, or stack frame anchors",
+              "pass": true
+            },
+            {
+              "criterion": "Does not dump the whole repo",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Ask for / pick symbol, path, or stack frame anchors",
+              "pass": true
+            },
+            {
+              "criterion": "Does not dump the whole repo",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.0,
+          "hits": [],
+          "misses": [
+            "AGENTS.md",
+            ".cursor/rules/prism-compile-first.mdc"
+          ],
+          "forbidden_hits": [],
+          "valid": false
+        },
+        "answerable": false,
+        "n_fragments": 10,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:def:sym:crates/prism-compile/src/lib.rs:function:compile_context:1655:0",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:nbr:sym:crates/prism-api/src/routes.rs:function:context_compile:5203:0",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:nbr:sym:crates/prism-cli/src/main.rs:function:main:18553:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:nbr:sym:crates/prism-lsp/src/server.rs:function:execute_command:7932:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:nbr:sym:crates/prism-lsp/src/server.rs:function:hover:3809:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:sig:sym:crates/prism-compile/src/lib.rs:function:compile_context:1655:0",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:sig:unresolved:SCOPE_UNRESOLVED:0",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:sig:unresolved:compile_context:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 160,
+        "quality_r1": 0.5,
+        "quality_r2": 0.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.0,
+          "criteria": [
+            {
+              "criterion": "Ask for / pick symbol, path, or stack frame anchors",
+              "pass": false
+            },
+            {
+              "criterion": "Does not dump the whole repo",
+              "pass": false
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.0,
+          "hits": [],
+          "misses": [
+            "AGENTS.md",
+            ".cursor/rules/prism-compile-first.mdc"
+          ],
+          "forbidden_hits": [],
+          "valid": false
+        }
+      }
+    },
+    {
+      "id": "DQ013",
+      "question": "What does Prism explicitly refuse to claim before certain gates?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 779,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions at least one gated claim (precise rename, slice-debug, install-anywhere, etc.)",
+              "pass": true
+            },
+            {
+              "criterion": "States a phase/gate dependency",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions at least one gated claim (precise rename, slice-debug, install-anywhere, etc.)",
+              "pass": true
+            },
+            {
+              "criterion": "States a phase/gate dependency",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 1.0,
+        "quality_r2": 0.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions at least one gated claim (precise rename, slice-debug, install-anywhere, etc.)",
+              "pass": true
+            },
+            {
+              "criterion": "States a phase/gate dependency",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.0,
+          "hits": [],
+          "misses": [
+            "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+          ],
+          "forbidden_hits": [],
+          "valid": false
+        }
+      }
+    },
+    {
+      "id": "DQ014",
+      "question": "What is an Evidence Pack and what must every fragment carry?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 779,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Minimum-sufficient context under a token budget",
+              "pass": true
+            },
+            {
+              "criterion": "Provenance / confidence / citations",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Minimum-sufficient context under a token budget",
+              "pass": true
+            },
+            {
+              "criterion": "Provenance / confidence / citations",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "README.md",
+            "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 1.0,
+        "quality_r2": 0.5,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.5,
+          "criteria": [
+            {
+              "criterion": "Minimum-sufficient context under a token budget",
+              "pass": true
+            },
+            {
+              "criterion": "Provenance / confidence / citations",
+              "pass": false
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.5,
+          "hits": [
+            "README.md"
+          ],
+          "misses": [
+            "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+          ],
+          "forbidden_hits": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "DQ015",
+      "question": "How do confidence tiers (extracted, asserted, heuristic, precise) differ?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 779,
+        "quality_r1": 0.6667,
+        "quality_r2": 0.6667,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 0.6667,
+          "criteria": [
+            {
+              "criterion": "Distinguishes code-extracted vs doc-asserted",
+              "pass": true
+            },
+            {
+              "criterion": "Notes precise requires SCIP/LSP-class evidence",
+              "pass": true
+            },
+            {
+              "criterion": "Heuristic stays labeled",
+              "pass": false
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.6667,
+          "criteria": [
+            {
+              "criterion": "Distinguishes code-extracted vs doc-asserted",
+              "pass": true
+            },
+            {
+              "criterion": "Notes precise requires SCIP/LSP-class evidence",
+              "pass": true
+            },
+            {
+              "criterion": "Heuristic stays labeled",
+              "pass": false
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md",
+            "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 735,
+        "quality_r1": 1.0,
+        "quality_r2": 0.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.6667,
+          "criteria": [
+            {
+              "criterion": "Distinguishes code-extracted vs doc-asserted",
+              "pass": true
+            },
+            {
+              "criterion": "Notes precise requires SCIP/LSP-class evidence",
+              "pass": false
+            },
+            {
+              "criterion": "Heuristic stays labeled",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.0,
+          "hits": [],
+          "misses": [
+            "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md",
+            "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+          ],
+          "forbidden_hits": [],
+          "valid": false
+        }
+      }
+    },
+    {
+      "id": "DQ016",
+      "question": "When should an agent use impact vs neighbors vs repo_map?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": "budget_exceeded",
+        "tokens": null,
+        "quality_r1": 0.0,
+        "quality_r2": 0.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 0.0,
+          "criteria": [
+            {
+              "criterion": "impact for blast-radius / change analysis",
+              "pass": false
+            },
+            {
+              "criterion": "neighbors for 1-hop graph hops",
+              "pass": false
+            },
+            {
+              "criterion": "repo_map for orientation / communities",
+              "pass": false
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.0,
+          "criteria": [
+            {
+              "criterion": "impact for blast-radius / change analysis",
+              "pass": false
+            },
+            {
+              "criterion": "neighbors for 1-hop graph hops",
+              "pass": false
+            },
+            {
+              "criterion": "repo_map for orientation / communities",
+              "pass": false
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.0,
+          "hits": [],
+          "misses": [
+            "docs/architecture/MCP-TOOL-CATALOG.md",
+            "AGENTS.md"
+          ],
+          "forbidden_hits": [],
+          "valid": false
+        },
+        "answerable": false,
+        "n_fragments": 0,
+        "fragment_labels": []
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 1.0,
+        "quality_r2": 0.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.6667,
+          "criteria": [
+            {
+              "criterion": "impact for blast-radius / change analysis",
+              "pass": false
+            },
+            {
+              "criterion": "neighbors for 1-hop graph hops",
+              "pass": true
+            },
+            {
+              "criterion": "repo_map for orientation / communities",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.0,
+          "hits": [],
+          "misses": [
+            "docs/architecture/MCP-TOOL-CATALOG.md",
+            "AGENTS.md"
+          ],
+          "forbidden_hits": [],
+          "valid": false
+        }
+      }
+    },
+    {
+      "id": "DQ017",
+      "question": "What languages or extractors does Prism support at T1?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 783,
+        "quality_r1": 1.0,
+        "quality_r2": 0.5,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Names more than one language family (e.g. Python/TS/Rust/Go/Java or markdown)",
+              "pass": true
+            },
+            {
+              "criterion": "Notes unresolved edges are first-class",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.5,
+          "criteria": [
+            {
+              "criterion": "Names more than one language family (e.g. Python/TS/Rust/Go/Java or markdown)",
+              "pass": false
+            },
+            {
+              "criterion": "Notes unresolved edges are first-class",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.5,
+          "hits": [
+            "README.md"
+          ],
+          "misses": [
+            "docs/contributing/plugin-guide.md"
+          ],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": false,
+        "n_fragments": 5,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:sig:unresolved:T1:0",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 1452,
+        "quality_r1": 1.0,
+        "quality_r2": 0.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Names more than one language family (e.g. Python/TS/Rust/Go/Java or markdown)",
+              "pass": true
+            },
+            {
+              "criterion": "Notes unresolved edges are first-class",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.0,
+          "hits": [],
+          "misses": [
+            "README.md",
+            "docs/contributing/plugin-guide.md"
+          ],
+          "forbidden_hits": [],
+          "valid": false
+        }
+      }
+    },
+    {
+      "id": "DQ018",
+      "question": "Why is Prism local-first and what does that imply for API keys?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 779,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Indexing does not require an API key",
+              "pass": true
+            },
+            {
+              "criterion": "Works offline / local SQLite index",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Indexing does not require an API key",
+              "pass": true
+            },
+            {
+              "criterion": "Works offline / local SQLite index",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "README.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 1.0,
+        "quality_r2": 0.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Indexing does not require an API key",
+              "pass": true
+            },
+            {
+              "criterion": "Works offline / local SQLite index",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.0,
+          "hits": [],
+          "misses": [
+            "README.md"
+          ],
+          "forbidden_hits": [],
+          "valid": false
+        }
+      }
+    },
+    {
+      "id": "DQ019",
+      "question": "How do host adapters register Prism for Cursor vs VS Code vs Claude?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 779,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions prism host install",
+              "pass": true
+            },
+            {
+              "criterion": "Names at least two host targets",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions mcp.json or CLAUDE.md",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions prism host install",
+              "pass": true
+            },
+            {
+              "criterion": "Names at least two host targets",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions mcp.json or CLAUDE.md",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "README.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions prism host install",
+              "pass": true
+            },
+            {
+              "criterion": "Names at least two host targets",
+              "pass": true
+            },
+            {
+              "criterion": "Mentions mcp.json or CLAUDE.md",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "README.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "DQ020",
+      "question": "What is Phase 12 Accuracy & Grounding trying to fix?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 787,
+        "quality_r1": 1.0,
+        "quality_r2": 0.6667,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Doc/narrative evidence missing or placeholder packs",
+              "pass": true
+            },
+            {
+              "criterion": "Honest gaps instead of synthetic fragments",
+              "pass": true
+            },
+            {
+              "criterion": "Five-arm / Graphify comparison",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.6667,
+          "criteria": [
+            {
+              "criterion": "Doc/narrative evidence missing or placeholder packs",
+              "pass": true
+            },
+            {
+              "criterion": "Honest gaps instead of synthetic fragments",
+              "pass": false
+            },
+            {
+              "criterion": "Five-arm / Graphify comparison",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.5,
+          "hits": [
+            "docs/REPO-FEATURE-SUMMARY-AND-TOKEN-COMPARISON.md"
+          ],
+          "misses": [
+            "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+          ],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/REPO-FEATURE-SUMMARY-AND-TOKEN-COMPARISON.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/eval/P12-ADJUDICATION-PROTOCOL.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 0.6667,
+        "quality_r2": 0.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.6667,
+          "criteria": [
+            {
+              "criterion": "Doc/narrative evidence missing or placeholder packs",
+              "pass": true
+            },
+            {
+              "criterion": "Honest gaps instead of synthetic fragments",
+              "pass": false
+            },
+            {
+              "criterion": "Five-arm / Graphify comparison",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.0,
+          "hits": [],
+          "misses": [
+            "docs/planning/PLANNING-AND-IMPLEMENTATION.md",
+            "docs/REPO-FEATURE-SUMMARY-AND-TOKEN-COMPARISON.md"
+          ],
+          "forbidden_hits": [],
+          "valid": false
+        }
+      }
+    },
+    {
+      "id": "DQ021",
+      "question": "What refusal codes can Prism return and what repair does each suggest?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 770,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Lists at least three of SCOPE_UNRESOLVED, BUDGET_EXCEEDED, INDEX_UNAVAILABLE, PRECISION_REQUIRED, VIEW_TOO_LARGE",
+              "pass": true
+            },
+            {
+              "criterion": "Gives a next action for one of them",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Lists at least three of SCOPE_UNRESOLVED, BUDGET_EXCEEDED, INDEX_UNAVAILABLE, PRECISION_REQUIRED, VIEW_TOO_LARGE",
+              "pass": true
+            },
+            {
+              "criterion": "Gives a next action for one of them",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "AGENTS.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/AGENT-USAGE.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 212,
+        "quality_r1": 1.0,
+        "quality_r2": 0.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.5,
+          "criteria": [
+            {
+              "criterion": "Lists at least three of SCOPE_UNRESOLVED, BUDGET_EXCEEDED, INDEX_UNAVAILABLE, PRECISION_REQUIRED, VIEW_TOO_LARGE",
+              "pass": false
+            },
+            {
+              "criterion": "Gives a next action for one of them",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.0,
+          "hits": [],
+          "misses": [
+            "AGENTS.md"
+          ],
+          "forbidden_hits": [],
+          "valid": false
+        }
+      }
+    },
+    {
+      "id": "DQ022",
+      "question": "How does Prism help debug a crash with a stack trace?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 779,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions debug workflow or compile_context with error/stack",
+              "pass": true
+            },
+            {
+              "criterion": "Error/stack criterion never dropped under budget",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions debug workflow or compile_context with error/stack",
+              "pass": true
+            },
+            {
+              "criterion": "Error/stack criterion never dropped under budget",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "AGENTS.md",
+            "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 1.0,
+        "quality_r2": 0.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions debug workflow or compile_context with error/stack",
+              "pass": true
+            },
+            {
+              "criterion": "Error/stack criterion never dropped under budget",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.0,
+          "hits": [],
+          "misses": [
+            "AGENTS.md",
+            "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+          ],
+          "forbidden_hits": [],
+          "valid": false
+        }
+      }
+    },
+    {
+      "id": "DQ023",
+      "question": "Is team shared-index / certified answer cache part of the solo product today?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 779,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "States P10/team features are deferred or optional",
+              "pass": true
+            },
+            {
+              "criterion": "Solo mode does not require always-on shared graph DB",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "States P10/team features are deferred or optional",
+              "pass": true
+            },
+            {
+              "criterion": "Solo mode does not require always-on shared graph DB",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "docs/planning/PLANNING-AND-IMPLEMENTATION.md",
+            "README.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 1.0,
+        "quality_r2": 0.5,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.5,
+          "criteria": [
+            {
+              "criterion": "States P10/team features are deferred or optional",
+              "pass": false
+            },
+            {
+              "criterion": "Solo mode does not require always-on shared graph DB",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "docs/planning/PLANNING-AND-IMPLEMENTATION.md",
+            "README.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "DQ024",
+      "question": "What path classes must not appear in Evidence Packs unless the question anchors there?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 779,
+        "quality_r1": 1.0,
+        "quality_r2": 0.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "Mentions fixtures and/or vendored/generated",
+              "pass": true
+            },
+            {
+              "criterion": "ACC-6 or first-party scoping policy",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.0,
+          "criteria": [
+            {
+              "criterion": "Mentions fixtures and/or vendored/generated",
+              "pass": false
+            },
+            {
+              "criterion": "ACC-6 or first-party scoping policy",
+              "pass": false
+            }
+          ]
+        },
+        "citation": {
+          "rate": 1.0,
+          "hits": [
+            "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+          ],
+          "misses": [],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": false,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 0.5,
+        "quality_r2": 0.0,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.0,
+          "criteria": [
+            {
+              "criterion": "Mentions fixtures and/or vendored/generated",
+              "pass": false
+            },
+            {
+              "criterion": "ACC-6 or first-party scoping policy",
+              "pass": false
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.0,
+          "hits": [],
+          "misses": [
+            "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+          ],
+          "forbidden_hits": [],
+          "valid": false
+        }
+      }
+    },
+    {
+      "id": "DQ025",
+      "question": "How does Prism claim to reduce tokens vs explore-style agent loops?",
+      "intent": "architecture",
+      "prism": {
+        "refusal": null,
+        "tokens": 770,
+        "quality_r1": 1.0,
+        "quality_r2": 1.0,
+        "judge_r1": {
+          "pass_id": "R1",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "compile_context / Evidence Pack vs many greps/reads",
+              "pass": true
+            },
+            {
+              "criterion": "Reports measured or targeted reduction factors honestly",
+              "pass": true
+            }
+          ]
+        },
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 1.0,
+          "criteria": [
+            {
+              "criterion": "compile_context / Evidence Pack vs many greps/reads",
+              "pass": true
+            },
+            {
+              "criterion": "Reports measured or targeted reduction factors honestly",
+              "pass": true
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.3333,
+          "hits": [
+            "README.md"
+          ],
+          "misses": [
+            "docs/REPO-FEATURE-SUMMARY-AND-TOKEN-COMPARISON.md",
+            "docs/eval/PUBLIC-BENCHMARK-REPORT.md"
+          ],
+          "forbidden_hits": [],
+          "valid": true
+        },
+        "answerable": true,
+        "n_fragments": 4,
+        "fragment_labels": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:2",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/AGENT-USAGE.md:3",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "r1": "necessary",
+            "r2": "necessary",
+            "label": "necessary"
+          }
+        ]
+      },
+      "graphify": {
+        "ok": true,
+        "tokens": 2000,
+        "quality_r1": 1.0,
+        "quality_r2": 0.5,
+        "judge_r2": {
+          "pass_id": "R2",
+          "quality": 0.5,
+          "criteria": [
+            {
+              "criterion": "compile_context / Evidence Pack vs many greps/reads",
+              "pass": true
+            },
+            {
+              "criterion": "Reports measured or targeted reduction factors honestly",
+              "pass": false
+            }
+          ]
+        },
+        "citation": {
+          "rate": 0.3333,
+          "hits": [
+            "docs/eval/PUBLIC-BENCHMARK-REPORT.md"
+          ],
+          "misses": [
+            "README.md",
+            "docs/REPO-FEATURE-SUMMARY-AND-TOKEN-COMPARISON.md"
+          ],
+          "forbidden_hits": [],
+          "valid": true
+        }
+      }
+    }
+  ],
+  "acc1": {
+    "n": 25,
+    "answerable": 20,
+    "answerable_rate": 0.8,
+    "mean_quality": 0.7733,
+    "pass": true
+  },
+  "acc4": {
+    "n": 20,
+    "accepted": 19,
+    "acceptance_rate": 0.95,
+    "samples": [
+      {
+        "id": "CL001",
+        "community_id": "comm:louvain:79",
+        "auto_label": "architecture",
+        "path_prefix": "docs/architecture/",
+        "file_count": 21,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "architecture",
+        "decision": "accept"
+      },
+      {
+        "id": "CL002",
+        "community_id": "comm:louvain:87",
+        "auto_label": "scorecards",
+        "path_prefix": "eval/scorecards/",
+        "file_count": 11,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "scorecards",
+        "decision": "accept"
+      },
+      {
+        "id": "CL003",
+        "community_id": "comm:louvain:6",
+        "auto_label": "prism-compile",
+        "path_prefix": "crates/prism-compile/",
+        "file_count": 9,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "prism-compile",
+        "decision": "accept"
+      },
+      {
+        "id": "CL004",
+        "community_id": "comm:louvain:19",
+        "auto_label": "prism-semantic",
+        "path_prefix": "crates/prism-semantic/",
+        "file_count": 9,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "prism-semantic",
+        "decision": "accept"
+      },
+      {
+        "id": "CL005",
+        "community_id": "comm:louvain:18",
+        "auto_label": "prism-precise",
+        "path_prefix": "crates/prism-precise/",
+        "file_count": 8,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "prism-precise",
+        "decision": "accept"
+      },
+      {
+        "id": "CL006",
+        "community_id": "comm:louvain:2",
+        "auto_label": "prism-agent",
+        "path_prefix": "crates/prism-agent/",
+        "file_count": 7,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "prism-agent",
+        "decision": "accept"
+      },
+      {
+        "id": "CL007",
+        "community_id": "comm:louvain:20",
+        "auto_label": "prism-store",
+        "path_prefix": "crates/prism-store/",
+        "file_count": 7,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "prism-store",
+        "decision": "accept"
+      },
+      {
+        "id": "CL008",
+        "community_id": "comm:louvain:21",
+        "auto_label": "prism-view",
+        "path_prefix": "crates/prism-view/",
+        "file_count": 7,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "prism-view",
+        "decision": "accept"
+      },
+      {
+        "id": "CL009",
+        "community_id": "comm:louvain:84",
+        "auto_label": "baselines",
+        "path_prefix": "eval/baselines/",
+        "file_count": 6,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "baselines",
+        "decision": "accept"
+      },
+      {
+        "id": "CL010",
+        "community_id": "comm:louvain:81",
+        "auto_label": "eval",
+        "path_prefix": "docs/eval/",
+        "file_count": 6,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "eval",
+        "decision": "accept"
+      },
+      {
+        "id": "CL011",
+        "community_id": "comm:louvain:3",
+        "auto_label": "prism-api",
+        "path_prefix": "crates/prism-api/",
+        "file_count": 6,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "prism-api",
+        "decision": "accept"
+      },
+      {
+        "id": "CL012",
+        "community_id": "comm:louvain:7",
+        "auto_label": "prism-core",
+        "path_prefix": "crates/prism-core/",
+        "file_count": 5,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "prism-core",
+        "decision": "accept"
+      },
+      {
+        "id": "CL013",
+        "community_id": "comm:louvain:13",
+        "auto_label": "prism-ir",
+        "path_prefix": "crates/prism-ir/",
+        "file_count": 5,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "prism-ir",
+        "decision": "accept"
+      },
+      {
+        "id": "CL014",
+        "community_id": "comm:louvain:15",
+        "auto_label": "prism-mcp",
+        "path_prefix": "crates/prism-mcp/",
+        "file_count": 5,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "prism-mcp",
+        "decision": "accept"
+      },
+      {
+        "id": "CL015",
+        "community_id": "comm:louvain:17",
+        "auto_label": "prism-plan",
+        "path_prefix": "crates/prism-plan/",
+        "file_count": 5,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "prism-plan",
+        "decision": "accept"
+      },
+      {
+        "id": "CL016",
+        "community_id": "comm:louvain:89",
+        "auto_label": "languages",
+        "path_prefix": "fixtures/languages/",
+        "file_count": 4,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "languages",
+        "decision": "accept"
+      },
+      {
+        "id": "CL017",
+        "community_id": "comm:louvain:5",
+        "auto_label": "prism-cli",
+        "path_prefix": "crates/prism-cli/",
+        "file_count": 4,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "prism-cli",
+        "decision": "accept"
+      },
+      {
+        "id": "CL018",
+        "community_id": "comm:louvain:0",
+        "auto_label": ".",
+        "path_prefix": "./",
+        "file_count": 3,
+        "r1": "reject",
+        "r2": "reject",
+        "final_label": "revise:.",
+        "decision": "reject"
+      },
+      {
+        "id": "CL019",
+        "community_id": "comm:louvain:96",
+        "auto_label": "plugins",
+        "path_prefix": "schemas/plugins/",
+        "file_count": 3,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "plugins",
+        "decision": "accept"
+      },
+      {
+        "id": "CL020",
+        "community_id": "comm:louvain:92",
+        "auto_label": "precise",
+        "path_prefix": "fixtures/precise/",
+        "file_count": 3,
+        "r1": "accept",
+        "r2": "accept",
+        "final_label": "precise",
+        "decision": "accept"
+      }
+    ],
+    "pass": true
+  },
+  "acc5": {
+    "claim": "quality(Prism) >= quality(Graphify)-2pts AND tokens(Prism) <= 0.5 * tokens(Graphify)",
+    "quality_delta_pts": 43.3,
+    "token_ratio": 0.461,
+    "prism_quality_mean": 0.7733,
+    "graphify_quality_mean": 0.34,
+    "prism_tokens_mean": 752.4,
+    "graphify_tokens_mean": 1632.5,
+    "status": "PASS"
+  },
+  "acc7": {
+    "n_packs": 20,
+    "n_fragments": 95,
+    "precision": 0.9895,
+    "cohen_kappa": 1.0,
+    "pass": true
+  },
+  "already_closed": {
+    "ACC-2": "PASS (invariant)",
+    "ACC-3": "PASS (seed-grounding sample)",
+    "ACC-6": "PASS (path-class)"
+  },
+  "five_arm": {
+    "arms": [
+      {
+        "arm": "A",
+        "protocol": "explore",
+        "tokens_mean": 18000,
+        "quality_mean": 0.7,
+        "citation_mean": 0.55,
+        "notes": "scripted explore placeholder (unchanged)"
+      },
+      {
+        "arm": "B",
+        "protocol": "explore",
+        "tokens_mean": 12000,
+        "quality_mean": 0.62,
+        "citation_mean": 0.5,
+        "notes": "scripted explore placeholder (unchanged)"
+      },
+      {
+        "arm": "C",
+        "protocol": "prism",
+        "tokens_mean": 752.4,
+        "quality_mean": 0.7733,
+        "citation_mean": 0.7533,
+        "notes": "live-judged Doc-QA"
+      },
+      {
+        "arm": "D",
+        "protocol": "prism",
+        "tokens_mean": 902.9,
+        "quality_mean": 0.7933,
+        "citation_mean": 0.7533,
+        "notes": "frontier+prism estimated from C (+budget headroom)"
+      },
+      {
+        "arm": "E",
+        "protocol": "graphify",
+        "tokens_mean": 1632.5,
+        "quality_mean": 0.34,
+        "citation_mean": 0.3533,
+        "notes": "live graphify query --budget 2000 on pinned graphify-out"
+      }
+    ]
+  },
+  "gate": {
+    "status": "PASS",
+    "notes": "All live ACC targets met"
+  }
+}

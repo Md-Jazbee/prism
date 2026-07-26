@@ -11,7 +11,7 @@
   ],
   "necessary_spans": [
     "README.md",
-    "docs/PRODUCT-SETUP.md"
+    "docs/architecture/PRODUCT-SETUP.md"
   ],
   "forbidden_sources": [
     "fixtures/repos/"

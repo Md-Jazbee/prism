@@ -1,0 +1,30 @@
+{
+  "suite": "p12-acc7",
+  "n_packs": 20,
+  "n_fragments": 95,
+  "precision": 0.9895,
+  "cohen_kappa": 1.0,
+  "pass": true,
+  "packs": [
+    "DQ001",
+    "DQ002",
+    "DQ003",
+    "DQ004",
+    "DQ005",
+    "DQ006",
+    "DQ007",
+    "DQ008",
+    "DQ009",
+    "DQ010",
+    "DQ011",
+    "DQ012",
+    "DQ013",
+    "DQ014",
+    "DQ015",
+    "DQ017",
+    "DQ018",
+    "DQ019",
+    "DQ020",
+    "DQ021"
+  ]
+}

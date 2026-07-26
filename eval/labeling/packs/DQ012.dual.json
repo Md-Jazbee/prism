@@ -1,0 +1,72 @@
+{
+  "task_id": "DQ012",
+  "plan_id": "live:architecture",
+  "pack_schema": "0.0.1",
+  "reviewers": [
+    "R1-agent-rubric",
+    "R2-agent-rubric-strict"
+  ],
+  "fragments": [
+    {
+      "fragment_id": "frag:doc:doc:README.md:1",
+      "r1": "necessary",
+      "r2": "necessary",
+      "label": "necessary"
+    },
+    {
+      "fragment_id": "frag:kg:def:sym:crates/prism-compile/src/lib.rs:function:compile_context:1655:0",
+      "r1": "necessary",
+      "r2": "necessary",
+      "label": "necessary"
+    },
+    {
+      "fragment_id": "frag:kg:nbr:sym:crates/prism-api/src/routes.rs:function:context_compile:5203:0",
+      "r1": "necessary",
+      "r2": "necessary",
+      "label": "necessary"
+    },
+    {
+      "fragment_id": "frag:kg:nbr:sym:crates/prism-cli/src/main.rs:function:main:18553:1",
+      "r1": "necessary",
+      "r2": "necessary",
+      "label": "necessary"
+    },
+    {
+      "fragment_id": "frag:kg:nbr:sym:crates/prism-lsp/src/server.rs:function:execute_command:7932:2",
+      "r1": "necessary",
+      "r2": "necessary",
+      "label": "necessary"
+    },
+    {
+      "fragment_id": "frag:kg:nbr:sym:crates/prism-lsp/src/server.rs:function:hover:3809:3",
+      "r1": "necessary",
+      "r2": "necessary",
+      "label": "necessary"
+    },
+    {
+      "fragment_id": "frag:kg:repo_map",
+      "r1": "necessary",
+      "r2": "necessary",
+      "label": "necessary"
+    },
+    {
+      "fragment_id": "frag:kg:sig:sym:crates/prism-compile/src/lib.rs:function:compile_context:1655:0",
+      "r1": "necessary",
+      "r2": "necessary",
+      "label": "necessary"
+    },
+    {
+      "fragment_id": "frag:kg:sig:unresolved:SCOPE_UNRESOLVED:0",
+      "r1": "necessary",
+      "r2": "necessary",
+      "label": "necessary"
+    },
+    {
+      "fragment_id": "frag:kg:sig:unresolved:compile_context:1",
+      "r1": "necessary",
+      "r2": "necessary",
+      "label": "necessary"
+    }
+  ],
+  "precision": 1.0
+}

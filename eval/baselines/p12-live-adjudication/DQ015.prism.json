@@ -1,0 +1,303 @@
+{
+  "task": "DQ015",
+  "pack": {
+    "status": "ok",
+    "data": {
+      "meta": {
+        "intent": "architecture",
+        "budget_tokens": 850,
+        "tokens_used": 779,
+        "question": "How do confidence tiers (extracted, asserted, heuristic, precise) differ?",
+        "plan_id": "plan:architecture:eb4cc2b822077d0b",
+        "schema_version": "0.0.1"
+      },
+      "hierarchy": {
+        "l_arch": [
+          "frag:doc:doc:README.md:1",
+          "frag:kg:repo_map"
+        ],
+        "l_core": [
+          "frag:doc:doc:AGENTS.md:3",
+          "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:2"
+        ]
+      },
+      "fragments": [
+        {
+          "id": "frag:doc:doc:AGENTS.md:3",
+          "kind": "slice",
+          "layer": "core",
+          "text": "# AGENTS.md \u2014 Prism guidance (generated) (AGENTS.md)\n<!-- prism:generated from schemas/agent-workflow/v1 \u2014 regenerate via `prism agent generate-assets` -->\n# AGENTS.md \u2014 Prism guidance (generated)\n\n> Prefer `compile_context` (or a named workflow) before explore loops.\n\n## Primary path\n\n1. Call **compile_context** or `prism workflow run <id>`.\n2. Answer from Evidence Pack citations; inspect gaps / EXPLAIN drops.\n3. Use micro-tools only for targeted follow-ups.\n\n## Ensure install (P11)\n\nIf `prism` is missing from PATH, install before exploring the repo. **Do not ask for an API key** for core indexing \u2014 local-first.\n\n1. macOS/Linux: `curl -fsSL \"https://raw.githubusercontent.com/${PRISM_GITHUB_REPO:-example/prism}/main/scripts/install.sh\" | bash`",
+          "token_estimate": 191,
+          "provenance": {
+            "node_ids": [
+              "doc:AGENTS.md"
+            ],
+            "analyzer": "prism-extract-markdown",
+            "tier": "T1"
+          },
+          "confidence": "asserted",
+          "why_included": "architecture_prose",
+          "drop_priority": 23,
+          "roles": [
+            "architecture_prose"
+          ],
+          "must_include": false
+        },
+        {
+          "id": "frag:doc:doc:README.md:1",
+          "kind": "slice",
+          "layer": "arch",
+          "text": "# Prism \u2014 Repository Intelligence Platform (README.md)\n# Prism \u2014 Repository Intelligence Platform\n\nOpen-source **developer intelligence** that understands a repository *before* an LLM sees it.\n\nPrism indexes your codebase into a knowledge graph, then compiles **Evidence Packs** \u2014 minimum-sufficient, provenance-bearing context under a token budget \u2014 so agents call `compile_context` once instead of grepping their way through your repo. Local-first: indexing never requires a network or an API key.\n\n**Phase:** 11 \u2014 Install & Distribution (Stage A+B complete; cold-VM gate pending first public release). P0\u2013P7 + P9 gated \u00b7 P8 cut ([ADR-0007](docs/architecture/adr/0007-extension-cut-cli-mcp.md)) \u00b7 P10 deferred.\n\n---\n\n## Install\n\nNo Rust toolchain requir",
+          "token_estimate": 193,
+          "provenance": {
+            "node_ids": [
+              "doc:README.md"
+            ],
+            "analyzer": "prism-extract-markdown",
+            "tier": "T1"
+          },
+          "confidence": "asserted",
+          "why_included": "product_thesis",
+          "drop_priority": 0,
+          "roles": [
+            "product_thesis"
+          ],
+          "must_include": true
+        },
+        {
+          "id": "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:2",
+          "kind": "slice",
+          "layer": "core",
+          "text": "# Architecture Design Document (ADD) (docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)\n# Architecture Design Document (ADD)\n\n**Project working name:** Prism \u2014 Repository Intelligence Platform  \n**Document type:** Primary Architecture Design Document  \n**Status:** Research-backed design (no implementation)  \n**Date:** 2026-07-18  \n**Audience:** Architects, implementers, researchers, open-source contributors  \n\n**Related planning:** [`docs/planning/PLANNING-AND-IMPLEMENTATION.md`](../planning/PLANNING-AND-IMPLEMENTATION.md) \u2014 phase/stage execution plan (entry/exit criteria, deliverables, gates). Prior AOE gateway / cache-first notes are superseded where they conflict. This ADD re-centers the product on **pre-LLM repository understanding**. Caching remains an optional optimizatio",
+          "token_estimate": 199,
+          "provenance": {
+            "node_ids": [
+              "doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+            ],
+            "analyzer": "prism-extract-markdown",
+            "tier": "T1"
+          },
+          "confidence": "asserted",
+          "why_included": "architecture_prose",
+          "drop_priority": 22,
+          "roles": [
+            "architecture_prose"
+          ],
+          "must_include": false
+        },
+        {
+          "id": "frag:kg:repo_map",
+          "kind": "community",
+          "layer": "arch",
+          "text": "algorithm=louvain_v1+resolved_degree_hubs communities=40 hubs=10 bridges=0 entrypoints=8\n  community comm:louvain:79 files\u224821 label=architecture\n  community comm:louvain:87 files\u224811 label=scorecards\n  community comm:louvain:6 files\u22489 label=prism-compile\n  community comm:louvain:19 files\u22489 label=prism-semantic\n  community comm:louvain:18 files\u22488 label=prism-precise\n  hub sym:crates/prism-cli/src/main.rs:function:main:18553 degree=298\n  hub sym:crates/prism-compile/src/select.rs:function:select_from_kg:3940 degree=223\n  hub sym:crates/prism-extract-markdown/src/lib.rs:function:extract:1230 degree=156\n  entry crates/prism-cli/src/hook.rs (path_or_name:cli)\n  entry crates/prism-cli/src/host.rs (path_or_name:cli)\n  entry crates/prism-cli/src/main.rs (path:main_module)",
+          "token_estimate": 196,
+          "provenance": {
+            "node_ids": [
+              "comm:louvain:79",
+              "comm:louvain:87",
+              "comm:louvain:6",
+              "comm:louvain:19",
+              "comm:louvain:18",
+              "sym:crates/prism-cli/src/main.rs:function:main:18553",
+              "sym:crates/prism-compile/src/select.rs:function:select_from_kg:3940",
+              "sym:crates/prism-extract-markdown/src/lib.rs:function:extract:1230"
+            ],
+            "analyzer": "prism-store",
+            "tier": "T1"
+          },
+          "confidence": "heuristic",
+          "why_included": "community_map",
+          "drop_priority": 0,
+          "roles": [
+            "community_map",
+            "hub_nodes"
+          ],
+          "must_include": true
+        }
+      ],
+      "citations": [
+        {
+          "id": "C1",
+          "fragment_id": "frag:doc:doc:AGENTS.md:3",
+          "node_ids": [
+            "doc:AGENTS.md"
+          ]
+        },
+        {
+          "id": "C2",
+          "fragment_id": "frag:doc:doc:README.md:1",
+          "node_ids": [
+            "doc:README.md"
+          ]
+        },
+        {
+          "id": "C3",
+          "fragment_id": "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:2",
+          "node_ids": [
+            "doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md"
+          ]
+        },
+        {
+          "id": "C4",
+          "fragment_id": "frag:kg:repo_map",
+          "node_ids": [
+            "comm:louvain:79",
+            "comm:louvain:87",
+            "comm:louvain:6",
+            "comm:louvain:19",
+            "comm:louvain:18",
+            "sym:crates/prism-cli/src/main.rs:function:main:18553",
+            "sym:crates/prism-compile/src/select.rs:function:select_from_kg:3940",
+            "sym:crates/prism-extract-markdown/src/lib.rs:function:extract:1230"
+          ]
+        }
+      ],
+      "gaps": [],
+      "drops": [
+        {
+          "fragment_id": "frag:doc:doc:docs/architecture/PRODUCT-SETUP.md:4",
+          "reason": "budget_pressure: drop_priority=24 (ADD \u00a718.1 / plan drop_order)",
+          "drop_priority": 24,
+          "token_estimate": 200
+        }
+      ],
+      "explain": {
+        "plan_id": "plan:architecture:eb4cc2b822077d0b",
+        "budget_tokens": 850,
+        "tokens_used": 779,
+        "must_include_ok": true,
+        "fragments": [
+          {
+            "fragment_id": "frag:doc:doc:AGENTS.md:3",
+            "why_included": "architecture_prose",
+            "token_estimate": 191,
+            "must_include": false,
+            "kept": true
+          },
+          {
+            "fragment_id": "frag:doc:doc:README.md:1",
+            "why_included": "product_thesis",
+            "token_estimate": 193,
+            "must_include": true,
+            "kept": true
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:2",
+            "why_included": "architecture_prose",
+            "token_estimate": 199,
+            "must_include": false,
+            "kept": true
+          },
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/PRODUCT-SETUP.md:4",
+            "why_included": "architecture_prose",
+            "token_estimate": 200,
+            "must_include": false,
+            "kept": false
+          },
+          {
+            "fragment_id": "frag:kg:repo_map",
+            "why_included": "community_map",
+            "token_estimate": 196,
+            "must_include": true,
+            "kept": true
+          }
+        ],
+        "drops": [
+          {
+            "fragment_id": "frag:doc:doc:docs/architecture/PRODUCT-SETUP.md:4",
+            "reason": "budget_pressure: drop_priority=24 (ADD \u00a718.1 / plan drop_order)",
+            "drop_priority": 24,
+            "token_estimate": 200
+          }
+        ],
+        "notes": [
+          "must-include fragments cannot be budget-evicted",
+          "error/stack + criterion slice never dropped under budget pressure",
+          "extractive default; no abstractive code summaries",
+          "P12: unfilled roles become gaps[], never placeholder fragments"
+        ]
+      }
+    }
+  },
+  "judge": {
+    "refusal": null,
+    "tokens": 779,
+    "quality_r1": 0.6667,
+    "quality_r2": 0.6667,
+    "judge_r1": {
+      "pass_id": "R1",
+      "quality": 0.6667,
+      "criteria": [
+        {
+          "criterion": "Distinguishes code-extracted vs doc-asserted",
+          "pass": true
+        },
+        {
+          "criterion": "Notes precise requires SCIP/LSP-class evidence",
+          "pass": true
+        },
+        {
+          "criterion": "Heuristic stays labeled",
+          "pass": false
+        }
+      ]
+    },
+    "judge_r2": {
+      "pass_id": "R2",
+      "quality": 0.6667,
+      "criteria": [
+        {
+          "criterion": "Distinguishes code-extracted vs doc-asserted",
+          "pass": true
+        },
+        {
+          "criterion": "Notes precise requires SCIP/LSP-class evidence",
+          "pass": true
+        },
+        {
+          "criterion": "Heuristic stays labeled",
+          "pass": false
+        }
+      ]
+    },
+    "citation": {
+      "rate": 1.0,
+      "hits": [
+        "docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md",
+        "docs/planning/PLANNING-AND-IMPLEMENTATION.md"
+      ],
+      "misses": [],
+      "forbidden_hits": [],
+      "valid": true
+    },
+    "answerable": true,
+    "n_fragments": 4,
+    "fragment_labels": [
+      {
+        "fragment_id": "frag:doc:doc:AGENTS.md:3",
+        "r1": "necessary",
+        "r2": "necessary",
+        "label": "necessary"
+      },
+      {
+        "fragment_id": "frag:doc:doc:README.md:1",
+        "r1": "necessary",
+        "r2": "necessary",
+        "label": "necessary"
+      },
+      {
+        "fragment_id": "frag:doc:doc:docs/architecture/ARCHITECTURE-DESIGN-DOCUMENT.md:2",
+        "r1": "necessary",
+        "r2": "necessary",
+        "label": "necessary"
+      },
+      {
+        "fragment_id": "frag:kg:repo_map",
+        "r1": "necessary",
+        "r2": "necessary",
+        "label": "necessary"
+      }
+    ]
+  }
+}

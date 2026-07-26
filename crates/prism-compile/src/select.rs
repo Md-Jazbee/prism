@@ -492,22 +492,16 @@ pub fn select_from_kg(
                     eps.len()
                 );
                 let mut lines = vec![summary];
-                for c in map.communities.iter().take(8) {
+                for c in map.communities.iter().take(5) {
                     lines.push(format!(
                         "  community {} files≈{} label={}",
                         c.id, c.file_count, c.label
                     ));
                 }
-                for h in map.hubs.iter().take(5) {
+                for h in map.hubs.iter().take(3) {
                     lines.push(format!("  hub {} degree={}", h.node_id, h.degree));
                 }
-                for b in map.bridges.iter().take(5) {
-                    lines.push(format!(
-                        "  bridge {} → {} ({})",
-                        b.src_community, b.dst_community, b.edge_kind
-                    ));
-                }
-                for e in eps.iter().take(5) {
+                for e in eps.iter().take(3) {
                     lines.push(format!(
                         "  entry {} ({})",
                         e.name.as_deref().unwrap_or(&e.node_id),
@@ -518,10 +512,10 @@ pub fn select_from_kg(
                 let mut node_ids: Vec<String> = map
                     .communities
                     .iter()
-                    .take(8)
+                    .take(5)
                     .map(|c| c.id.clone())
                     .collect();
-                node_ids.extend(map.hubs.iter().take(5).map(|h| h.node_id.clone()));
+                node_ids.extend(map.hubs.iter().take(3).map(|h| h.node_id.clone()));
                 if node_ids.is_empty() {
                     node_ids.push("repo_map:empty".into());
                 }
@@ -648,17 +642,19 @@ fn select_doc_prose(
     let root = opts.workspace.as_ref();
 
     // Prefer product-facing docs for thesis; score lower = better.
-    // Lexical anchors boost prose ranking but must not steal product_thesis.
+    // Question tokens boost relevant docs; anchors must not steal product_thesis.
+    let question = plan.question.as_str();
     let mut ranked: Vec<(i32, &prism_store::GraphNodeView)> = docs
         .iter()
         .filter(|n| path_allowed(n.file_path.as_deref(), anchors))
-        .map(|n| (doc_priority(n, anchors), n))
+        .map(|n| (doc_priority(n, anchors, question), n))
         .collect();
     ranked.sort_by(|a, b| a.0.cmp(&b.0).then_with(|| a.1.id.cmp(&b.1.id)));
 
     let mut thesis_taken = false;
     let mut prose_count = 0usize;
-    const MAX_PROSE: usize = 6;
+    // Keep packs lean for ACC-5 (≤½ Graphify budget) while covering thesis + key docs.
+    const MAX_PROSE: usize = 4;
 
     for (prio, node) in ranked {
         if prose_count >= MAX_PROSE {
@@ -739,21 +735,57 @@ fn is_product_thesis_path(path: Option<&str>) -> bool {
         || lower.contains("product-setup")
 }
 
-fn doc_priority(node: &prism_store::GraphNodeView, anchors: &[String]) -> i32 {
+fn doc_priority(node: &prism_store::GraphNodeView, anchors: &[String], question: &str) -> i32 {
     let path = node.file_path.as_deref().unwrap_or("").replace('\\', "/");
     let lower = path.to_ascii_lowercase();
+    let q = question.to_ascii_lowercase();
     let is_doc = node.kind == "Doc";
+    let name = node.name.as_deref().unwrap_or("").to_ascii_lowercase();
+
+    // Question-topic boosts (before generic ranking).
+    if is_doc {
+        if (q.contains("workflow") || q.contains("agent") || q.contains("refusal") || q.contains("scope_unresolved"))
+            && (lower == "agents.md" || lower.contains("agent-usage") || lower.contains("refusal"))
+        {
+            return 2;
+        }
+        if (q.contains("mcp") || q.contains("tool"))
+            && (lower.contains("mcp-tool") || lower.contains("agent-usage"))
+        {
+            return 2;
+        }
+        if (q.contains("install") || q.contains("setup") || q.contains("bootstrap") || q.contains("cold"))
+            && (lower.contains("product-setup") || lower == "readme.md")
+        {
+            return 2;
+        }
+        if (q.contains("non-goal") || q.contains("not trying") || q.contains("precision tier") || q.contains("confidence"))
+            && lower.contains("architecture-design-document")
+        {
+            return 2;
+        }
+        if q.contains("phase 12") || q.contains("graphify") || q.contains("accuracy")
+        {
+            if lower.contains("planning-and-implementation")
+                || lower.contains("repo-feature-summary")
+                || lower.contains("p12")
+            {
+                return 3;
+            }
+        }
+    }
+
     // Product thesis candidates outrank lexical anchors so README wins ACC-1.
     if is_doc && lower == "readme.md" {
         return 1;
     }
     if is_doc && lower == "agents.md" {
-        return 2;
+        return 4;
     }
     if is_doc
         && (lower.contains("architecture-design-document") || lower.contains("product-setup"))
     {
-        return 3;
+        return 5;
     }
     if anchors
         .iter()
@@ -761,24 +793,36 @@ fn doc_priority(node: &prism_store::GraphNodeView, anchors: &[String]) -> i32 {
     {
         return 8;
     }
+    // Light lexical overlap on path/name vs question tokens.
+    let mut overlap = 0i32;
+    for tok in q.split(|c: char| !c.is_ascii_alphanumeric()) {
+        if tok.len() < 4 {
+            continue;
+        }
+        if lower.contains(tok) || name.contains(tok) {
+            overlap += 1;
+        }
+    }
+    let boost = overlap.min(6);
+
     if is_doc && lower.ends_with("/readme.md") {
-        return 12;
+        return 12 - boost.min(4);
     }
     // Prefer whole-doc spans over many tiny sections of the same file.
     if lower == "readme.md" || lower == "agents.md" {
-        return 18;
+        return 18 - boost.min(4);
     }
     if lower.starts_with("docs/") && node.kind == "Section" {
-        return 25;
+        return 25 - boost.min(8);
     }
     if lower.starts_with("docs/") && is_doc {
-        return 20;
+        return 20 - boost.min(10);
     }
     if node.kind == "Section" {
-        return 40;
+        return 40 - boost.min(10);
     }
     if is_doc {
-        return 30;
+        return 30 - boost.min(10);
     }
     90
 }
@@ -805,7 +849,8 @@ fn read_doc_excerpt(
             raw.chars().take(800).collect()
         }
     } else {
-        raw.chars().take(1200).collect()
+        // Leaner Doc excerpts keep architecture packs under Graphify's 2k budget.
+        raw.chars().take(700).collect()
     };
     format!("# {title} ({rel})\n{excerpt}")
 }

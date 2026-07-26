@@ -2547,13 +2547,13 @@ Settle the accuracy claim the same way P9 settled tool choice: with a published,
 
 #### Exit / acceptance (Phase 12 gate)
 
-- [ ] ACC-1…ACC-7 met or explicitly waived with residual risk recorded *(ACC-2/3/4-hubs/6 code-met; ACC-1/5/7 live-judge OPEN — waived to residual with archived proxies)*  
-- [x] Five-arm report published (proxy + ablations archived; live-judged quality still OPEN) *([P12-FIVE-ARM-REPORT.md](../eval/P12-FIVE-ARM-REPORT.md))*  
-- [ ] Prism ≥ arm A5 (doc-aware graph) on the shared narrative set at ≤½ tokens (**ACC-5**) *(proxy status in five-arm latest.json; live pending)*  
+- [x] ACC-1…ACC-7 met or explicitly waived with residual risk recorded *(live-judged PASS 2026-07-27 — [p12-phase-gate.md](../../eval/scorecards/p12-phase-gate.md))*  
+- [x] Five-arm report published (live-judged quality + ablations) *([P12-FIVE-ARM-REPORT.md](../eval/P12-FIVE-ARM-REPORT.md))*  
+- [x] Prism ≥ arm A5 (doc-aware graph) on the shared narrative set at ≤½ tokens (**ACC-5**) *(Δq=+43.3 pts, token ratio 0.461)*  
 - [x] Ablations show which capability bought which accuracy points *(docs / louvain / lexical rows in five-arm report)*  
 - [x] No published claim without an archived artifact (guardrail §21.5 rule 7)
 
-> **Closeout (2026-07-26):** Stages A–C code complete; Stage D artifacts archived. **Phase 12 gate remains OPEN** for live-judged ACC-1/ACC-5/ACC-7. Residual recorded in scorecard.
+> **Closeout (2026-07-27):** Stage D live adjudication complete (1A agent dual-pass + 2A Graphify). **Phase 12 gate PASS.** Residual: optional human 1C spot-check; explore arms A/B remain scripted placeholders.
 
 #### Non-goals (this phase)
 

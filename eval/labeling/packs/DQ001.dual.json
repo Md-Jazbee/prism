@@ -1,0 +1,36 @@
+{
+  "task_id": "DQ001",
+  "plan_id": "live:architecture",
+  "pack_schema": "0.0.1",
+  "reviewers": [
+    "R1-agent-rubric",
+    "R2-agent-rubric-strict"
+  ],
+  "fragments": [
+    {
+      "fragment_id": "frag:doc:doc:AGENTS.md:2",
+      "r1": "necessary",
+      "r2": "necessary",
+      "label": "necessary"
+    },
+    {
+      "fragment_id": "frag:doc:doc:README.md:1",
+      "r1": "necessary",
+      "r2": "necessary",
+      "label": "necessary"
+    },
+    {
+      "fragment_id": "frag:doc:doc:docs/architecture/AGENT-USAGE.md:3",
+      "r1": "necessary",
+      "r2": "necessary",
+      "label": "necessary"
+    },
+    {
+      "fragment_id": "frag:kg:repo_map",
+      "r1": "necessary",
+      "r2": "necessary",
+      "label": "necessary"
+    }
+  ],
+  "precision": 1.0
+}
