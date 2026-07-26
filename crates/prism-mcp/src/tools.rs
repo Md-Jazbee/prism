@@ -89,6 +89,15 @@ pub fn list_tools_schema() -> Value {
                 "properties": {
                     "question": { "type": "string", "description": "Natural-language or agent question" },
                     "budget_tokens": { "type": "integer", "default": 4000 },
+                    "remaining_context_tokens": {
+                        "type": "integer",
+                        "description": "Agent remaining context; compiler uses min(budget_tokens, remaining)"
+                    },
+                    "progressive": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Include architecture-first progressive layers in the result"
+                    },
                     "intent": {
                         "type": "string",
                         "description": "Optional force: repo_qa|debug|impact|refactor|generate|review|architecture"
@@ -241,11 +250,7 @@ pub fn list_tools_schema() -> Value {
 pub fn call_tool(ctx: &ToolContext, name: &str, arguments: Value) -> ToolOutcome {
     if !ALLOWED_TOOLS.contains(&name) {
         return ToolOutcome::Err {
-            error: ToolError {
-                code: ToolErrorCode::InvalidArgs,
-                message: format!("tool '{name}' is not allowlisted"),
-                hint: Some(format!("Allowed: {}", ALLOWED_TOOLS.join(", "))),
-            },
+            error: ToolError::invalid_args(format!("tool '{name}' is not allowlisted")),
         };
     }
     match name {
@@ -307,6 +312,14 @@ fn parse_hints(args: &Value) -> Result<PlanHints, ToolError> {
             .iter()
             .filter_map(|v| v.as_str().map(str::to_string))
             .collect();
+    }
+    // P9 budget negotiation
+    if let Some(rem) = args
+        .get("remaining_context_tokens")
+        .and_then(|v| v.as_u64())
+    {
+        let requested = hints.budget_tokens.unwrap_or(4000);
+        hints.budget_tokens = Some(requested.min(rem as u32).clamp(256, 128_000));
     }
     Ok(hints)
 }
@@ -374,11 +387,40 @@ fn tool_compile_context(ctx: &ToolContext, args: Value) -> ToolOutcome {
                         code: ToolErrorCode::Internal,
                         message: "pack fragment missing provenance.node_ids".into(),
                         hint: None,
+                        repair: None,
                     },
                 };
             }
             let n = pack.fragments.len() as u64;
-            let result = serde_json::to_value(&pack).unwrap_or(json!({}));
+            let progressive = args
+                .get("progressive")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false);
+            let mut result = serde_json::to_value(&pack).unwrap_or(json!({}));
+            if progressive {
+                if let Some(obj) = result.as_object_mut() {
+                    obj.insert(
+                        "progressive_layers".into(),
+                        json!([
+                            {
+                                "name": "architecture",
+                                "fragment_ids": pack.hierarchy.l_arch,
+                                "notes": ["Stream first — agent may begin reasoning"]
+                            },
+                            {
+                                "name": "must_include",
+                                "fragment_ids": pack.fragments.iter().filter(|f| f.must_include).map(|f| &f.id).collect::<Vec<_>>(),
+                                "notes": ["Must-include finalized before streaming began"]
+                            },
+                            {
+                                "name": "support",
+                                "fragment_ids": pack.fragments.iter().filter(|f| !f.must_include && !matches!(f.layer, prism_compile::PackLayer::Arch)).map(|f| &f.id).collect::<Vec<_>>(),
+                                "notes": ["Soft-drop candidates under budget"]
+                            }
+                        ]),
+                    );
+                }
+            }
             let note = if require_precise {
                 "Evidence Pack under require_precise; fragments keep labeled confidence (never silent upgrade)."
             } else {
@@ -387,11 +429,7 @@ fn tool_compile_context(ctx: &ToolContext, args: Value) -> ToolOutcome {
             ok("compile_context", note, result, started, n)
         }
         CompileOutcome::ScopeUnresolved(u) => ToolOutcome::Err {
-            error: ToolError {
-                code: ToolErrorCode::ScopeUnresolved,
-                message: u.reason,
-                hint: Some(format!("Ask for: {}", u.ask_for.join("; "))),
-            },
+            error: ToolError::scope_unresolved(u.reason).with_candidates(u.ask_for),
         },
         CompileOutcome::BudgetExceeded(e) => ToolOutcome::Err {
             error: ToolError::budget_exceeded(e.reason),
@@ -425,17 +463,14 @@ fn tool_query_plan(args: Value) -> ToolOutcome {
             )
         }
         Ok(PlanOutcome::ScopeUnresolved(u)) => ToolOutcome::Err {
-            error: ToolError {
-                code: ToolErrorCode::ScopeUnresolved,
-                message: u.reason,
-                hint: Some(format!("Ask for: {}", u.ask_for.join("; "))),
-            },
+            error: ToolError::scope_unresolved(u.reason).with_candidates(u.ask_for),
         },
         Err(e) => ToolOutcome::Err {
             error: ToolError {
                 code: ToolErrorCode::Internal,
                 message: e.to_string(),
                 hint: None,
+                repair: None,
             },
         },
     }

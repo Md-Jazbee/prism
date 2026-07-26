@@ -1,0 +1,94 @@
+{
+  "schema_version": "agent-workflow/v1",
+  "workflows": [
+    {
+      "id": "onboarding",
+      "title": "Repo onboarding / orientation",
+      "trigger": "Newcomer or fresh agent needs orientation",
+      "steps": [
+        { "id": "map", "tool": "repo_map", "args": { "hub_limit": 15 } },
+        { "id": "entries", "tool": "entrypoints", "args": { "limit": 20 } },
+        {
+          "id": "orient",
+          "tool": "compile_context",
+          "args": {
+            "question": "Give a newcomer orientation of this repository",
+            "intent": "architecture",
+            "budget_tokens": 4000
+          }
+        }
+      ],
+      "expected_pack_shape": "architecture orientation pack with communities/hubs citations",
+      "refusal_points": ["INDEX_UNAVAILABLE"],
+      "gold_task_ids": ["TTO-1", "T001"]
+    },
+    {
+      "id": "review",
+      "title": "Change review",
+      "trigger": "Review a diff / PR / changed paths",
+      "steps": [
+        {
+          "id": "impact",
+          "tool": "compile_context",
+          "args": {
+            "question": "Review impact of the changed paths",
+            "intent": "review",
+            "budget_tokens": 4000
+          },
+          "on_refusal": "pick_anchor"
+        },
+        {
+          "id": "precision",
+          "tool": "impact",
+          "args": { "require_precise": false },
+          "optional": true,
+          "on_refusal": "import_precise"
+        }
+      ],
+      "expected_pack_shape": "review pack citing changed paths + blast radius",
+      "refusal_points": ["SCOPE_UNRESOLVED", "PRECISION_REQUIRED"],
+      "gold_task_ids": ["T005"]
+    },
+    {
+      "id": "debug",
+      "title": "Debug / crash investigation",
+      "trigger": "Stack trace or error text available",
+      "steps": [
+        {
+          "id": "debug_pack",
+          "tool": "compile_context",
+          "args": {
+            "question": "Why did this fail?",
+            "intent": "debug",
+            "budget_tokens": 4000
+          },
+          "on_refusal": "pick_anchor"
+        }
+      ],
+      "expected_pack_shape": "debug pack with error/stack + slice criterion never dropped",
+      "refusal_points": ["SCOPE_UNRESOLVED", "BUDGET_EXCEEDED"],
+      "gold_task_ids": ["T008"]
+    },
+    {
+      "id": "refactor_prep",
+      "title": "Refactor preparation",
+      "trigger": "Rename or structural refactor about to start",
+      "steps": [
+        {
+          "id": "gate",
+          "tool": "compile_context",
+          "args": {
+            "question": "Prepare a safe rename / refactor",
+            "intent": "refactor",
+            "require_precise": true,
+            "budget_tokens": 4000
+          },
+          "on_refusal": "import_precise"
+        }
+      ],
+      "expected_pack_shape": "refactor pack with precise references or PRECISION_REQUIRED repair",
+      "refusal_points": ["PRECISION_REQUIRED", "SCOPE_UNRESOLVED"],
+      "gold_task_ids": ["T003"]
+    }
+  ]
+}

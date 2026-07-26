@@ -1,0 +1,24 @@
+{
+  "schema_version": "agent-trace/v1",
+  "trace_id": "fixture-onboarding-001",
+  "workflow_id": "onboarding",
+  "started_at": "0",
+  "ended_at": "3",
+  "outcome": "ok",
+  "events": [
+    { "ts": "0", "kind": "tool_call", "tool": "repo_map" },
+    { "ts": "0", "kind": "tool_result", "tool": "repo_map", "ok": true },
+    { "ts": "1", "kind": "tool_call", "tool": "entrypoints" },
+    { "ts": "1", "kind": "tool_result", "tool": "entrypoints", "ok": true },
+    { "ts": "2", "kind": "tool_call", "tool": "compile_context" },
+    { "ts": "2", "kind": "tool_result", "tool": "compile_context", "ok": true, "hit_count": 5 }
+  ],
+  "metrics": {
+    "first_tool": "repo_map",
+    "chose_compile_first": false,
+    "refusal_count": 0,
+    "repair_success_count": 0,
+    "hops": 3
+  },
+  "notes": "Onboarding starts with orientation micro-tools then compile; first-tool-choice metric for Prism arms prefers compile_context-first traces."
+}

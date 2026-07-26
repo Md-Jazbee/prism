@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-26  
-**Current phase:** **P8 gate passed** · P9 Agent Experience next · P0–P7 complete · **P10 deferred**  
+**Current phase:** **P9 gate passed** · P0–P9 complete · **P10 deferred (optional)**  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)  
 **Source of truth for stack/layout:** [TECH-STACK-AND-PROJECT-STRUCTURE.md](../architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md)
@@ -25,10 +25,10 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P6** | Consolidation & Interaction Substrate | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P7** | Visual Repository Intelligence | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P8** | IDE Extension (VS Code / Cursor) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
-| **P9** | Agent Experience & Workflows | ░░░░░░░░░░ **0%** | 📋 Planned |
+| **P9** | Agent Experience & Workflows | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-26 |
 | **P10** | Team / Distributed (optional, was P6) | ░░░░░░░░░░ **0%** | ⚪ Deferred |
 
-**How to read progress:** the **engine half (P0–P5) is complete**. **P6–P8** interaction surfaces are gated (HTTP/daemon, visual renderer, IDE extension). **P9** (agent experience) is next. P10 stays optional.
+**How to read progress:** **P0–P9 are gated**. The engine half (P0–P5) and interaction half (P6–P9) are complete. **P10** (team/distributed) stays optional.
 
 ```mermaid
 flowchart LR
@@ -40,7 +40,7 @@ flowchart LR
     P5 --> P6[P6 Interaction Substrate<br/>✅ done]
     P6 --> P7[P7 Visual Repo Intelligence<br/>✅ done]
     P7 --> P8[P8 IDE Extension<br/>✅ done]
-    P8 --> P9[P9 Agent Experience<br/>📋 planned]
+    P8 --> P9[P9 Agent Experience<br/>✅ done]
     P9 -.-> P10[P10 Distributed / Team<br/>optional]
 
     style P0 fill:#b8e994,stroke:#78e08f,color:#000
@@ -53,7 +53,7 @@ flowchart LR
     style P7 fill:#b8e994,stroke:#78e08f,color:#000
     style P7 fill:#b8e994,stroke:#78e08f,color:#000
     style P8 fill:#b8e994,stroke:#78e08f,color:#000
-    style P9 fill:#ffeaa7,stroke:#fdcb6e,color:#000
+    style P9 fill:#b8e994,stroke:#78e08f,color:#000
     style P10 fill:#dfe6e9,stroke:#b2bec3,color:#000
 ```
 
@@ -83,12 +83,12 @@ flowchart LR
 | Architecture intelligence | P5 | 🟡 communities + hubs + entrypoints + hotspots (path-prefix, not Leiden) |
 | WASM plugin host | P5 → **P6** | ⚪ **deferred** — [ADR-0001](../architecture/adr/0001-wasm-plugin-host-deferred.md) (gap G-03 waived) |
 | Daemon + HTTP/SSE API | P6 | ✅ `prismd` + `prism-api` `/v1/*` + SSE (gaps G-01/G-10) |
-| LSP surface | P6 | ⬜ design only — gap G-02 |
-| Graph View-Model contract | P6 | ⬜ gap G-13 prerequisite |
+| LSP surface | P6 | ✅ `prism-lsp` |
+| Graph View-Model contract | P6 | ✅ `schemas/graph-view/v1` |
 | Interactive graph rendering | P7 | ✅ `@prism/graph-view` + SVG screenshot-diff (G-13 closed) |
 | IDE extension | P5 → **P8** | ✅ `extensions/vscode` VSIX + panels + MCP auto-reg |
-| Agent workflows + rules assets | P9 | ⬜ gap G-15 |
-| Four-arm LLM benchmark | P5 → **P9** | ⬜ proxies only — gap G-12 (risks R1/R2) |
+| Agent workflows + rules assets | P9 | ✅ `prism-agent` + catalog → AGENTS.md (G-15 closed) |
+| Four-arm LLM benchmark | P5 → **P9** | ✅ report v2 scripted-proxy + dual-review 70% (live LLM opt-in) |
 | Team/shared index | P10 | ⬜ deferred |
 | N1/N2 criterion benches | P6-A | 🟡 `crates/prism-bench` + CI smoke (hard P95 TBD) |
 | `schemas/mcp-tools/v1` | P6-A | ✅ catalog + per-tool JSON + conformance test |
@@ -852,18 +852,45 @@ Extension delivers packs/views locally; MCP is auto-registered. **P9** owns agen
 
 ---
 
-## Phase 9 — Agent Experience & Workflows (outline)
+## Phase 9 — Agent Experience & Workflows
 
-**State:** 📋 Planned  
+**State:** ✅ **Gate passed 2026-07-26** (Stage A–C)  
 **Duration:** ~4 weeks  
 **Gate:** Four-arm benchmark published; dual-reviewed precision measured against ≥70%; agents choose `compile_context` first at the target rate on captured traces.  
-**Detail:** [planning §16](./PLANNING-AND-IMPLEMENTATION.md#16-phase-9--agent-experience--workflows)
+**Detail:** [planning §16](./PLANNING-AND-IMPLEMENTATION.md#16-phase-9--agent-experience--workflows)  
+**Scorecard:** [p9-phase-gate.md](../../eval/scorecards/p9-phase-gate.md)  
+**Report:** [PUBLIC-BENCHMARK-REPORT-V2.md](../eval/PUBLIC-BENCHMARK-REPORT-V2.md)
 
 | Stage | Tasks (summary) | Status |
 |---|---|---|
-| **A — Contract hardening** | Tool ergonomics; refusal-repair loops; budget negotiation; progressive packs; trace schema | ⬜ |
-| **B — Workflows + assets** | Onboarding / review / debug / refactor-prep; generated rules + skills; workflow fixtures | ⬜ |
-| **C — Closed-loop eval** | Four-arm run; dual-review labels; trace metrics; public report v2; close R1/R2/R8 | ⬜ |
+| **A — Contract hardening** | Tool ergonomics; refusal-repair loops; budget negotiation; progressive packs; trace schema | ✅ exited 2026-07-26 |
+| **B — Workflows + assets** | Onboarding / review / debug / refactor-prep; generated rules + skills; workflow fixtures | ✅ exited 2026-07-26 |
+| **C — Closed-loop eval** | Four-arm run; dual-review labels; trace metrics; public report v2; close R1/R2/R8 | ✅ exited 2026-07-26 |
+
+### Stage A — Agent contract hardening ✅
+
+- [x] [AGENT-TOOL-ERGONOMICS.md](../architecture/AGENT-TOOL-ERGONOMICS.md)
+- [x] [REFUSAL-REPAIR.md](../architecture/REFUSAL-REPAIR.md) + `ToolError.repair`
+- [x] [BUDGET-NEGOTIATION.md](../architecture/BUDGET-NEGOTIATION.md) (`remaining_context_tokens`, progressive layers)
+- [x] [AGENT-TRACES.md](../architecture/AGENT-TRACES.md) + `schemas/agent-trace/v1`
+
+### Stage B — Workflows & rules assets ✅
+
+- [x] [WORKFLOW-CATALOG.md](../architecture/WORKFLOW-CATALOG.md) + embedded catalog
+- [x] `prism workflow` / `POST /v1/workflow` / `prism agent generate-assets`
+- [x] Fixtures under `fixtures/workflows/`
+- [x] [AGENT-USAGE.md](../architecture/AGENT-USAGE.md) aligned
+
+### Stage C — Closed-loop eval + gate ✅
+
+- [x] Four-arm harness + `eval/baselines/four-arm/latest.json`
+- [x] Dual-review sample T001 (70%, κ=0.78)
+- [x] Public report v2; residual risks R1/R2/R8 updated
+- [x] Honest caveat: live LLM judges remain opt-in
+
+#### Handoff
+
+Interaction half **P6–P9 complete**. **P10** remains optional team/distributed scale-out.
 
 ---
 
@@ -904,7 +931,7 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 |---|---|---|
 | **W-SVC** | Local service layer — `prismd`, HTTP/SSE, sessions, cancellation | P6 Stage B |
 | **W-VIZ** | Visualization — view-model, LOD, layout determinism, render budgets | ✅ P6 Stage C + P7 gate |
-| **W-AX** | Agent experience — tool ergonomics, refusal repair, workflows, rules assets | P9 (drafts in P8 Stage C) |
+| **W-AX** | Agent experience — tool ergonomics, refusal repair, workflows, rules assets | ✅ P9 gate |
 | **W-DEBT** | As-built reconciliation — drift register, ADRs, expiring waivers | 🟡 P6 Stage A |
 
 ---
@@ -946,3 +973,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P6 Stage C exited / gate passed:** `prism-view` + `schemas/graph-view/v1`, `VIEW_TOO_LARGE`, deterministic layout, `POST /v1/view` / `prism view`, `prism-lsp` (hover/symbols/codelens/commands), fixtures + p6-phase-gate scorecard. **P7 opened** (visual renderer). |
 | 2026-07-26 | **P7 Stages A–C exited / gate passed:** projection/LOD/layout/aggregation docs; `@prism/graph-view` (Cytoscape + SVG/Mermaid export, interaction grammar, visual encoding); overlay goldens + visual EXPLAIN; screenshot-diff suite; p7-phase-gate (human TTO lab deferred to P8). **P8 opened**. |
 | 2026-07-26 | **P8 Stages A–C exited / gate passed:** `extensions/vscode` (daemon HTTP→CLI transport, ADR-0006 binary delivery, evidence+graph webviews, commands, decorations off-by-default, Cursor MCP auto-reg, AGENTS.md generation, actionable refusals, extension.yml VSIX CI, p8-phase-gate). Marketplace publish + `@vscode/test-electron` deferred. **P9 opened**. |
+| 2026-07-26 | **P9 Stages A–C exited / gate passed:** `prism-agent` (refusal repair, budget negotiation, progressive packs, traces); workflow catalog + CLI/HTTP; generated AGENTS.md/rules/skills; four-arm report v2 (scripted proxy + dual-review 70%); R1 restated, R2/R8/R15 closed. **P0–P9 program complete**; P10 remains optional. |

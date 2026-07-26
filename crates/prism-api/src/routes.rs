@@ -37,6 +37,8 @@ pub fn router(state: AppState) -> Router {
         .route("/v1/repo/map", get(repo_map))
         .route("/v1/intel/entrypoints", get(entrypoints))
         .route("/v1/view", post(graph_view))
+        .route("/v1/workflow", post(run_workflow_http))
+        .route("/v1/workflows", get(list_workflows_http))
         .route("/v1/events", get(events_sse))
         .layer(axum::middleware::from_fn_with_state(
             state.clone(),
@@ -132,11 +134,7 @@ async fn query_plan(
             "plan": plan,
         }))),
         Ok(PlanOutcome::ScopeUnresolved(u)) => Err(ApiError::from_tool(
-            ToolError {
-                code: prism_mcp::ToolErrorCode::ScopeUnresolved,
-                message: u.reason,
-                hint: Some(format!("Ask for: {}", u.ask_for.join("; "))),
-            },
+            ToolError::scope_unresolved(u.reason).with_candidates(u.ask_for),
             Some(snap),
         )),
         Err(e) => Err(ApiError::internal(e.to_string())),
@@ -148,6 +146,10 @@ struct CompileBody {
     question: String,
     #[serde(default)]
     budget_tokens: Option<u32>,
+    #[serde(default)]
+    remaining_context_tokens: Option<u32>,
+    #[serde(default)]
+    progressive: bool,
     #[serde(default)]
     intent: Option<String>,
     #[serde(default)]
@@ -178,7 +180,13 @@ async fn context_compile(
     }
     let plan_body = PlanBody {
         question: body.question.clone(),
-        budget_tokens: body.budget_tokens,
+        budget_tokens: {
+            let requested = body.budget_tokens.unwrap_or(4000);
+            Some(match body.remaining_context_tokens {
+                Some(rem) if rem > 0 => requested.min(rem).clamp(256, 128_000),
+                _ => requested,
+            })
+        },
         intent: body.intent.clone(),
         anchors: body.anchors.clone(),
         stack_frames: body.stack_frames.clone(),
@@ -193,16 +201,20 @@ async fn context_compile(
         )
     })?;
     match outcome {
-        CompileOutcome::Ok(pack) => Ok(Json(json!({
-            "snapshot_id": snap,
-            "pack": pack,
-        }))),
+        CompileOutcome::Ok(pack) => {
+            let progressive = if body.progressive {
+                Some(prism_agent::progressive_layers(&pack))
+            } else {
+                None
+            };
+            Ok(Json(json!({
+                "snapshot_id": snap,
+                "pack": pack,
+                "progressive_layers": progressive,
+            })))
+        }
         CompileOutcome::ScopeUnresolved(u) => Err(ApiError::from_tool(
-            ToolError {
-                code: prism_mcp::ToolErrorCode::ScopeUnresolved,
-                message: u.reason,
-                hint: Some(format!("Ask for: {}", u.ask_for.join("; "))),
-            },
+            ToolError::scope_unresolved(u.reason).with_candidates(u.ask_for),
             Some(snap),
         )),
         CompileOutcome::BudgetExceeded(e) => Err(ApiError::from_tool(
@@ -511,6 +523,35 @@ async fn events_sse(
         Err(_) => None,
     });
     Sse::new(stream).keep_alive(KeepAlive::new().interval(Duration::from_secs(15)))
+}
+
+#[derive(Debug, Deserialize)]
+struct WorkflowBody {
+    workflow_id: String,
+    #[serde(default)]
+    overrides: Value,
+    #[serde(default)]
+    persist_trace: bool,
+}
+
+async fn list_workflows_http() -> Result<Json<Value>, ApiError> {
+    prism_agent::list_workflows()
+        .map(Json)
+        .map_err(|e| ApiError::internal(e.to_string()))
+}
+
+async fn run_workflow_http(
+    State(state): State<AppState>,
+    Json(body): Json<WorkflowBody>,
+) -> Result<Json<Value>, ApiError> {
+    let result = prism_agent::run_workflow(
+        &state.workspace,
+        &body.workflow_id,
+        &body.overrides,
+        body.persist_trace,
+    )
+    .map_err(|e| ApiError::internal(e.to_string()))?;
+    Ok(Json(serde_json::to_value(result).unwrap_or(json!({}))))
 }
 
 fn open_kg(state: &AppState) -> Result<SqliteKgStore, ApiError> {

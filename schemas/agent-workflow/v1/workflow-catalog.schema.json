@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/agent-workflow/v1/workflow-catalog.schema.json",
+  "title": "Prism Agent Workflow Catalog v1",
+  "type": "object",
+  "required": ["schema_version", "workflows"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "agent-workflow/v1" },
+    "workflows": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/workflow" }
+    }
+  },
+  "$defs": {
+    "step": {
+      "type": "object",
+      "required": ["id", "tool"],
+      "properties": {
+        "id": { "type": "string" },
+        "tool": { "type": "string" },
+        "args": { "type": "object" },
+        "optional": { "type": "boolean", "default": false },
+        "on_refusal": {
+          "type": "string",
+          "description": "Repair action id if this step refuses"
+        }
+      }
+    },
+    "workflow": {
+      "type": "object",
+      "required": ["id", "title", "trigger", "steps", "expected_pack_shape"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": ["onboarding", "review", "debug", "refactor_prep"]
+        },
+        "title": { "type": "string" },
+        "trigger": { "type": "string" },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/step" },
+          "minItems": 1
+        },
+        "expected_pack_shape": { "type": "string" },
+        "refusal_points": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "gold_task_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

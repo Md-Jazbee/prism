@@ -1,0 +1,23 @@
+[package]
+name = "prism-agent"
+description = "Agent workflows, refusal repair, traces, and asset generation (P9)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+uuid = { workspace = true }
+prism-mcp = { workspace = true }
+prism-compile = { workspace = true }
+prism-plan = { workspace = true }
+prism-store = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+prism-core = { workspace = true }

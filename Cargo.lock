@@ -964,6 +964,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "prism-agent"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "prism-compile",
+ "prism-core",
+ "prism-mcp",
+ "prism-plan",
+ "prism-store",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror",
+ "uuid",
+]
+
+[[package]]
 name = "prism-api"
 version = "0.0.1"
 dependencies = [
@@ -972,6 +989,7 @@ dependencies = [
  "futures-util",
  "http",
  "http-body-util",
+ "prism-agent",
  "prism-compile",
  "prism-core",
  "prism-mcp",
@@ -1009,6 +1027,7 @@ version = "0.0.1"
 dependencies = [
  "anyhow",
  "clap",
+ "prism-agent",
  "prism-api",
  "prism-compile",
  "prism-core",

@@ -383,7 +383,7 @@ prism/
 │   ├── prism-daemon/                   # `prismd` — watcher, warm caches, sessions (P6)
 │   ├── prism-lsp/                      # LSP server + IDE commands (P6)
 │   ├── prism-plugin-host/              # ‹planned P6› wasmtime WIT host
-│   └── prism-agent/                    # ‹planned P9› workflow catalog + rules/asset generation
+│   └── prism-agent/                    # workflow catalog + rules/asset generation (P9)
 │
 ├── plugins/                            # ‹planned P6› third-party / example WASM extractors
 │   └── examples/

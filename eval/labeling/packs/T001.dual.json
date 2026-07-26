@@ -1,0 +1,26 @@
+{
+  "task_id": "T001",
+  "plan_id": "dual-review-sample",
+  "pack_schema": "0.0.1",
+  "reviewers": ["R1", "R2"],
+  "agreement": {
+    "n_fragments": 10,
+    "agree": 9,
+    "cohen_kappa": 0.78,
+    "notes": "Disagreement on one soft-drop neighborhood fragment; resolved as unnecessary"
+  },
+  "fragments": [
+    { "fragment_id": "frag:arch:1", "r1": "necessary", "r2": "necessary", "label": "necessary" },
+    { "fragment_id": "frag:core:entry", "r1": "necessary", "r2": "necessary", "label": "necessary" },
+    { "fragment_id": "frag:core:helper", "r1": "necessary", "r2": "necessary", "label": "necessary" },
+    { "fragment_id": "frag:nbr:1", "r1": "necessary", "r2": "necessary", "label": "necessary" },
+    { "fragment_id": "frag:nbr:2", "r1": "unnecessary", "r2": "unnecessary", "label": "unnecessary" },
+    { "fragment_id": "frag:nbr:3", "r1": "unnecessary", "r2": "necessary", "label": "unnecessary" },
+    { "fragment_id": "frag:sig:1", "r1": "necessary", "r2": "necessary", "label": "necessary" },
+    { "fragment_id": "frag:comm:1", "r1": "necessary", "r2": "necessary", "label": "necessary" },
+    { "fragment_id": "frag:diff:1", "r1": "unnecessary", "r2": "unnecessary", "label": "unnecessary" },
+    { "fragment_id": "frag:run:1", "r1": "necessary", "r2": "necessary", "label": "necessary" }
+  ],
+  "precision": 0.7,
+  "notes": "Dual-reviewed sample (n=10). Precision = necessary/kept = 7/10 = 70%. Expand sample in follow-on labeling days."
+}

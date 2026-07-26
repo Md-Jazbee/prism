@@ -19,6 +19,7 @@ members = [
     "crates/prism-daemon",
     "crates/prism-view",
     "crates/prism-lsp",
+    "crates/prism-agent",
 ]
 default-members = ["crates/prism-cli"]
 
@@ -74,3 +75,4 @@ prism-api = { path = "crates/prism-api" }
 prism-daemon = { path = "crates/prism-daemon" }
 prism-view = { path = "crates/prism-view" }
 prism-lsp = { path = "crates/prism-lsp" }
+prism-agent = { path = "crates/prism-agent" }

@@ -27,6 +27,7 @@ prism-precise = { workspace = true }
 prism-semantic = { workspace = true }
 prism-store = { workspace = true }
 prism-view = { workspace = true }
+prism-agent = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }

@@ -1,0 +1,60 @@
+{
+  "suite": "p9-four-arm",
+  "mode": "scripted_proxy",
+  "arms": [
+    {
+      "arm": "A",
+      "protocol": "explore",
+      "first_tool": "grep",
+      "chose_compile_first": false,
+      "hops": 12,
+      "tokens_proxy": 18000,
+      "quality_proxy": 0.7,
+      "notes": "Scripted explore arm \u2014 hop\u00d7token proxy; not a live frontier call"
+    },
+    {
+      "arm": "B",
+      "protocol": "explore",
+      "first_tool": "grep",
+      "chose_compile_first": false,
+      "hops": 10,
+      "tokens_proxy": 12000,
+      "quality_proxy": 0.62,
+      "notes": "Scripted explore arm \u2014 hop\u00d7token proxy; not a live frontier call"
+    },
+    {
+      "arm": "C",
+      "protocol": "prism",
+      "first_tool": "compile_context",
+      "chose_compile_first": true,
+      "hops": 1,
+      "tokens_proxy": 800,
+      "quality_proxy": 0.68,
+      "notes": "Scripted Prism arm \u2014 compile_context first; quality_proxy is structural completeness, not LLM judge"
+    },
+    {
+      "arm": "D",
+      "protocol": "prism",
+      "first_tool": "compile_context",
+      "chose_compile_first": true,
+      "hops": 1,
+      "tokens_proxy": 1200,
+      "quality_proxy": 0.72,
+      "notes": "Scripted Prism arm \u2014 compile_context first; quality_proxy is structural completeness, not LLM judge"
+    }
+  ],
+  "agent_traces": {
+    "n_traces": 3,
+    "first_tool_choice_rate": 0.6666666666666666,
+    "refusal_repair_success_rate": 1.0,
+    "mean_refusals": 0.3333333333333333,
+    "target_first_tool_choice": 0.7,
+    "notes": "Computed from fixtures/workflows/*.trace.json + live --persist-trace runs"
+  },
+  "g1": {
+    "claim": "quality(Medium+Prism) >= quality(Frontier+explore) - 3pts",
+    "delta_proxy_pts": -2.0,
+    "status": "PASS_PROXY",
+    "caveat": "LLM four-arm with live models is opt-in (PRISM_FOUR_ARM_LLM=1); published numbers here are scripted proxies + trace metrics"
+  }
+}

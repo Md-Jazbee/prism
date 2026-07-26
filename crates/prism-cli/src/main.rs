@@ -136,6 +136,54 @@ enum Commands {
         #[arg(long, default_value = ".")]
         workspace: PathBuf,
     },
+    /// Agent workflows (P9).
+    Workflow {
+        #[command(subcommand)]
+        cmd: WorkflowCmd,
+    },
+    /// Agent assets / repair helpers (P9).
+    Agent {
+        #[command(subcommand)]
+        cmd: AgentCmd,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+enum WorkflowCmd {
+    /// List workflow catalog entries.
+    List,
+    /// Run a named workflow (onboarding|review|debug|refactor_prep).
+    Run {
+        id: String,
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long)]
+        question: Option<String>,
+        #[arg(long = "anchor")]
+        anchors: Vec<String>,
+        #[arg(long = "changed")]
+        changed_paths: Vec<String>,
+        #[arg(long)]
+        error_text: Option<String>,
+        #[arg(long, default_value_t = false)]
+        persist_trace: bool,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+enum AgentCmd {
+    /// Regenerate AGENTS.md, Cursor rule, and skills from the workflow catalog.
+    #[command(name = "generate-assets")]
+    GenerateAssets {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
+    /// Print a machine-actionable repair payload for an error code.
+    Repair {
+        code: String,
+        #[arg(long)]
+        message: Option<String>,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -1035,6 +1083,75 @@ fn main() -> Result<()> {
             let workspace = std::fs::canonicalize(&workspace).unwrap_or(workspace);
             prism_lsp::run_stdio(prism_lsp::LspConfig { workspace })?;
         }
+        Commands::Workflow { cmd } => match cmd {
+            WorkflowCmd::List => {
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&prism_agent::list_workflows()?)?
+                );
+            }
+            WorkflowCmd::Run {
+                id,
+                path,
+                question,
+                anchors,
+                changed_paths,
+                error_text,
+                persist_trace,
+            } => {
+                let mut overrides = serde_json::Map::new();
+                if let Some(q) = question {
+                    overrides.insert("question".into(), serde_json::Value::String(q));
+                }
+                if !anchors.is_empty() {
+                    overrides.insert(
+                        "anchors".into(),
+                        serde_json::Value::Array(
+                            anchors.into_iter().map(serde_json::Value::String).collect(),
+                        ),
+                    );
+                }
+                if !changed_paths.is_empty() {
+                    overrides.insert(
+                        "changed_paths".into(),
+                        serde_json::Value::Array(
+                            changed_paths
+                                .into_iter()
+                                .map(serde_json::Value::String)
+                                .collect(),
+                        ),
+                    );
+                }
+                if let Some(e) = error_text {
+                    overrides.insert("error_text".into(), serde_json::Value::String(e));
+                }
+                let result = prism_agent::run_workflow(
+                    &path,
+                    &id,
+                    &serde_json::Value::Object(overrides),
+                    persist_trace,
+                )?;
+                println!("{}", serde_json::to_string_pretty(&result)?);
+                if !result.ok {
+                    std::process::exit(2);
+                }
+            }
+        },
+        Commands::Agent { cmd } => match cmd {
+            AgentCmd::GenerateAssets { path } => {
+                let agents = prism_agent::generate_agents_md(&path)?;
+                let rule = prism_agent::generate_cursor_rule(&path)?;
+                let skills = prism_agent::generate_skill_markdown(&path)?;
+                println!("wrote {}", agents.display());
+                println!("wrote {}", rule.display());
+                println!("wrote {}", skills.display());
+            }
+            AgentCmd::Repair { code, message } => {
+                let msg = message.unwrap_or_else(|| code.clone());
+                let repair = prism_agent::repair_for(&code, &msg, Vec::<String>::new());
+                println!("{}", serde_json::to_string_pretty(&repair)?);
+            }
+        },
     }
     Ok(())
 }

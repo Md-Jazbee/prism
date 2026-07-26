@@ -7,6 +7,15 @@
   "properties": {
     "question": { "type": "string", "description": "Natural-language or agent question" },
     "budget_tokens": { "type": "integer", "default": 4000 },
+    "remaining_context_tokens": {
+      "type": "integer",
+      "description": "Agent remaining context; compiler uses min(budget_tokens, remaining)"
+    },
+    "progressive": {
+      "type": "boolean",
+      "default": false,
+      "description": "Include architecture-first progressive layers in the result"
+    },
     "intent": {
       "type": "string",
       "description": "Optional force: repo_qa|debug|impact|refactor|generate|review|architecture"

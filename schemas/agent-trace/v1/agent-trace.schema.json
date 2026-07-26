@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prism.dev/schemas/agent-trace/v1/agent-trace.schema.json",
+  "title": "Prism Agent Trace v1",
+  "description": "Local-only tool sequence traces. Never store repository file contents.",
+  "type": "object",
+  "required": ["schema_version", "trace_id", "started_at", "events"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "agent-trace/v1" },
+    "trace_id": { "type": "string" },
+    "session_id": { "type": "string" },
+    "workflow_id": { "type": "string" },
+    "started_at": { "type": "string", "format": "date-time" },
+    "ended_at": { "type": "string", "format": "date-time" },
+    "outcome": {
+      "type": "string",
+      "enum": ["ok", "refused", "repaired", "aborted", "unknown"]
+    },
+    "events": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/event" }
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "first_tool": { "type": "string" },
+        "chose_compile_first": { "type": "boolean" },
+        "refusal_count": { "type": "integer" },
+        "repair_success_count": { "type": "integer" },
+        "hops": { "type": "integer" },
+        "tokens_in_estimate": { "type": "integer" },
+        "tokens_out_estimate": { "type": "integer" }
+      }
+    }
+  },
+  "$defs": {
+    "event": {
+      "type": "object",
+      "required": ["ts", "kind"],
+      "properties": {
+        "ts": { "type": "string" },
+        "kind": {
+          "type": "string",
+          "enum": ["tool_call", "tool_result", "refusal", "repair", "note"]
+        },
+        "tool": { "type": "string" },
+        "ok": { "type": "boolean" },
+        "error_code": { "type": "string" },
+        "repair_action": { "type": "string" },
+        "latency_ms": { "type": "integer" },
+        "hit_count": { "type": "integer" }
+      }
+    }
+  }
+}
