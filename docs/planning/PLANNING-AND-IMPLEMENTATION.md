@@ -2,8 +2,8 @@
 
 **Project working name:** Prism — Repository Intelligence Platform  
 **Document type:** Detailed Planning & Implementation Guide (phase → stage)  
-**Status:** Active — P0–P7 + P9 delivered; P8 cut (CLI+MCP); P10 deferred; **P11 Install & Distribution in progress**; **P12 Accuracy & Grounding planned**  
-**Date:** 2026-07-19 · **Revised:** 2026-07-26 (P12 accuracy/grounding phase added after a doc-aware-graph head-to-head; P11 Stage C pending; P10 remains skipped/deferred)  
+**Status:** Active — P0–P7 + P9 delivered; P8 cut (CLI+MCP); P10 deferred; P11 Stage C pending; **P12 Accuracy & Grounding gated**; **P13–P15 engineering half opened** (refactor · performance · reliability)  
+**Date:** 2026-07-19 · **Revised:** 2026-07-27 (P13–P15 engineering half; **Java + Perl T1 extractors** delivered on the P1 language-expansion track)  
 **Governs:** Execution of the [Architecture Design Document](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)  
 **Audience:** Project leads, architects, implementers, evaluators, open-source contributors  
 
@@ -46,16 +46,23 @@ This document turns the ADD’s high-level roadmap into an executable plan. It d
 17. [Phase 10 — Team / Distributed (optional)](#17-phase-10--team--distributed-optional)
 18. [Phase 11 — Install & Distribution (any system)](#18-phase-11--install--distribution-any-system)
 19. [Phase 12 — Accuracy & Grounding (doc-aware evidence)](#19-phase-12--accuracy--grounding-doc-aware-evidence)
-20. [Evaluation program (runs across phases)](#20-evaluation-program-runs-across-phases)
-21. [Risk register & guardrails](#21-risk-register--guardrails)
-22. [Definition of Done (program-level)](#22-definition-of-done-program-level)
-23. [Appendix — Checklists & templates](#23-appendix--checklists--templates)
+20. [Phase 13 — Core Refactor & Boundary Hardening](#20-phase-13--core-refactor--boundary-hardening)
+21. [Phase 14 — Performance & Scale Proof](#21-phase-14--performance--scale-proof)
+22. [Phase 15 — Reliability, Governance & Release Trust](#22-phase-15--reliability-governance--release-trust)
+23. [Evaluation program (runs across phases)](#23-evaluation-program-runs-across-phases)
+24. [Risk register & guardrails](#24-risk-register--guardrails)
+25. [Definition of Done (program-level)](#25-definition-of-done-program-level)
+26. [Appendix — Checklists & templates](#26-appendix--checklists--templates)
 
 > **Phase renumbering note (2026-07-26).** The former *Phase 6 — Team / Distributed* is now **Phase 10** and stays optional/deferred. Phases 6–9 cover the *interaction* half: service surfaces, graph rendering, IDE extension (later cut), and agent experience. Historical references to “P6 Stage C certified caches” now mean **P10 Stage C**.
 >
 > **P11 note (2026-07-26).** **Phase 11 — Install & Distribution** is planned next and does **not** depend on Phase 10. P10 remains skipped. Inspiration: Graphify’s ensure-installed skill step, host adapters (`claude install` / hooks), and one-shot project bootstrap — adapted to Prism’s single Rust binary + MCP surface ([PRODUCT-SETUP.md](../architecture/PRODUCT-SETUP.md), ADR-0007).
 >
 > **P12 note (2026-07-26).** **Phase 12 — Accuracy & Grounding** is opened and runs **parallel to P11 Stage C**. It answers a measured failure: on a product/architecture narrative question, Prism returned tiny packs made of *role placeholders* while a doc-aware graph (Graphify) answered from README/ADD concept nodes. P12 adds a documentation layer, kills synthetic fragments in favour of honest `gaps[]`, replaces directory “communities” with seeded semantic clustering, and settles accuracy with a five-arm benchmark. Token efficiency is already won; **sufficiency** is the open goal.
+>
+> **P13–P15 note (2026-07-27).** Phases 0–12 grew capability; a measured re-analysis of the as-built codebase (19,960 LOC / 20 crates / 103 test fns) found the next constraint is no longer capability but **changeability, proven performance, and maintained claims**. Three engineering-half phases open together: **P13 Core Refactor** (god files, four duplicated tool surfaces, stringly-typed refusals), **P14 Performance & Scale Proof** (NFRs still measured on a 16-file synthetic fixture while pilot corpora sit unused), **P15 Reliability & Governance** (two expired waivers, a stale risk register, the accuracy harness outside CI). These phases ship **no new user-visible capability** — their gates are parity, ceilings, and evidence.
+>
+> **Language expansion (2026-07-27).** **Java** and **Perl** T1 extractors landed on the ongoing P1 expansion track (not a new phase): `prism-extract-java`, `prism-extract-perl`, golden fixtures, conformance CI, and `tree-sitter` bumped **0.24 → 0.26** (required by `tree-sitter-perl`). Details: [§7.5 Language expansion — Java & Perl](#75-language-expansion--java--perl-delivered-2026-07-27).
 
 ---
 
@@ -123,7 +130,7 @@ Align with ADD Goals G1–G9:
 
 ### 3.1 Phase sequence
 
-The program has three halves. **P0–P5 (the engine half, delivered)** made repository understanding correct, budgeted, and measurable. **P6–P9 (the interaction half, mostly delivered)** made that understanding usable — service surfaces, rendered graphs, and agent workflows (P8 IDE extension was **cut** in favor of CLI + MCP). **P11 (distribution half, planned next)** makes Prism installable on any system without a Rust toolchain. **P10** remains an optional scale-out and is **skipped for now**.
+The program has five halves — the arithmetic is wrong and the history is honest. **P0–P5 (engine half, delivered)** made repository understanding correct, budgeted, and measurable. **P6–P9 (interaction half, delivered)** made that understanding usable — service surfaces, rendered graphs, and agent workflows (P8 IDE extension was **cut** in favor of CLI + MCP). **P11 (distribution half)** makes Prism installable without a Rust toolchain. **P12 (accuracy half, gated)** made packs sufficient rather than merely small. **P13–P15 (engineering half, opened 2026-07-27)** ship no new capability: they make the code changeable, prove the performance NFRs at real scale, and bring the program’s claims back under maintenance. **P10** remains an optional scale-out and is **skipped for now**.
 
 ```mermaid
 flowchart LR
@@ -143,18 +150,27 @@ flowchart LR
     subgraph Distribution["Distribution half — planned"]
       P11[P11 Install & Distribution]
     end
-    subgraph Accuracy["Accuracy half — planned"]
+    subgraph Accuracy["Accuracy half — gated"]
       P12[P12 Accuracy & Grounding]
+    end
+    subgraph Engineering["Engineering half — opened 2026-07-27"]
+      P13[P13 Core Refactor]
+      P14[P14 Performance & Scale Proof]
+      P15[P15 Reliability & Governance]
     end
     P5 --> P6 --> P7 --> P8
     P7 --> P9
     P9 --> P11
     P9 --> P12
+    P12 --> P13 --> P14 --> P15
+    P11 -.co-gates P11 Stage C.-> P15
     P9 -.skipped for now.-> P10[P10 Distributed / Team]
     P11 -.optional later.-> P10
 ```
 
 **P12 is parallel, not sequential:** it depends on the P9 agent surface and the P2 compiler, not on install work. P11 makes Prism *reachable*; P12 makes its answers *sufficient*.
+
+**P13 → P14 → P15 is sequential on purpose.** P14 optimizes the boundary P13 creates (one engine, one store owner) rather than four call paths; P15 audits claims that only become checkable once parity harnesses and perf ceilings exist. P15 Stage C co-gates with the still-open **P11 Stage C** cold-VM run.
 
 | Phase | Intent | Duration (calendar) | Primary user-visible outcome |
 |---|---|---|---|
@@ -171,6 +187,9 @@ flowchart LR
 | **P10** | Team/CI scale (optional) | TBD | Shared index, authz, optional certified caches — **deferred / skipped for now** |
 | **P11** | Anyone can install Prism on any common OS | 3–5 weeks | One-shot installers + Graphify-like agent bootstrap; cold machine → MCP-ready |
 | **P12** | Packs are sufficient, not merely small | 5–7 weeks | Doc-aware evidence, honest gaps instead of placeholders, semantic communities, five-arm accuracy report |
+| **P13** | The codebase becomes safe to change | 4–6 weeks | *(no user-visible change by design)* one service layer, decomposed god files, typed refusals, size budgets in CI |
+| **P14** | Performance stops being a claim | 4–6 weeks | Pilot-scale N1/N2 numbers with enforced CI ceilings; warm orientation; published memory + index-size budgets |
+| **P15** | Every claim has a live owner and artifact | 3–5 weeks | Refreshed waivers/risk register, three-OS + eval-harness CI, release provenance (SBOM/signing) |
 
 ### 3.2 Capability maturity ladder
 
@@ -212,6 +231,44 @@ Kept as a separate table so the P0–P11 ladder above stays a historical record.
 | Semantic communities (seeded Leiden) + labels | ○ (path prefixes) | ○ | ○ | ● | ● |
 | Centrality hubs excluding language builtins | ○ (degree, noisy) | ○ | ○ | ● | ● |
 | Live-judged accuracy vs doc-aware baseline | ○ (proxies only) | ○ | ○ | ○ | ● |
+
+#### 3.2.2 Engineering-half capability ladder (P13–P15)
+
+These are **internal** capabilities: none of them changes what a user sees, and that is the point. Baseline column measured 2026-07-27.
+
+| Capability | Today (post-P12) | P13 | P14 | P15 |
+|---|---|---|---|---|
+| Pack-output parity harness (frozen question set) | ○ | ● | ● | ● |
+| Typed refusal codes in IR (no hardcoded strings) | ○ (12 files) | ● | ● | ● |
+| Single service layer behind all four surfaces | ○ (4 adapters) | ● | ● | ● |
+| Enforced file/function size budgets | ○ (max 1,549 / ~949) | ● | ● | ● |
+| Architecture fitness rules on crate edges | ○ | ● | ● | ● |
+| One source of truth for MCP tool schemas | ○ (schema + 168-line JSON builder) | ● | ● | ● |
+| Store/session ownership behind one boundary | ○ (8+ ad-hoc `open` sites) | ◐ | ● | ● |
+| Pilot-scale N1/N2 measurements | ○ (16-file fixture) | ○ | ● | ● |
+| Hard perf ceilings + regression guard in CI | ○ (smoke only) | ○ | ● | ● |
+| Snapshot-keyed orientation cache | ○ (recomputed per call) | ○ | ● | ● |
+| Memory + index-size budgets published | ○ | ○ | ● | ● |
+| Waivers with live expiry + owner | ◐ (2 expired) | ◐ | ◐ | ● |
+| Risk register generated from gate artifacts | ○ (hand-maintained) | ○ | ○ | ● |
+| Coverage measured + ratcheted | ○ | ◐ | ◐ | ● |
+| CI matrix across macOS / Linux / Windows | ○ (Linux only) | ○ | ○ | ● |
+| Accuracy/parity harness executed by CI | ○ | ◐ | ◐ | ● |
+| Release provenance (SBOM / signatures) | ○ (checksums only) | ○ | ○ | ● |
+
+#### 3.2.3 Language-expansion track (P1 continuation — ongoing)
+
+First-party T1 extractors beyond the original P1 gate (Python + Rust). Markdown joined in P12; Java and Perl in 2026-07-27.
+
+| Language | Crate | Extensions | Analyzer | Golden fixture | T2/T3/T4 |
+|---|---|---|---|---|---|
+| Python | `prism-extract-python` | `.py`, `.pyi` | `tree-sitter-python@0.23` | `fixtures/languages/python/` | T3/T4 (Python) |
+| Rust | `prism-extract-rust` | `.rs` | `tree-sitter-rust@0.23` | `fixtures/languages/rust/` | — |
+| Markdown | `prism-extract-markdown` | `.md`, `.markdown`, `.mdx`, … | extractive (no tree-sitter) | `fixtures/languages/markdown/` | — |
+| **Java** | **`prism-extract-java`** | **`.java`** | **`tree-sitter-java@0.23`** | **`fixtures/languages/java/`** | **— (T1 only)** |
+| **Perl** | **`prism-extract-perl`** | **`.pl`, `.pm`, `.perl`** | **`tree-sitter-perl@1.1`** | **`fixtures/languages/perl/`** | **— (T1 only)** |
+
+**Dispatch:** all languages route through `prism-extract::detect_language` → `extract_file`. **Conformance:** `scripts/plugins/conformance-check.sh` runs every golden. **Re-index trigger:** `ANALYZER_PIPELINE_VERSION` bumped to `p12-doc-v2-perl-java` when Java/Perl landed.
 
 ### 3.3 What “implementation” means here
 
@@ -269,6 +326,14 @@ These run in every phase. Stage plans reference them by ID.
 | **W-DOC** | Documentation intelligence | Doc/section extraction, link & mention resolution, doc↔code binding, `asserted` confidence, doc goldens | Writing or rewriting the repo’s docs; abstractive summaries |
 | **W-ACC** | Accuracy program | Doc-QA gold sets, adjudication protocol, citation-validity scoring, cross-tool baseline arms, ablation discipline | Shipping features; choosing retrieval algorithms |
 
+### 4.4 Workstreams added for the engineering half (P13–P15)
+
+| ID | Workstream | Owns | Never owns |
+|---|---|---|---|
+| **W-REFAC** | Structural refactor | Service-layer boundary, module decomposition, typed error/refusal IR, size & complexity budgets, architecture fitness rules, parity harness | Behavior changes, new capabilities, performance tuning |
+| **W-PERF** | Performance & scale | Pilot-scale benches, profiling, caching and pooling strategy, pipeline parallelism, NFR ceilings and regression guards | Pack semantics, accuracy trade-offs, answer caching (P10) |
+| **W-REL** | Reliability & governance | Waiver expiry enforcement, risk-register generation, CI matrix and coverage policy, fuzz/property invariants, release provenance | Feature scope, roadmap negotiation |
+
 **Planning rules:**
 
 1. Every phase exit must update **W-EVAL** and **W-OBS**, even if the product surface barely changed.
@@ -276,6 +341,9 @@ These run in every phase. Stage plans reference them by ID.
 3. **W-VIZ never invents evidence.** A view may only render facts the KG or a pack already contains, with the same provenance and confidence labels.
 4. **W-DIST never requires a network after install** for the core index + MCP path (N5 / G8). Installers may download the binary once; day-2 usage stays local-first.
 5. **W-DOC never invents evidence, and W-ACC never ships features.** Documentation facts are extractive and labeled `asserted`; the accuracy program grades what exists rather than negotiating the gate. From P12 onward, no fragment may reach a pack without a citation to a real node or edge.
+6. **W-REFAC never changes behavior.** Any behavior difference discovered or intentionally chosen during a refactor requires an ADR before it merges; the parity harness is the arbiter, not reviewer intuition.
+7. **W-PERF never trades accuracy for latency.** Every optimization cites a profile, and the P12 accuracy checklist is re-run at each performance gate.
+8. **W-REL enforces expiry.** From P15 onward, a waiver whose expiry phase has shipped blocks the next phase gate until it is re-dated or closed — waivers age out loudly rather than silently.
 
 ---
 
@@ -318,6 +386,19 @@ flowchart TD
     P9S3 --> P11S1[P11 Stage A: Binary release matrix]
     P11S1 --> P11S2[P11 Stage B: Agent bootstrap + hosts]
     P11S2 --> P11S3[P11 Stage C: Install gate]
+    P11S3 --> P12S1[P12 Stage A: Documentation layer]
+    P12S1 --> P12S4[P12 Stage D: Accuracy gate]
+    P12S4 --> P13S1[P13 Stage A: Seams + characterization]
+    P13S1 --> P13S2[P13 Stage B: Service layer]
+    P13S2 --> P13S3[P13 Stage C: God-file decomposition]
+    P13S3 --> P13S4[P13 Stage D: Parity gate]
+    P13S4 --> P14S1[P14 Stage A: Pilot harness + profiles]
+    P14S1 --> P14S2[P14 Stage B: Store & cache optimization]
+    P14S2 --> P14S3[P14 Stage C: Pipeline parallelism]
+    P14S3 --> P14S4[P14 Stage D: NFR gate]
+    P14S4 --> P15S1[P15 Stage A: Governance sweep]
+    P15S1 --> P15S2[P15 Stage B: Test & CI hardening]
+    P15S2 --> P15S3[P15 Stage C: Release trust]
     P9S3 -.-> P10[P10 Optional team mode — skipped for now]
 ```
 
@@ -334,7 +415,11 @@ flowchart TD
 9. **No “agents prefer Prism” claim** before P9 Stage C measures it on real traces.  
 10. **No visualization that invents structure.** Every rendered node/edge maps to a KG node/edge or pack fragment with its original tier and confidence.  
 11. **No “install anywhere” claim** before P11 Stage C proves cold-machine → MCP-ready on macOS, Linux, and Windows without a Rust toolchain.  
-12. **P11 does not wait on P10.** Distribution is a solo-developer adoption gate; team/shared index stays optional and deferred.
+12. **P11 does not wait on P10.** Distribution is a solo-developer adoption gate; team/shared index stays optional and deferred.  
+13. **No refactor without a parity net.** P13 Stage B may not move code before Stage A’s golden corpus reproduces deterministically (added 2026-07-27).  
+14. **No optimization without a profile.** P14 changes cite a Stage A profile; “obvious” wins that no profile supports do not merge.  
+15. **No perf claim from the mini fixture.** N1/N2 claims require pilot-repo numbers with named hardware and snapshot id.  
+16. **No new capability inside P13–P15.** A feature idea discovered during this half becomes a backlog item, not a stage deliverable.
 
 ### 5.3 Approximate effort envelope
 
@@ -352,8 +437,12 @@ flowchart TD
 | P9 | ~4 | Proof of the agent thesis |
 | P10 | optional / skipped for now | Ops/product expansion |
 | P11 | 3–5 | Release engineering + Graphify-like bootstrap |
+| P12 | 5–7 | Accuracy program + doc layer |
+| P13 | 4–6 | Refactor discipline (no new features; parity is the hard part) |
+| P14 | 4–6 | Profiling + systems tuning at pilot scale |
+| P15 | 3–5 | Governance + CI/release engineering |
 
-Total critical path (P0–P5): roughly **22–36 weeks**. Interaction half (P6–P9): roughly **15–20 weeks** on top. Distribution half (P11): roughly **3–5 weeks** after P9, and it is the first block that needs **release-engineering** skill (CI matrix, signing, package taps) alongside Rust.
+Total critical path (P0–P5): roughly **22–36 weeks**. Interaction half (P6–P9): roughly **15–20 weeks** on top. Distribution half (P11): roughly **3–5 weeks** after P9, and it is the first block that needs **release-engineering** skill (CI matrix, signing, package taps) alongside Rust. Engineering half (P13–P15): roughly **11–17 weeks**, and it is the first block whose success is measured by what *does not* change.
 
 ---
 
@@ -730,6 +819,52 @@ Add lightweight architecture orientation (communities/hubs) and **prove** the to
 | Heuristic CALLS poison impact | High | High | Confidence + depth caps; escalate to P3 |
 | Scope creep into search UI | Medium | High | MCP tools only; context compiler deferred to P2 |
 | Quality gap vs explore ≥10 pts | Medium | High | Improve recipes and resolution; delay P2 marketing claims |
+
+---
+
+### 7.5 Language expansion — Java & Perl (delivered 2026-07-27)
+
+> **Track, not a phase.** Extends P1 Stage A (T1 extractors) after the P12 gate. Does **not** reopen P1–P12 gates; adds first-party languages using the frozen LanguageExtractor ABI + golden conformance pattern.
+
+**Goal:** Index `.java` and Perl (`.pl`/`.pm`) sources into the syntactic KG with the same T1 fact shapes as Python/Rust — symbols, imports/`use`, heuristic `CALLS`, and `EXTENDS` where cheap.
+
+**Depends on:** P1 gate (ABI + dispatch) · P12 doc layer (shared `prism-extract` registry)
+
+| ID | Deliverable | Status |
+|---|---|---|
+| **LANG-1** | `prism-extract-java` — classes, methods, imports, extends, calls | ✅ delivered |
+| **LANG-2** | `prism-extract-perl` — package, `use`, subs, calls | ✅ delivered |
+| **LANG-3** | Dispatch in `prism-extract` for `.java`, `.pl`, `.pm`, `.perl` | ✅ delivered |
+| **LANG-4** | Golden fixtures + conformance tests in CI | ✅ delivered |
+| **LANG-5** | `tree-sitter` workspace bump **0.24 → 0.26** (Perl grammar requires 0.26) | ✅ delivered |
+| **LANG-6** | `ANALYZER_PIPELINE_VERSION` → `p12-doc-v2-perl-java` (forces re-index) | ✅ delivered |
+
+**Extracted fact shapes (T1, heuristic where noted):**
+
+| Language | Definitions | Imports / modules | Calls | Inheritance |
+|---|---|---|---|---|
+| Java | class, interface, enum, method, constructor | `import` → `module:` nodes | `method_invocation` → `CALLS` | `extends` → `EXTENDS` |
+| Perl | `sub` → function symbols | `package` + `use` → `module:` nodes | bareword calls → `CALLS` | — (not in v1) |
+
+**Non-goals (explicit):**
+
+- T2 precise tier, T3/T4 semantic slices, or SCIP for Java/Perl (remain Python-first per ADR-0002 trajectory)
+- New MCP tools — existing structural tools consume the new facts automatically after re-index
+- TypeScript, Go, or other languages (future expansion entries follow the same LANG-* checklist)
+
+**Verification:**
+
+```bash
+./scripts/plugins/conformance-check.sh   # includes java + perl goldens
+cargo test -p prism-extract-java -p prism-extract-perl -p prism-extract
+prism index .                            # pick up new extensions after pipeline version bump
+```
+
+**Residual / follow-ons:**
+
+- Extractor design docs under `docs/architecture/extractors/` (java.md, perl.md) — optional polish
+- Pilot-repo eval on a Java or Perl corpus — not run yet; structural proxies unchanged
+- P13 refactor should treat new crates like existing extractors (no special-case god files)
 
 ---
 
@@ -1304,6 +1439,8 @@ Publish proof. Close the quality gap claim for the program.
 | `prism-ir` | ✅ | facts, IDs, confidence, schema versions |
 | `prism-obs` | ✅ | event schema + emit |
 | `prism-extract`, `-python`, `-rust` | ✅ | Rust replaced the planned TypeScript/Go as the second language |
+| `prism-extract-markdown` | ✅ | P12 doc layer (not in original §12 audit) |
+| `prism-extract-java`, `-perl` | ✅ | **2026-07-27** language expansion — T1 only; see [§7.5](#75-language-expansion--java--perl-delivered-2026-07-27) |
 | `prism-mcp` | ✅ | 9 tools; **hand-rolled stdio JSON-RPC, not `rmcp`** |
 | `prism-plan`, `prism-compile` | ✅ | recipes, plan IR, packs, EXPLAIN |
 | `prism-precise`, `prism-semantic` | ✅ | T2 overlay, T3/T4 slices |
@@ -1325,7 +1462,7 @@ Severity: **S1** blocks a stated claim · **S2** blocks planned product surface 
 | **G-01** | No HTTP/SSE API surface — nothing but the CLI and MCP stdio can talk to Prism | S2 | no `prism-api`, no axum in any manifest | P6 Stage B |
 | **G-02** | No LSP server; `IDE-INTEGRATION.md` commands have no host | S2 | no `prism-lsp` | P6 Stage C |
 | **G-03** | P5 tech-view claimed “WASM host **proven** with one example plugin”; nothing was built | **S1** | no `prism-plugin-host`, no `plugins/` | P6 Stage A — build it **or** amend the claim to “native ABI documented, WASM deferred” |
-| **G-04** | Language coverage re-baselined silently (TS/Go → Rust) without a written waiver | S3 | `crates/prism-extract-*` | P6 Stage A waiver + language expansion track |
+| **G-04** | Language coverage re-baselined silently (TS/Go → Rust) without a written waiver | S3 | `crates/prism-extract-*` | P6 Stage A waiver + language expansion track (**partially closed** — Java/Perl added 2026-07-27; TS/Go still open) |
 | **G-05** | MCP transport diverges from the `rmcp` decision | S3 | `prism-mcp/Cargo.toml` has no `rmcp` | P6 Stage A ADR: keep hand-rolled or migrate |
 | **G-06** | No Kuzu adapter and **no measured evidence** for the P95 <50ms structural-query NFR | S2 | no bench, no criterion | P6 Stage A |
 | **G-07** | `benches/` contains only a README, so growth rule 6 (“perf regressions fail CI”) is unenforceable | S3 | `benches/README.md` | P6 Stage A |
@@ -2326,7 +2463,7 @@ flowchart LR
 | **ACC-6** | 0 vendored/fixture fragments in packs unless the question anchors there | fixtures indexed indistinguishably |
 | **ACC-7** | G3 precision sample extended to n≥20 dual-reviewed, still ≥70% | n=10 (T001), κ=0.78 |
 
-> **Naming:** `ACC-n` are P12 accuracy targets; `A1`–`A5` remain **benchmark arms** (§20.1). Arm A5 is the doc-aware graph baseline that target ACC-5 measures against.
+> **Naming:** `ACC-n` are P12 accuracy targets; `A1`–`A5` remain **benchmark arms** (§23.1). Arm A5 is the doc-aware graph baseline that target ACC-5 measures against.
 
 ---
 
@@ -2367,7 +2504,7 @@ Give the KG the nodes it is missing. Repository *intent* lives in markdown; toda
 
 | Risk | Mitigation |
 |---|---|
-| Doc layer drifts into abstractive summarization | Extractive spans only; guardrail added to §21.4 |
+| Doc layer drifts into abstractive summarization | Extractive spans only; guardrail added to §24.4 |
 | Docs contradict code and the model believes the doc | `asserted` confidence + never precision-gated; review sample includes contradiction cases |
 | Markdown-heavy monorepos blow up index size | Section-level granularity + size caps + `index_status` reporting doc share |
 | Doc nodes pollute code queries | Default `kind` filtering; opt-in inclusion by recipe |
@@ -2420,14 +2557,14 @@ Stop manufacturing evidence. Today an unfillable role becomes synthetic text; a 
 3. **Seed-grounding design** — scoring, thresholds, candidate ranking, refusal copy  
 4. **Vocabulary-expansion design** — term sources, expansion caps, EXPLAIN disclosure  
 5. **Path-class policy** — first-party vs vendored/fixture/generated, with per-repo overrides  
-6. **Updated intent recipe cards** for `repo_qa` and `architecture` (template §23.3)  
+6. **Updated intent recipe cards** for `repo_qa` and `architecture` (template §26.3)  
 
 #### Risks
 
 | Risk | Mitigation |
 |---|---|
 | Packs get smaller and look “worse” to existing token dashboards | Report answerability alongside tokens; ACC-1/ACC-2 are the gate, not pack size |
-| Lexical fallback becomes the retrieval spine | Lexical may only *seed* anchors, never emit fragments; EXPLAIN records seed origin; guardrail in §21.4 |
+| Lexical fallback becomes the retrieval spine | Lexical may only *seed* anchors, never emit fragments; EXPLAIN records seed origin; guardrail in §24.4 |
 | More refusals annoy agents | Refusals must carry ranked candidates; measure repair success as in P9 |
 | Path classification hides real first-party code | Overrides + `index_status` reporting of excluded classes |
 
@@ -2530,7 +2667,7 @@ Settle the accuracy claim the same way P9 settled tool choice: with a published,
 
 #### Deliverables
 
-1. **Doc-QA gold suite v1** (task cards per template §23.9)  
+1. **Doc-QA gold suite v1** (task cards per template §26.9)  
 2. **Five-arm accuracy report v1** — per-arm tokens/quality/citation validity + ablation table  
 3. **Adjudication protocol** doc + κ results  
 4. **P12 scorecard** — ACC-1…ACC-7 pass/fail with artifacts  
@@ -2551,7 +2688,7 @@ Settle the accuracy claim the same way P9 settled tool choice: with a published,
 - [x] Five-arm report published (live-judged quality + ablations) *([P12-FIVE-ARM-REPORT.md](../eval/P12-FIVE-ARM-REPORT.md))*  
 - [x] Prism ≥ arm A5 (doc-aware graph) on the shared narrative set at ≤½ tokens (**ACC-5**) *(Δq=+43.3 pts, token ratio 0.461)*  
 - [x] Ablations show which capability bought which accuracy points *(docs / louvain / lexical rows in five-arm report)*  
-- [x] No published claim without an archived artifact (guardrail §21.5 rule 7)
+- [x] No published claim without an archived artifact (guardrail §24.6 rule 7)
 
 > **Closeout (2026-07-27):** Stage D live adjudication complete (1A agent dual-pass + 2A Graphify). **Phase 12 gate PASS.** Residual: optional human 1C spot-check; explore arms A/B remain scripted placeholders.
 
@@ -2572,9 +2709,624 @@ Settle the accuracy claim the same way P9 settled tool choice: with a published,
 
 ---
 
-## 20. Evaluation program (runs across phases)
+## 20. Phase 13 — Core Refactor & Boundary Hardening
 
-### 20.1 Benchmark arms (always)
+> **Opened 2026-07-27.** First phase whose product outcome is **zero new user-visible features**. P0–P12 grew capability fast; the engine now carries god files, four duplicated tool surfaces, and a stringly-typed error model. P13 pays that down **without changing behavior**.
+
+**Phase goal:** Make the codebase safe to change. Extract one service layer that every surface calls, decompose the three god files, replace duplicated refusal strings with a typed IR, and put size/complexity budgets under CI — with pack-output parity as the proof that nothing moved.
+
+**Phase duration:** 4–6 weeks  
+**Phase gate (summary):** On a frozen question set, packs produced before and after the refactor are semantically identical; every surface (MCP/CLI/HTTP/LSP) routes through one service crate; no file >600 LOC and no function >120 LOC without a recorded waiver.
+
+### 20.1 Measured baseline (why this phase exists)
+
+Measured 2026-07-27 — **19,960 LOC** of Rust across **20 crates**, **103 test functions**:
+
+| Signal | Measurement | Consequence |
+|---|---|---|
+| CLI god file | `prism-cli/src/main.rs` **1,549 LOC**; `main()` ≈ **949 lines**; graph hub degree **298** | Every CLI change edits one function; zero in-file tests |
+| Selection god function | `prism-compile/src/select.rs` **1,099 LOC**; `select_from_kg()` ≈ **516 lines**; **no `#[cfg(test)]` module** | The accuracy-critical core (P12) is the least unit-tested code we own |
+| Agent contract has two sources of truth | `prism-mcp/src/tools.rs` **874 LOC**, `list_tools_schema()` **168 lines** of hand-built JSON, while `schemas/mcp-tools/v1/` is the declared contract of record | Schema drift between the file agents read and the code agents call |
+| No shared service layer | Tool-name references: MCP **88** · CLI **34** · HTTP **23** · LSP **12**; `prism-cli` depends on **14** workspace crates (incl. `prism-api`, `prism-daemon`, `prism-lsp`, `prism-view`) | Four adapters re-implement dispatch; the CLI has become a fan-in god crate |
+| Refusal model is stringly typed | Refusal codes appear in **12 files** (`mcp/errors.rs` 14, `agent/repair.rs` 6, `agent/assets.rs` 6, `precise/require.rs` 5, `cli/main.rs` 5, `api/error.rs` 5) | “Every surface shares one error model” (§25.1 item 2) is a convention, not a type |
+| Store handles opened ad hoc | `SqliteKgStore::open(...)` at 8+ call sites outside `prism-store` — including per-request in `prism-api/src/routes.rs` | No ownership boundary; the performance half is P14 |
+| Test net is thin where it matters | 103 test fns / ~20k LOC; `main.rs` and `select.rs` have **0** in-file tests; `communities.rs` is ~27% tests | Refactoring without characterization tests is a gamble |
+| Orientation clustering is fragmenting | `repo_map`: **40** communities, **10 singleton** `docs/architecture/` communities, `bridges=0`, largest community is docs (21 files / 180 nodes) | Louvain quality degrades as the doc layer grows (P12 Stage C follow-through) |
+
+**What is already healthy — do not “fix” it:** `unwrap()`/`expect()` in the four highest-count files (`incremental.rs`, `intel.rs`, `compile/lib.rs`, `workspace.rs`) are **entirely inside `#[cfg(test)]` modules** — production paths return `Result`. Zero `TODO`/`FIXME`/`HACK` markers. MSRV pinned (`rust-version = 1.85`). Clippy runs `-D warnings` on all targets in CI.
+
+### 20.2 Refactor targets (measurable)
+
+| ID | Target | Baseline today |
+|---|---|---|
+| **REF-1** | Pack **parity**: frozen question set produces semantically identical packs pre/post refactor | no parity harness exists |
+| **REF-2** | One service crate owns capability execution; MCP/CLI/HTTP/LSP contain adapter code only | 4 duplicated dispatch surfaces |
+| **REF-3** | No file >600 LOC, no function >120 LOC (waiver requires an ADR) | max file 1,549; max fn ~949 |
+| **REF-4** | Refusal codes are a typed enum in `prism-ir`; no surface hardcodes the strings | codes in 12 files |
+| **REF-5** | MCP tool schemas generated from `schemas/mcp-tools/v1` — one source of truth | 168-line hand-built JSON |
+| **REF-6** | `prism-cli` depends on ≤6 workspace crates | 14 |
+| **REF-7** | Characterization tests cover CLI dispatch + selection roles before decomposition | 0 in-file tests in both |
+
+```mermaid
+flowchart LR
+    A[Stage A Seams + characterization] --> B[Stage B Service layer extraction]
+    B --> C[Stage C God-file decomposition]
+    C --> D[Stage D Parity gate + budgets in CI]
+```
+
+---
+
+### Stage A — Seams before surgery
+
+#### Purpose
+
+Buy the safety net first. Nothing is moved in this stage: we add types, tests, and measurements that make the later stages verifiable.
+
+#### Entry criteria
+
+- P12 gate passed (pack semantics stable enough to freeze)  
+- Agreement that P13 ships **no behavior change** — parity is the gate
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| **W-REFAC** (new) | **Characterization tests:** freeze a question/command set; record current pack + CLI JSON output as golden artifacts |
+| **W-REFAC / W-IR** | **Typed refusal IR:** `RefusalCode` enum + `PrismError` in `prism-ir`, with `Display`/serde mapping to today’s exact strings (wire-compatible) |
+| **W-REFAC** | **Complexity census:** per-file/per-function size report committed as a baseline artifact; budgets defined but **not yet enforced** |
+| **W-CC** | Extract pure helpers out of `select_from_kg` where provably side-effect free, guarded by the new goldens |
+| **W-DEBT** | Record which oversized units get waivers vs decomposition, before anyone starts moving code |
+
+#### Deliverables
+
+1. **Parity harness spec + golden corpus** — frozen questions, commands, and expected pack/CLI shapes  
+2. **Refusal IR design** — enum, wire mapping, migration order per surface  
+3. **Complexity baseline report** — file/function size census with budget thresholds proposed  
+4. **Refactor waiver list** — units allowed to stay large, each with a reason and expiry  
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Goldens encode current bugs as “correct” | Parity is scoped to *structure and citations*, not to placeholder-era text; P12 invariants still apply |
+| Typed errors change wire strings and break agents | Serde mapping is byte-compatible; conformance test asserts old strings |
+| Census becomes a vanity metric | Budgets are enforced only in Stage D, after decomposition proves them reachable |
+
+#### Exit / acceptance
+
+- [ ] Golden corpus reproducible on two machines (deterministic)  
+- [ ] `RefusalCode` exists and round-trips to the exact current strings  
+- [ ] Complexity baseline committed with proposed budgets (REF-3)  
+- [ ] No production behavior change (parity harness green against itself)
+
+---
+
+### Stage B — Service layer extraction
+
+#### Purpose
+
+Create the missing middle. Today four adapters each know how to *execute* capabilities; they should only know how to *speak a protocol*.
+
+#### Entry criteria
+
+- Stage A goldens green  
+- Capability inventory agreed (compile, plan, resolve, neighbors, impact, repo_map, entrypoints, detect_changes, view, slice, workflow)
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| **W-REFAC** | **`prism-engine` crate:** one typed entry per capability — request struct in, typed result or `PrismError` out; owns store/session handles |
+| **W-MCP / W-SVC** | MCP + HTTP become adapters: parse → call engine → serialize; no graph or budget logic left in either |
+| **W-IDE** | LSP adapter follows the same contract (it already has the thinnest surface — do it first as the pilot) |
+| **W-REFAC** | **CLI dependency diet:** CLI talks to the engine, not to `prism-api`/`prism-daemon`/`prism-lsp`/`prism-view` directly (REF-6) |
+| **W-STORE** | Session/handle ownership moves behind the engine — no `SqliteKgStore::open` outside `prism-store`/engine (sets up P14) |
+| **W-OBS** | One instrumentation point per capability instead of four partial ones |
+
+#### Deliverables
+
+1. **Capability contract** — request/response types, error taxonomy, cancellation and budget parameters  
+2. **Adapter migration order** — LSP → MCP → HTTP → CLI, with parity checked after each  
+3. **Dependency-graph target** — allowed edges between crates (an architecture fitness rule)  
+4. **Deprecation notes** for any direct-store call sites removed  
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Engine becomes a second god crate | Capability modules, not one `engine.rs`; Stage D budgets apply to it too |
+| Migration drags and the repo lives in two worlds | Adapter-by-adapter with parity gates; no long-lived branch |
+| Hidden behavior differences between surfaces surface as “regressions” | They are **findings** — record them; the engine picks one correct behavior with an ADR |
+
+#### Exit / acceptance
+
+- [ ] All four surfaces route through `prism-engine` (REF-2)  
+- [ ] No `SqliteKgStore::open` outside `prism-store` / engine  
+- [ ] `prism-cli` workspace dependencies ≤6 (REF-6)  
+- [ ] Parity green after each adapter migration  
+- [ ] Divergences found between surfaces are recorded as ADRs, not silently unified
+
+---
+
+### Stage C — God-file decomposition
+
+#### Purpose
+
+Break the three files that concentrate change risk, now that behavior is pinned by goldens and routed through one engine.
+
+#### Entry criteria
+
+- Stage B complete; parity harness reliable  
+- Waiver list agreed (what may stay big)
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| **W-REFAC** | `main.rs` → one module per command group (`index`, `compile`, `query`, `host`, `hook`, `agent`, `self-update`); `main()` becomes routing only |
+| **W-CC** | `select.rs` → role resolvers (doc/prose, code definition, neighbors, community) + a thin orchestrator; each resolver independently unit-tested |
+| **W-MCP** | `tools.rs` → schema-driven dispatch generated from `schemas/mcp-tools/v1` (REF-5); handlers become one function each |
+| **W-KG** | Split `communities.rs` (818 LOC) into clustering, labeling, and hub-ranking modules — prerequisite for the P12-C quality follow-ups (singleton communities, `bridges=0`) |
+| **W-EVAL** | Unit tests land **with** each extracted module; coverage of `select.rs` roles becomes a tracked number |
+
+#### Deliverables
+
+1. **Module maps** for `prism-cli`, `prism-compile`, `prism-mcp`, `prism-store::communities`  
+2. **Schema-generated MCP dispatch** design (codegen or build script, with conformance test)  
+3. **Role-resolver test matrix** for selection  
+4. **Community-quality follow-up note** — singleton communities and inert bridges triaged (fix here or defer to an accuracy follow-on with an ID)
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Decomposition changes pack ordering subtly | Parity harness compares citations and roles, not just token counts |
+| Codegen adds build complexity | Prefer a checked-in generated file with a CI freshness test over build-time magic |
+| Splitting `communities.rs` disturbs P12 gate results | Re-run the P12 ACC checklist as part of Stage C exit |
+
+#### Exit / acceptance
+
+- [ ] `main()` is routing only; command modules own their logic  
+- [ ] No selection role resolver exceeds the function budget; each has tests (REF-7)  
+- [ ] MCP schema has exactly one source of truth, verified by conformance test (REF-5)  
+- [ ] P12 ACC-1…ACC-7 re-run and still pass  
+- [ ] Parity green
+
+---
+
+### Stage D — Parity gate & enforced budgets
+
+#### Purpose
+
+Turn the one-off cleanup into a property the repository keeps.
+
+#### Entry criteria
+
+- Stages A–C delivered; waiver list final
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| **W-REFAC** | Enforce REF-3 budgets in CI (file/function size), with the waiver list as the only escape hatch |
+| **W-REFAC** | **Architecture fitness test:** forbidden crate edges fail the build (e.g. CLI → daemon, adapters → store) |
+| **W-EVAL** | Parity harness runs in CI on every PR touching engine/compile/store |
+| **W-DEBT** | Close the refactor drift items; every remaining oversized unit has an ADR with an expiry phase |
+| **W-OBS** | Publish the P13 scorecard: LOC distribution, duplication counts, dependency fan-in before/after |
+
+#### Deliverables
+
+1. **P13 scorecard** — REF-1…REF-7 pass/fail with before/after numbers  
+2. **CI policy** — size budgets, fitness rules, parity job  
+3. **ADR set** for accepted divergences and remaining waivers  
+4. **Phase 13 gate evidence pack**  
+
+#### Exit / acceptance (Phase 13 gate)
+
+- [ ] REF-1…REF-7 met or waived with a dated ADR  
+- [ ] CI fails a PR that reintroduces a god file or a forbidden crate edge  
+- [ ] Pack parity job green on the frozen set (REF-1)  
+- [ ] No user-visible behavior change shipped by this phase without an ADR
+
+#### Non-goals (this phase)
+
+- New capabilities, tiers, or languages  
+- Performance work (that is P14 — measure, do not optimize here)  
+- Changing Evidence Pack semantics or P12 accuracy behavior  
+- Rewriting extractors or the storage engine
+
+#### Handoff
+
+P14 inherits a single place to optimize (engine + store boundary) instead of four call paths.
+
+---
+
+## 21. Phase 14 — Performance & Scale Proof
+
+> **Opened 2026-07-27.** Prism’s NFRs (N1 cold index, N2 P95 query) are still **unproven at real scale**: benches run against a 16-file synthetic fixture while two pinned pilot corpora sit unused for performance work.
+
+**Phase goal:** Prove — and then defend in CI — that indexing and structural queries meet their NFRs on real repositories, by fixing the measured hot spots: per-call store opens, uncached orientation, and a mostly single-threaded pipeline.
+
+**Phase duration:** 4–6 weeks  
+**Phase gate (summary):** N1 and N2 targets met on pinned pilot repos (httpx, ripgrep) with hard numeric ceilings enforced in CI, plus published memory and index-size budgets.
+
+### 21.1 Measured baseline (why this phase exists)
+
+| Signal | Measurement | Consequence |
+|---|---|---|
+| Benchmarks measure a toy | N1/N2 baselines use **8 Python + 8 Rust synthetic modules**; means: cold index 6.52 ms, incremental 3.43 ms, queries 12.8–31.8 µs | Numbers are a regression slope, not NFR proof — the baseline doc says so honestly |
+| CI bench is a smoke, not a gate | `--sample-size 10 --warm-up-time 1 --measurement-time 1`; “hard P95 fail gates wait until pilot-repo numbers exist” | A 10× slowdown could merge unnoticed |
+| Pilot corpora exist but are unused for perf | `fixtures/repos/snapshots/httpx` **12 MB**, `ripgrep` **10 MB** — pinned for eval only | The hard part is already vendored; nobody points the benches at it |
+| Store opened per call | `SqliteKgStore::open(...)` per request in `prism-api/src/routes.rs`, plus LSP/compile/precise call sites | PRAGMA + schema probe per request; no pooling or warm handle |
+| Orientation recomputed every time | `repo_map` runs `file_adjacency()` + `louvain_cluster()` on each call (`communities.rs`, 818 LOC); no snapshot-keyed cache | Louvain cost is paid per agent orientation call |
+| Parallelism is shallow | Exactly **one** `par_iter()` in the workspace (`prism-core/src/incremental.rs`); writes serialize through a single connection | Extraction scales; persistence does not |
+| Index growth is real | This workspace: **519 files → 3,351 nodes / 12,839 edges / 17.5 MB** (doc layer ~doubled node count) | Size/memory budgets need numbers before the next layer lands |
+
+### 21.2 Performance targets (measurable)
+
+| ID | Target | Baseline today |
+|---|---|---|
+| **PERF-1** | N1 cold index meets the ADD target on **pilot repos**, published per repo | only mini-fixture numbers |
+| **PERF-2** | N1 incremental single-file edit <2 s on pilot repos | mini-fixture 3.43 ms (not comparable) |
+| **PERF-3** | N2 structural query **P95 <50 ms on pilot repos**, enforced as a CI ceiling | ceiling explicitly deferred |
+| **PERF-4** | Warm `repo_map` served from a snapshot-keyed cache; cold recompute only on index change | recomputed every call |
+| **PERF-5** | Peak RSS + on-disk index size budgets published per KLOC and enforced | unmeasured |
+| **PERF-6** | Perf regression guard: CI fails on >20% slowdown vs recorded baseline | none |
+
+```mermaid
+flowchart LR
+    A[Stage A Pilot harness + profiles] --> B[Stage B Store & query optimization]
+    B --> C[Stage C Pipeline parallelism]
+    C --> D[Stage D NFR gate]
+```
+
+---
+
+### Stage A — Pilot-scale harness & profiling
+
+#### Purpose
+
+Measure the real thing before changing it. Every optimization in this phase must cite a profile.
+
+#### Entry criteria
+
+- Pilot SHAs pinned (already true: httpx `b5addb6`, ripgrep `f9c05a9`)  
+- P13 Stage B engine boundary available, or a documented plan to measure both paths
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| **W-PERF** (new) | Pilot-scale bench suite: cold index, incremental edit, and the N2 query set against httpx + ripgrep |
+| **W-PERF** | Phase timing breakdown: walk → extract → resolve → persist → cluster, reported per repo |
+| **W-PERF** | Profiles: CPU flamegraph + `EXPLAIN QUERY PLAN` for the hot SQL in `query.rs` / `communities.rs` / `intel.rs` |
+| **W-OBS** | Perf events emitted with snapshot id so numbers are attributable to an index version |
+| **W-EVAL** | Baseline scorecard format that can be diffed release over release |
+
+#### Deliverables
+
+1. **Pilot bench suite** design + fixture policy (vendored snapshots, not network clones)  
+2. **Phase-timing report** for both pilots  
+3. **Query plan audit** — indexes used/missed, N+1 patterns, prepared-statement reuse opportunities  
+4. **Perf baseline v1** scorecard  
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| CI runners too slow/noisy for absolute ceilings | Ceilings set from CI-runner baselines with variance bands; local numbers reported separately |
+| Vendored pilots bloat the repo further | Already vendored (22 MB total); no new corpora without a size review |
+| Profiling becomes a one-off | Profiles are archived artifacts referenced by the gate |
+
+#### Exit / acceptance
+
+- [ ] Benches run against both pilots and publish per-phase timings  
+- [ ] Query plan audit lists every full-table scan on a hot path  
+- [ ] Baseline v1 archived and diffable
+
+---
+
+### Stage B — Store, query & cache optimization
+
+#### Purpose
+
+Fix the two structural costs the audit already predicts: opening a store per call, and recomputing orientation per call.
+
+#### Entry criteria
+
+- Stage A profiles exist; optimizations must reference them  
+- P13 Stage B ownership boundary in place (no ad-hoc `open` call sites)
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| **W-PERF / W-STORE** | Warm handle / connection pool owned by the engine; PRAGMA + schema probe once per process, not per request |
+| **W-PERF** | Prepared-statement reuse and batched reads on `query.rs` hot paths |
+| **W-PERF** | **Snapshot-keyed caches** for orientation (communities, hubs, entrypoints) and, if profiles justify, compiled packs — invalidated by snapshot id, never by TTL |
+| **W-STORE** | Index/schema tuning driven by the query-plan audit; write batching + transaction sizing |
+| **W-SEC** | Cache lives under `.prism/`, respects redaction, and never persists secrets from doc nodes |
+| **W-DEBT** | Any memoization must satisfy the program rule: **cache is memoization only**, dependency-keyed, never an answer cache (that stays P10 Stage C) |
+
+#### Deliverables
+
+1. **Session/pool design** — lifetime, concurrency, WAL implications  
+2. **Cache design** — keys (snapshot id + query shape), invalidation, size caps, disable switch  
+3. **Schema/index change set** with before/after query plans  
+4. **Updated perf scorecard** showing the delta attributable to each change  
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Caching serves stale orientation after an edit | Key on snapshot id; incremental index bumps it; test edit→query→fresh result |
+| Pooling introduces lock contention under the daemon | Load test the daemon path; WAL + read-only connections for query traffic |
+| “Cache” quietly becomes an answer cache | Explicit non-goal; guardrail in §24.6 |
+
+#### Exit / acceptance
+
+- [ ] No per-request store open on any surface  
+- [ ] Warm `repo_map` served from cache; correctness test proves invalidation on edit (PERF-4)  
+- [ ] Hot-path query plans use indexes; no full scans on N2 paths  
+- [ ] Measured improvement attributed change-by-change
+
+---
+
+### Stage C — Pipeline parallelism & incremental correctness
+
+#### Purpose
+
+Make indexing scale past one `par_iter()` without breaking the incremental guarantees P0–P1 established.
+
+#### Entry criteria
+
+- Stage B landed (store boundary stable under concurrency)  
+- Incremental correctness tests exist and pass
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| **W-PERF / W-STORE** | Pipeline extract → persist with bounded channels; batch writes instead of per-file transactions |
+| **W-PERF** | Parallelize markdown + code extraction paths; measure whether tree-sitter parsing or SQLite writes dominate |
+| **W-CORE** | Deterministic output under parallelism (stable node/edge ordering) so packs and goldens stay reproducible |
+| **W-PERF** | Analyzer-version reindex cost: P12 introduced `ANALYZER_PIPELINE_VERSION` invalidation — measure and bound a full re-extract |
+| **W-EVAL** | Concurrency stress: index while querying; assert no torn reads and no corrupted snapshot |
+
+#### Deliverables
+
+1. **Pipeline design** — stages, backpressure, failure isolation per file  
+2. **Determinism proof** — same repo indexed N times yields identical graph bytes or a documented canonical ordering  
+3. **Reindex-cost note** — what a pipeline-version bump costs on pilots  
+4. **Concurrency test suite**  
+
+#### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Parallel writes corrupt or serialize anyway | Single writer + batched transactions; parallelism stays on the CPU-bound side |
+| Nondeterministic ordering breaks pack parity (REF-1) | Canonical sort before persist; parity harness is the guard |
+| Speedups only appear on huge repos | Report both pilots and the mini fixture; no cherry-picking |
+
+#### Exit / acceptance
+
+- [ ] Measurable cold-index speedup on pilots with determinism preserved  
+- [ ] Index-while-query stress passes with no stale/torn results  
+- [ ] Analyzer-version reindex cost documented (PERF-1 context)
+
+---
+
+### Stage D — NFR gate
+
+#### Purpose
+
+Convert measurements into enforced ceilings, so performance stops being a claim.
+
+#### Entry criteria
+
+- Stages A–C delivered; CI-runner variance characterized
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| **W-PERF / W-EVAL** | Hard ceilings in CI for N1/N2 on pilot repos with variance bands (PERF-3, PERF-6) |
+| **W-PERF** | Memory + index-size budgets published per KLOC (PERF-5) |
+| **W-OBS** | Perf scorecard published alongside the accuracy scorecard — tokens, accuracy, and latency in one place |
+| **W-DEBT** | Retire the P6 Stage A note that hard gates “wait until pilot numbers exist” — the numbers now exist or the gate fails honestly |
+
+#### Deliverables
+
+1. **P14 scorecard** — PERF-1…PERF-6 pass/fail per pilot  
+2. **CI perf policy** — ceilings, bands, and the escape procedure for legitimate regressions  
+3. **Capacity note** — expected behavior on a 100k-LOC repository, stated with evidence or stated as unknown  
+4. **Phase 14 gate evidence pack**  
+
+#### Exit / acceptance (Phase 14 gate)
+
+- [ ] PERF-1…PERF-6 met or waived with dated ADRs  
+- [ ] CI fails a >20% regression on the pilot benches  
+- [ ] Published numbers name the hardware and the snapshot they came from  
+- [ ] No accuracy regression: P12 ACC checklist re-run green
+
+#### Non-goals (this phase)
+
+- Shared/team index or remote workers (P10)  
+- LLM answer caching (P10 Stage C)  
+- Swapping SQLite for another engine without an ADR  
+- New analysis tiers or languages
+
+#### Handoff
+
+P15 inherits trustworthy perf artifacts to include in release evidence.
+
+---
+
+## 22. Phase 15 — Reliability, Governance & Release Trust
+
+> **Opened 2026-07-27.** Two waivers have outlived their expiry phases, the residual-risk register predates P12, and the harness that gates accuracy is not run by CI. This phase makes the program’s **claims** as maintained as its code.
+
+**Phase goal:** Close governance drift, extend the test and CI safety net to the places that gate releases, and finish the release-trust story P11 started.
+
+**Phase duration:** 3–5 weeks  
+**Phase gate (summary):** Every waiver has a live expiry, the residual-risk register is generated from evidence rather than memory, CI exercises all three OS families plus the eval harness, and release artifacts carry provenance.
+
+### 22.1 Measured baseline (why this phase exists)
+
+| Signal | Measurement | Consequence |
+|---|---|---|
+| Expired / orphaned waivers | ADR-0005 (OTLP exporter) expiry **Phase 7** — passed. ADR-0001 (WASM plugin host) expiry **Phase 8** — a phase that was **cut** (ADR-0007) | Two waivers are live with no enforceable review point |
+| Residual-risk register is stale | R4 still says communities are path-prefix with “optional Leiden later” — Louvain shipped in P12 Stage C; R2/R13 predate the P12 numbers | The public risk list understates *and* overstates reality |
+| Gate-critical harness is outside CI | `eval/baselines/p12_live_adjudication.py` is a **top-5 graph hub (degree 136)** and produces the ACC verdicts, but no CI job runs Python eval | The accuracy gate can silently rot |
+| CI is single-OS | `ci.yml` runs `ubuntu-latest` only, while P11 claims macOS/Linux/Windows support | Cross-platform claims rest on the install-smoke job alone |
+| No coverage signal | No `tarpaulin`/`llvm-cov`; 103 test fns for ~20k LOC | “Well tested” is unmeasured; P13 makes it measurable |
+| No MSRV verification job | `rust-version = 1.85` declared; CI builds with `stable` | MSRV can break without anyone noticing |
+| P11 Stage C still open | Cold-VM gate pending a public release tag | The distribution claim remains partially unproven |
+
+### 22.2 Reliability targets (measurable)
+
+| ID | Target | Baseline today |
+|---|---|---|
+| **REL-1** | Every ADR waiver has a **live, future** expiry phase and a named owner | 2 expired/orphaned |
+| **REL-2** | Residual-risk register generated from gate artifacts, regenerated at every phase exit | hand-maintained, stale |
+| **REL-3** | Eval harness (accuracy + parity) runs in CI on a schedule and on relevant PRs | not run |
+| **REL-4** | CI matrix covers macOS, Linux, Windows for build + test | Linux only |
+| **REL-5** | Coverage measured and ratcheted (no decrease), with selection/engine paths reported separately | unmeasured |
+| **REL-6** | MSRV job proves `1.85` still builds | absent |
+| **REL-7** | Release artifacts carry provenance (SBOM and/or signatures) beyond SHA-256 | checksums only |
+
+```mermaid
+flowchart LR
+    A[Stage A Governance sweep] --> B[Stage B Test & CI hardening]
+    B --> C[Stage C Release trust]
+```
+
+---
+
+### Stage A — Governance sweep
+
+#### Purpose
+
+Make the paper trail true again. This is cheap, high-trust work that the program’s own guardrails already demand (“no claim without an artifact”).
+
+#### Entry criteria
+
+- P12 gate artifacts available as evidence inputs
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| **W-REL** (new) | **Waiver audit:** re-date ADR-0001 and ADR-0005 to live expiry phases, or close them; add an owner field |
+| **W-REL / W-DEBT** | **Risk register refresh:** regenerate `PROGRAM-RESIDUAL-RISKS.md` from phase gate outputs; mark R4/R2/R13 with their P12 reality |
+| **W-DEBT** | Drift sweep across README / ADD / TASKS for post-P12 statements (e.g. README still says “Phase 11”) |
+| **W-REL** | Define the **expiry enforcement rule**: a waiver whose phase has shipped blocks the next phase gate until re-dated |
+
+#### Deliverables
+
+1. **Waiver audit report** + updated ADRs  
+2. **Regenerated residual-risk register** with provenance links  
+3. **Doc drift closure list**  
+4. **Waiver expiry policy** (enforcement point + owner)
+
+#### Exit / acceptance
+
+- [ ] Zero waivers with past or orphaned expiries (REL-1)  
+- [ ] Risk register entries each cite an artifact (REL-2)  
+- [ ] Phase-status statements agree across README, ADD, planning, and TASKS
+
+---
+
+### Stage B — Test & CI hardening
+
+#### Purpose
+
+Extend CI to the surfaces that actually gate releases: other operating systems, the eval harness, coverage, and MSRV.
+
+#### Entry criteria
+
+- Stage A complete (so CI is not enforcing stale claims)  
+- P13 parity harness available to run in CI
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| **W-REL** | OS matrix for build + test (macOS, Windows, Linux) with clear skip rules for platform-specific tests |
+| **W-REL / W-ACC** | Eval harness job: parity + ACC checklist on a schedule; failures open an issue rather than silently passing |
+| **W-REL** | Coverage baseline + ratchet; report `prism-compile` / `prism-engine` separately (they carry accuracy) |
+| **W-REL** | MSRV job pinned to `rust-version` |
+| **W-EVAL** | Property/fuzz tests for extractors (malformed source, huge files, mixed encodings) and pack invariants (never drop must-include; no fragment without citation) |
+| **W-SEC** | Secret-redaction regression test kept in the matrix (planted-secret fixture already exists) |
+
+#### Deliverables
+
+1. **CI matrix design** + runtime budget (keep PR feedback under a stated ceiling)  
+2. **Coverage policy** — baseline, ratchet rule, exclusions  
+3. **Property/fuzz test plan** for extractor and pack invariants  
+4. **Harness-in-CI runbook** (what to do when accuracy drifts)
+
+#### Exit / acceptance
+
+- [ ] Three-OS matrix green (REL-4)  
+- [ ] Coverage measured, published, and ratcheted (REL-5)  
+- [ ] MSRV job green (REL-6)  
+- [ ] Eval harness runs unattended and reports (REL-3)  
+- [ ] Fuzz corpus finds no panics in extractor paths
+
+---
+
+### Stage C — Release trust & Phase 15 exit
+
+#### Purpose
+
+Finish what P11 started: an install users can verify, on a release that can be traced.
+
+#### Entry criteria
+
+- Stages A–B delivered  
+- A public release tag exists (also unblocks the open **P11 Stage C** cold-VM gate)
+
+#### Workstreams
+
+| Workstream | Activities |
+|---|---|
+| **W-REL / W-DIST** | Provenance: SBOM and/or signature (cosign/minisign) attached to release artifacts (REL-7) |
+| **W-DIST** | Upgrade/rollback smoke: N → N+1 → back to N, with host adapters intact |
+| **W-SEC** | Release checklist executed against the gate tag; supply-chain review of new dependencies added since P11 |
+| **W-EVAL** | Co-gate with P11 Stage C: cold-VM matrix run on the same tag |
+| **W-DEBT** | Final reconciliation: phase status in every top-level document matches the gate evidence |
+
+#### Deliverables
+
+1. **P15 scorecard** — REL-1…REL-7  
+2. **Provenance documentation** — what is signed, how to verify  
+3. **Upgrade/rollback report**  
+4. **Phase 15 gate evidence pack**
+
+#### Exit / acceptance (Phase 15 gate)
+
+- [ ] REL-1…REL-7 met or waived with dated ADRs  
+- [ ] A user can verify a release artifact’s provenance from published instructions  
+- [ ] Upgrade and rollback both proven on a real tag  
+- [ ] P11 Stage C cold-VM gate closed or its residual risk restated with a date
+
+#### Non-goals (this phase)
+
+- New product capability of any kind  
+- Team/shared index (P10)  
+- Re-opening the IDE extension (ADR-0007)  
+- Performance work (P14 owns ceilings)
+
+#### Handoff
+
+The program reaches a state where **capability, accuracy, performance, and claims** are each backed by a maintained artifact — the precondition for opening P10 or a public 1.0.
+
+---
+
+## 23. Evaluation program (runs across phases)
+
+### 23.1 Benchmark arms (always)
 
 | Arm | Description |
 |---|---|
@@ -2586,7 +3338,7 @@ Settle the accuracy claim the same way P9 settled tool choice: with a published,
 
 **Program success:** A3 approaches A1; A4 optional ceiling. The four-arm run with real models is **executed in P9 Stage C** — until then, published numbers are structural proxies and must say so. **From P12 Stage D the suite is five-arm:** A5 exists so “we beat naive explore” is never mistaken for “we beat a doc-aware graph”, which measurement on 2026-07-26 showed we did not on narrative questions.
 
-### 20.2 Task categories by phase emphasis
+### 23.2 Task categories by phase emphasis
 
 | Category | Introduce | Primary phase gate |
 |---|---|---|
@@ -2603,8 +3355,11 @@ Settle the accuracy claim the same way P9 settled tool choice: with a published,
 | **Doc-grounded product / narrative QA** | P12 | P12 |
 | **Citation validity (does the answer’s evidence exist?)** | P12 | P12 |
 | **Cross-tool parity vs doc-aware graph** | P12 | P12 |
+| **Pack parity across a refactor** (same question, same evidence) | P13 | P13 |
+| **Pilot-scale index & query performance** | P14 | P14 |
+| **Claim freshness audit** (waivers, risk register, docs vs gates) | P15 | P15 |
 
-### 20.3 Metrics ownership
+### 23.3 Metrics ownership
 
 | Metric | Owner workstream | First measured |
 |---|---|---|
@@ -2630,20 +3385,32 @@ Settle the accuracy claim the same way P9 settled tool choice: with a published,
 | **Seed-grounding precision / wrong-seed rate** (ACC-3) | W-PLAN + W-ACC | P12 |
 | **Community label acceptance + unresolved-hub share** (ACC-4) | W-KG + W-ACC | P12 |
 | **Parity delta vs doc-aware baseline arm A5** (ACC-5) | W-ACC + W-EVAL | P12 |
+| **Pack parity rate across refactors** (REF-1) | W-REFAC + W-EVAL | P13 |
+| **Max file / function size + waiver count** (REF-3) | W-REFAC | P13 |
+| **Surface duplication & crate fan-in** (REF-2, REF-6) | W-REFAC | P13 |
+| **N1 cold/incremental on pilot repos** (PERF-1, PERF-2) | W-PERF + W-STORE | P14 |
+| **N2 P95 on pilot repos, enforced** (PERF-3) | W-PERF + W-OBS | P14 |
+| **Warm orientation hit rate + invalidation correctness** (PERF-4) | W-PERF | P14 |
+| **Peak memory + index size per KLOC** (PERF-5) | W-PERF | P14 |
+| **Perf regression detection rate** (PERF-6) | W-PERF + W-EVAL | P14 |
+| **Waiver freshness (expired waivers = 0)** (REL-1) | W-REL + W-DEBT | P15 |
+| **Test coverage, ratcheted** (REL-5) | W-REL + W-EVAL | P15 |
+| **CI matrix breadth + harness execution** (REL-3, REL-4) | W-REL | P15 |
 
-### 20.4 Labeling discipline
+### 23.4 Labeling discipline
 
 - Necessary-span labels are **versioned** with pack algorithm version.  
 - Prefer dual review on precision samples; dual review becomes **mandatory** from P9 Stage C.  
 - Never change gold answers silently after a published report—cut a new suite version.  
 - Visual-surface metrics (P7) are reported alongside token metrics, never instead of them: a faster-to-read wrong answer is still wrong.
 - **Token metrics are never reported without an answerability metric (added P12):** a 149-token pack that teaches the model nothing is a failure, not a 22× win.
+- **Performance numbers name their fixture, hardware, and snapshot (added P14):** a mini-fixture microsecond and a pilot-repo millisecond are different claims and are never averaged together.
 
 ---
 
-## 21. Risk register & guardrails
+## 24. Risk register & guardrails
 
-### 21.1 Program risks (from ADD, planning actions)
+### 24.1 Program risks (from ADD, planning actions)
 
 | Risk | Planning guardrail |
 |---|---|
@@ -2656,7 +3423,7 @@ Settle the accuracy claim the same way P9 settled tool choice: with a published,
 | AOE cache bet returns | Answer cache blocked until P10 Stage C |
 | Prism only usable by Rust contributors | P11 cold-machine install gate; PRODUCT-SETUP must not lead with `cargo build` |
 
-### 21.2 Interaction-half risks (added 2026-07-26)
+### 24.2 Interaction-half risks (added 2026-07-26)
 
 | Risk | Planning guardrail |
 |---|---|
@@ -2669,7 +3436,7 @@ Settle the accuracy claim the same way P9 settled tool choice: with a published,
 | Editor/agent platform churn | Feature-detect, degrade to plain MCP, pin API versions in CI |
 | The four-arm benchmark never happens (again) | It is the P9 gate; the phase cannot exit without it |
 
-### 21.3 Distribution-half risks (added 2026-07-26 — P11)
+### 24.3 Distribution-half risks (added 2026-07-26 — P11)
 
 | Risk | Planning guardrail |
 |---|---|
@@ -2679,12 +3446,12 @@ Settle the accuracy claim the same way P9 settled tool choice: with a published,
 | P11 quietly absorbs P10 shared-index work | Explicit non-goal; shared index stays deferred |
 | VSIX revived under distribution pressure | ADR-0007; CLI + MCP only |
 
-### 21.4 Accuracy-half risks (added 2026-07-26 — P12)
+### 24.4 Accuracy-half risks (added 2026-07-26 — P12)
 
 | Risk | Planning guardrail |
 |---|---|
 | Placeholder fragments make empty packs look successful | P12 Stage B invariant: no fragment without a citation; placeholder rate is a gated metric (ACC-2) |
-| Token efficiency is optimized at the cost of sufficiency | Every token claim ships beside an answerability claim (§20.4); ACC-5 requires quality parity *and* ≤½ tokens |
+| Token efficiency is optimized at the cost of sufficiency | Every token claim ships beside an answerability claim (§23.4); ACC-5 requires quality parity *and* ≤½ tokens |
 | The doc layer becomes an LLM summarizer | Extractive spans only; no model in the index path (G8); `asserted` confidence, never precision-gated |
 | Documentation lies and Prism launders the lie | `asserted` ≠ `extracted`; contradiction cases are part of the review sample; W-DEBT owns drift |
 | Lexical seeding slides into embedding-first retrieval | Lexical may seed anchors only, never emit fragments; “structure before similarity” stays a release-notes guardrail |
@@ -2693,7 +3460,25 @@ Settle the accuracy claim the same way P9 settled tool choice: with a published,
 | Accuracy phase quietly reopens tiers or caching | T2/T4 semantics and answer caching are explicit P12 non-goals |
 | Baseline arm is dropped when it wins | Arm A5 stays in the suite regardless of outcome; removing an arm requires a written waiver |
 
-### 21.5 Stage churn guardrails
+### 24.5 Engineering-half risks (added 2026-07-27 — P13–P15)
+
+| Risk | Planning guardrail |
+|---|---|
+| A refactor phase quietly ships behavior changes | Parity harness is the gate (REF-1); any intentional divergence needs an ADR before merge (planning rule 6) |
+| The refactor never ends — “just one more cleanup” | Stage D enforces budgets and closes the phase; remaining oversized units get dated waivers, not open-ended intent |
+| The new service layer becomes the next god crate | Capability modules with the same size budgets; architecture fitness rules apply to the engine too |
+| Typed refusals break the agent wire contract | Serde mapping is byte-compatible with today’s strings; a conformance test asserts it |
+| Optimization work degrades accuracy | P12 ACC checklist re-runs at every P14 gate; caches are dependency-keyed memoization only |
+| Snapshot-keyed caches serve stale evidence after an edit | Invalidation keyed on snapshot id (never TTL); edit→query freshness test is an exit criterion |
+| Parallel indexing makes packs nondeterministic | Canonical ordering before persist; the P13 parity harness is the detector |
+| Pilot benches get tuned into a benchmark game | Both pilots plus the mini fixture are reported; no cherry-picking a corpus |
+| CI runner variance turns hard ceilings into flake | Ceilings derived from runner baselines with variance bands and a documented escape procedure |
+| Growing CI matrix slows PR feedback until it is bypassed | Stated runtime budget; heavy jobs (eval harness, pilots) run scheduled, not per-PR |
+| Governance sweep becomes a documentation-only ritual | REL-2 requires the register to be *generated* from gate artifacts; unsupported entries fail the sweep |
+| Waivers accumulate silently again | Planning rule 8: an expired waiver blocks the next phase gate |
+| The engineering half is skipped under feature pressure | Its own gate evidence packs; P10 / 1.0 may not open until P15 exits or its residual risk is restated with a date |
+
+### 24.6 Stage churn guardrails
 
 1. **No skipping phase gates** without a written waiver listing residual risk.  
 2. **No embedding-centric retrieval narrative** in release notes.  
@@ -2704,11 +3489,14 @@ Settle the accuracy claim the same way P9 settled tool choice: with a published,
 7. **No claim without an artifact.** If a gate says “proven”, the repository must contain the thing that proves it (this rule exists because of gap G-03).  
 8. **No “works on my machine” install story.** If a gate claims cross-platform install, evidence is cold VMs or CI matrix artifacts — not a maintainer laptop.  
 9. **No synthesized evidence.** A fragment either cites a real node/edge with a source range or it does not ship; absence is expressed as a gap, never as plausible-looking filler (added P12).  
-10. **No accuracy claim from proxies alone.** Structural proxies may report progress; a *quality* gate requires live-judged runs against the baseline arms (added P12).
+10. **No accuracy claim from proxies alone.** Structural proxies may report progress; a *quality* gate requires live-judged runs against the baseline arms (added P12).  
+11. **No silent behavior change during a refactor.** Parity is the arbiter; divergences ship as ADRs (added P13).  
+12. **No performance claim without fixture, hardware, and snapshot id** (added P14).  
+13. **No expired waiver.** A waiver past its expiry phase blocks the next gate until re-dated, re-owned, or closed (added P15).
 
 ---
 
-## 22. Definition of Done (program-level)
+## 25. Definition of Done (program-level)
 
 Prism’s planning program (P0–P5) is done when all are true:
 
@@ -2722,7 +3510,7 @@ Prism’s planning program (P0–P5) is done when all are true:
 
 **Status:** items 1–3 and 5–7 are met as of the P5 gate. Item 4 is **interim** — the four-arm benchmark lands in P9 Stage C.
 
-### 22.1 Definition of Done — interaction half (P6–P9)
+### 25.1 Definition of Done — interaction half (P6–P9)
 
 The interaction program is done when all are true:
 
@@ -2736,7 +3524,7 @@ The interaction program is done when all are true:
 
 Phase 10 is an **optional expansion**, not required for MVP product identity — and is **skipped for now**.
 
-### 22.2 Definition of Done — distribution half (P11)
+### 25.2 Definition of Done — distribution half (P11)
 
 The distribution program is done when all are true:
 
@@ -2747,7 +3535,7 @@ The distribution program is done when all are true:
 5. **Docs match reality.** PRODUCT-SETUP / INSTALL lead with the release path; from-source is contributor-only.
 6. **Local-first survived install.** After the one-time binary download, indexing and MCP do not require network.
 
-### 22.3 Definition of Done — accuracy half (P12)
+### 25.3 Definition of Done — accuracy half (P12)
 
 The accuracy program is done when all are true:
 
@@ -2759,11 +3547,25 @@ The accuracy program is done when all are true:
 6. **The comparison is public.** A five-arm, live-judged report — including a doc-aware graph baseline — shows Prism at parity or better on narrative tasks at ≤½ the tokens, with ablations attributing the gains.
 7. **Local-first survived accuracy.** No LLM, key, or network entered the index path to achieve any of the above.
 
+### 25.4 Definition of Done — engineering half (P13–P15)
+
+The engineering program is done when all are true:
+
+1. **The code is changeable.** One service layer owns capability execution, no file or function exceeds its budget without a dated ADR, and CI rejects reintroductions.
+2. **Nothing moved that should not have.** A frozen question set produces the same evidence before and after the refactor; every intentional difference has an ADR.
+3. **The error model is a type, not a convention.** Refusal codes live in the IR and every surface renders the same code the same way.
+4. **Performance is proven where users live.** N1 and N2 targets are met on pinned pilot repositories with hard CI ceilings, published memory and index-size budgets, and a regression guard.
+5. **Orientation is warm.** Repeated `repo_map` / community work is served from a snapshot-keyed cache whose invalidation is tested, not assumed.
+6. **Claims are maintained.** Every waiver has a live expiry and an owner; the residual-risk register is generated from gate artifacts; documents agree on phase status.
+7. **CI covers what gates releases.** Three OS families, MSRV, coverage with a ratchet, and the accuracy/parity harness all run without a human remembering to run them.
+8. **Releases are verifiable.** A user can check provenance beyond a checksum, and upgrade/rollback are proven on a real tag.
+9. **Nothing new shipped.** The engineering half added no user-visible capability — by design, and the changelog shows it.
+
 ---
 
-## 23. Appendix — Checklists & templates
+## 26. Appendix — Checklists & templates
 
-### 23.1 Stage kickoff checklist
+### 26.1 Stage kickoff checklist
 
 - [ ] Re-read relevant ADD sections for this stage  
 - [ ] Confirm entry criteria  
@@ -2772,7 +3574,7 @@ The accuracy program is done when all are true:
 - [ ] Identify eval measurement (even qualitative)  
 - [ ] List non-goals for this stage (what we refuse to build now)  
 
-### 23.2 Stage exit review template
+### 26.2 Stage exit review template
 
 | Field | Content |
 |---|---|
@@ -2783,7 +3585,7 @@ The accuracy program is done when all are true:
 | Waiver? | none / signed waiver |
 | Next stage entry | confirmed / blocked by X |
 
-### 23.3 Intent recipe card (template)
+### 26.3 Intent recipe card (template)
 
 ```text
 Intent: <name>
@@ -2796,7 +3598,7 @@ Refuse when: <SCOPE_UNRESOLVED conditions>
 Eval tasks: <IDs>
 ```
 
-### 23.4 Gold task card (template)
+### 26.4 Gold task card (template)
 
 ```text
 Task ID:
@@ -2810,7 +3612,7 @@ Labels (necessary spans):
 Scoring method:
 ```
 
-### 23.5 Phase gate evidence pack (required artifacts)
+### 26.5 Phase gate evidence pack (required artifacts)
 
 | Phase | Evidence to archive |
 |---|---|
@@ -2827,8 +3629,12 @@ Scoring method:
 | P10 | Authz pilot notes, SLA, cache certificate design *(deferred)* |
 | P11 | Release archives + `SHA256SUMS`, installer smoke logs (3 OS), host-adapter matrix, P11 scorecard, INSTALL/PRODUCT-SETUP as-built |
 | P12 | Doc extraction spec + goldens, IR schema delta (`Doc`/`Section`/`asserted`), fragment-integrity invariant test, doc-QA gold suite, five-arm accuracy report v1 + ablations, adjudication protocol + κ, P12 scorecard (ACC-1…ACC-7) |
+| **Lang expansion** | Java + Perl extractor crates, golden fixtures, conformance CI update, `tree-sitter` 0.26 bump, pipeline version `p12-doc-v2-perl-java` | **2026-07-27** |
+| P13 | Complexity census (before/after), golden parity corpus + harness run, capability contract for the service layer, crate dependency-graph diff, MCP schema conformance test, ADR set for waivers/divergences, P13 scorecard (REF-1…REF-7) |
+| P14 | Pilot bench suite + per-phase timings, CPU profiles and query-plan audit, cache design + invalidation test, determinism proof under parallel indexing, perf scorecard per pilot with hardware + snapshot ids, CI ceiling policy, P14 scorecard (PERF-1…PERF-6) |
+| P15 | Waiver audit + re-dated ADRs, generated residual-risk register with artifact links, CI matrix + coverage + MSRV run logs, fuzz/property corpus results, provenance (SBOM/signature) verification transcript, upgrade/rollback report, P15 scorecard (REL-1…REL-7) |
 
-### 23.6 View kind card (template — P7)
+### 26.6 View kind card (template — P7)
 
 ```text
 View kind: <name>
@@ -2845,7 +3651,7 @@ Refuse when: <VIEW_TOO_LARGE conditions + suggested anchors>
 Eval tasks: <IDs>
 ```
 
-### 23.7 Glossary (planning-oriented)
+### 26.7 Glossary (planning-oriented)
 
 | Term | Meaning |
 |---|---|
@@ -2872,8 +3678,17 @@ Eval tasks: <IDs>
 | **Semantic community** | Cluster from seeded Leiden over import+call+`DESCRIBES` edges, labeled extractively — successor to path-prefix communities |
 | **Citation validity** | Whether the evidence an answer cites actually exists and says what the answer claims |
 | **Answerability** | Whether one pack is sufficient to answer a gold task — reported beside every token metric |
+| **Characterization test** | A test that records current behavior (not desired behavior) so a refactor can prove nothing moved |
+| **Parity harness** | The P13 runner that compiles packs for a frozen question set before and after a change and diffs citations, roles, and structure |
+| **Service layer (`prism-engine`)** | The single owner of capability execution; MCP/CLI/HTTP/LSP become protocol adapters over it |
+| **Architecture fitness rule** | A build-enforced constraint on which crates may depend on which — the automated version of a boxes-and-arrows diagram |
+| **Complexity budget** | Enforced ceilings on file and function size; exceeding one requires a dated ADR waiver |
+| **Snapshot-keyed cache** | Memoization invalidated by index snapshot id rather than by time; the only caching P14 permits |
+| **Pilot corpus** | A pinned real repository (httpx, ripgrep) used for scale claims — as opposed to the mini synthetic fixture |
+| **Regression guard** | CI check that fails a change exceeding a recorded performance ceiling by a stated margin |
+| **Waiver expiry sweep** | The P15 audit that re-dates, re-owns, or closes every ADR waiver whose expiry phase has shipped |
 
-### 23.8 Install journey card (template — P11)
+### 26.8 Install journey card (template — P11)
 
 ```text
 OS / arch: <macos-arm64 | linux-x86_64 | windows-x86_64 | …>
@@ -2889,7 +3704,7 @@ Uninstall clean: pass/fail
 Notes / limitations:
 ```
 
-### 23.9 Doc-QA gold task card (template — P12)
+### 26.9 Doc-QA gold task card (template — P12)
 
 ```text
 Task ID:
@@ -2905,7 +3720,7 @@ Baseline arm notes (explore / doc-aware graph):
 Scoring: quality rubric + citation validity (invalid citation ⇒ 0)
 ```
 
-### 23.10 Accuracy defect card (template — P12)
+### 26.10 Accuracy defect card (template — P12)
 
 ```text
 Defect ID:
@@ -2919,6 +3734,35 @@ Fix stage: P12 Stage A | B | C | D
 Regression artifact added: <fixture / invariant test / gold task id>
 ```
 
+### 26.11 Refactor parity card (template — P13)
+
+```text
+Refactor ID:
+Unit moved: <file / function / crate boundary>
+Before: <LOC, fn length, dependents, hub degree>
+After: <LOC, fn length, dependents>
+Behavior intent: none (parity) | intentional change (ADR: ____)
+Parity run: <corpus version, questions compared, diff result>
+Differences found: <none | list, each with ADR or fix>
+Tests added with the move: <ids>
+Budget compliance: file ≤600 / fn ≤120 — pass | waiver (ADR: ____, expires P__)
+```
+
+### 26.12 Performance budget card (template — P14)
+
+```text
+Measurement ID:
+Target: PERF-1 | PERF-2 | PERF-3 | PERF-4 | PERF-5 | PERF-6
+Fixture: mini | httpx@<sha> | ripgrep@<sha>
+Hardware: <CI runner class | local machine spec>
+Index snapshot id:
+Metric + value: <p50 / p95 / mean, with units>
+Profile reference: <flamegraph / query plan artifact>
+Change attributed: <what code change moved this number>
+Accuracy re-check: P12 ACC checklist pass/fail
+Ceiling proposed: <value + variance band> | not yet
+```
+
 ---
 
 ## Related documents
@@ -2930,8 +3774,10 @@ Regression artifact added: <fixture / invariant test / gold task id>
 - [Program residual risks](../eval/PROGRAM-RESIDUAL-RISKS.md) — R1/R2/R8 are the P9 targets  
 - [Repo feature summary & token comparison](../REPO-FEATURE-SUMMARY-AND-TOKEN-COMPARISON.md) — the 2026-07-26 measurement that motivated P12  
 - [Public benchmark report v2](../eval/PUBLIC-BENCHMARK-REPORT-V2.md) — four-arm proxies that P12 Stage D replaces with live-judged five-arm results  
+- [Why agents grepped instead of using Prism](../eval/WHY-AGENTS-GREP-INSTEAD-OF-PRISM.md) — the sufficiency diagnosis behind P12  
+- [P6 Stage A performance baselines](../../eval/scorecards/p6-stage-a-baselines.md) — the mini-fixture numbers P14 replaces with pilot-scale proof  
 - ADD §36 Phased Implementation Roadmap — phase durations and high-level gates (expanded here)
 
 ---
 
-*End of Planning & Implementation Document. P0–P7 + P9 delivered; P8 cut; P10 optional/deferred (skipped for now); P11 Install & Distribution in progress (Stage A+B complete, Stage C pending a public release); P12 Accuracy & Grounding planned — not yet implemented.*
+*End of Planning & Implementation Document. P0–P7 + P9 delivered; P8 cut; P10 optional/deferred (skipped for now); P11 Stage A+B complete with Stage C pending a public release; P12 Accuracy & Grounding gated; **Java + Perl T1 extractors delivered 2026-07-27** ([§7.5](#75-language-expansion--java--perl-delivered-2026-07-27)); P13 Core Refactor, P14 Performance & Scale Proof, and P15 Reliability & Governance opened 2026-07-27 — planned, not yet implemented.*

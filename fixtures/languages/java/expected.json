@@ -1,0 +1,314 @@
+{
+  "schema_version": "0.0.1",
+  "analyzer": "tree-sitter-java@0.23",
+  "tier": "T1",
+  "language": "java",
+  "path": "simple_class.java",
+  "nodes": [
+    {
+      "id": "file:simple_class.java",
+      "kind": "File",
+      "name": "simple_class.java",
+      "file_path": "simple_class.java",
+      "span": {
+        "start_byte": 0,
+        "end_byte": 333,
+        "start_line": 0,
+        "start_col": 0,
+        "end_line": 17,
+        "end_col": 0
+      },
+      "language": "java",
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "module:java.util.List",
+      "kind": "Module",
+      "name": "java.util.List",
+      "language": "java",
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "sym:simple_class.java:class:Child:184",
+      "kind": "Symbol",
+      "name": "Child",
+      "file_path": "simple_class.java",
+      "span": {
+        "start_byte": 171,
+        "end_byte": 332,
+        "start_line": 7,
+        "start_col": 0,
+        "end_line": 16,
+        "end_col": 1
+      },
+      "language": "java",
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "symbol_kind": "class"
+      }
+    },
+    {
+      "id": "sym:simple_class.java:method:helper:221",
+      "kind": "Symbol",
+      "name": "helper",
+      "file_path": "simple_class.java",
+      "span": {
+        "start_byte": 209,
+        "end_byte": 258,
+        "start_line": 8,
+        "start_col": 4,
+        "end_line": 10,
+        "end_col": 5
+      },
+      "language": "java",
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "symbol_kind": "method"
+      }
+    },
+    {
+      "id": "sym:simple_class.java:method:run:276",
+      "kind": "Symbol",
+      "name": "run",
+      "file_path": "simple_class.java",
+      "span": {
+        "start_byte": 264,
+        "end_byte": 330,
+        "start_line": 12,
+        "start_col": 4,
+        "end_line": 15,
+        "end_col": 5
+      },
+      "language": "java",
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "symbol_kind": "method"
+      }
+    },
+    {
+      "id": "unresolved:Base",
+      "kind": "Symbol",
+      "name": "Base",
+      "language": "java",
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "attrs": {
+        "unresolved": true
+      }
+    },
+    {
+      "id": "unresolved:missing_fn",
+      "kind": "Symbol",
+      "name": "missing_fn",
+      "language": "java",
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "attrs": {
+        "unresolved": true
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge:CALLS:sym:simple_class.java:method:run:276:sym:simple_class.java:method:helper:221:292",
+      "kind": "Calls",
+      "src": "sym:simple_class.java:method:run:276",
+      "dst": "sym:simple_class.java:method:helper:221",
+      "file_path": "simple_class.java",
+      "span": {
+        "start_byte": 292,
+        "end_byte": 298,
+        "start_line": 13,
+        "start_col": 8,
+        "end_line": 13,
+        "end_col": 14
+      },
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "attrs": {
+        "callee": "helper"
+      }
+    },
+    {
+      "id": "edge:CALLS:sym:simple_class.java:method:run:276:unresolved:missing_fn:311",
+      "kind": "Calls",
+      "src": "sym:simple_class.java:method:run:276",
+      "dst": "unresolved:missing_fn",
+      "file_path": "simple_class.java",
+      "span": {
+        "start_byte": 311,
+        "end_byte": 321,
+        "start_line": 14,
+        "start_col": 8,
+        "end_line": 14,
+        "end_col": 18
+      },
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "attrs": {
+        "callee": "missing_fn"
+      }
+    },
+    {
+      "id": "edge:CONTAINS:file:simple_class.java:sym:simple_class.java:class:Child:184:184",
+      "kind": "Contains",
+      "src": "file:simple_class.java",
+      "dst": "sym:simple_class.java:class:Child:184",
+      "file_path": "simple_class.java",
+      "span": {
+        "start_byte": 171,
+        "end_byte": 332,
+        "start_line": 7,
+        "start_col": 0,
+        "end_line": 16,
+        "end_col": 1
+      },
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:CONTAINS:file:simple_class.java:sym:simple_class.java:method:helper:221:221",
+      "kind": "Contains",
+      "src": "file:simple_class.java",
+      "dst": "sym:simple_class.java:method:helper:221",
+      "file_path": "simple_class.java",
+      "span": {
+        "start_byte": 209,
+        "end_byte": 258,
+        "start_line": 8,
+        "start_col": 4,
+        "end_line": 10,
+        "end_col": 5
+      },
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:CONTAINS:file:simple_class.java:sym:simple_class.java:method:run:276:276",
+      "kind": "Contains",
+      "src": "file:simple_class.java",
+      "dst": "sym:simple_class.java:method:run:276",
+      "file_path": "simple_class.java",
+      "span": {
+        "start_byte": 264,
+        "end_byte": 330,
+        "start_line": 12,
+        "start_col": 4,
+        "end_line": 15,
+        "end_col": 5
+      },
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:DEFINES:file:simple_class.java:sym:simple_class.java:class:Child:184:184",
+      "kind": "Defines",
+      "src": "file:simple_class.java",
+      "dst": "sym:simple_class.java:class:Child:184",
+      "file_path": "simple_class.java",
+      "span": {
+        "start_byte": 184,
+        "end_byte": 189,
+        "start_line": 7,
+        "start_col": 13,
+        "end_line": 7,
+        "end_col": 18
+      },
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:DEFINES:file:simple_class.java:sym:simple_class.java:method:helper:221:221",
+      "kind": "Defines",
+      "src": "file:simple_class.java",
+      "dst": "sym:simple_class.java:method:helper:221",
+      "file_path": "simple_class.java",
+      "span": {
+        "start_byte": 221,
+        "end_byte": 227,
+        "start_line": 8,
+        "start_col": 16,
+        "end_line": 8,
+        "end_col": 22
+      },
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:DEFINES:file:simple_class.java:sym:simple_class.java:method:run:276:276",
+      "kind": "Defines",
+      "src": "file:simple_class.java",
+      "dst": "sym:simple_class.java:method:run:276",
+      "file_path": "simple_class.java",
+      "span": {
+        "start_byte": 276,
+        "end_byte": 279,
+        "start_line": 12,
+        "start_col": 16,
+        "end_line": 12,
+        "end_col": 19
+      },
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:EXTENDS:sym:simple_class.java:class:Child:184:unresolved:Base:198",
+      "kind": "Extends",
+      "src": "sym:simple_class.java:class:Child:184",
+      "dst": "unresolved:Base",
+      "file_path": "simple_class.java",
+      "span": {
+        "start_byte": 198,
+        "end_byte": 202,
+        "start_line": 7,
+        "start_col": 27,
+        "end_line": 7,
+        "end_col": 31
+      },
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "heuristic"
+    },
+    {
+      "id": "edge:IMPORTS:file:simple_class.java:module:java.util.List:147",
+      "kind": "Imports",
+      "src": "file:simple_class.java",
+      "dst": "module:java.util.List",
+      "file_path": "simple_class.java",
+      "span": {
+        "start_byte": 147,
+        "end_byte": 169,
+        "start_line": 5,
+        "start_col": 0,
+        "end_line": 5,
+        "end_col": 22
+      },
+      "analyzer": "tree-sitter-java@0.23",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "raw": "import java.util.List;"
+      }
+    }
+  ]
+}

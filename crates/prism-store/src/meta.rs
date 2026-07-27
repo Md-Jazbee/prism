@@ -5,7 +5,7 @@ use rusqlite::{params, Connection};
 use std::path::Path;
 
 /// Bump when extractors change shape so content-identical files re-extract (P12).
-pub const ANALYZER_PIPELINE_VERSION: &str = "p12-doc-v1";
+pub const ANALYZER_PIPELINE_VERSION: &str = "p12-doc-v2-perl-java";
 
 /// Metadata store backed by SQLite WAL.
 pub struct SqliteMetaStore {

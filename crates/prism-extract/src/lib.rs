@@ -14,6 +14,8 @@ pub trait LanguageExtractor: Send + Sync {
 pub struct PythonExtractor;
 pub struct RustExtractor;
 pub struct MarkdownExtractor;
+pub struct JavaExtractor;
+pub struct PerlExtractor;
 
 impl LanguageExtractor for PythonExtractor {
     fn language(&self) -> &'static str {
@@ -51,6 +53,30 @@ impl LanguageExtractor for MarkdownExtractor {
     }
 }
 
+impl LanguageExtractor for JavaExtractor {
+    fn language(&self) -> &'static str {
+        prism_extract_java::LANGUAGE
+    }
+    fn analyzer(&self) -> &'static str {
+        prism_extract_java::ANALYZER
+    }
+    fn extract(&self, path: &str, bytes: &[u8]) -> Result<FactBundle> {
+        prism_extract_java::extract(path, bytes)
+    }
+}
+
+impl LanguageExtractor for PerlExtractor {
+    fn language(&self) -> &'static str {
+        prism_extract_perl::LANGUAGE
+    }
+    fn analyzer(&self) -> &'static str {
+        prism_extract_perl::ANALYZER
+    }
+    fn extract(&self, path: &str, bytes: &[u8]) -> Result<FactBundle> {
+        prism_extract_perl::extract(path, bytes)
+    }
+}
+
 /// Detect language from path extension.
 ///
 /// Markdown (P12 Stage A) is treated as a first-class documentation language so
@@ -60,6 +86,8 @@ pub fn detect_language(path: impl AsRef<Path>) -> Option<&'static str> {
     match ext.to_ascii_lowercase().as_str() {
         "py" | "pyi" => Some("python"),
         "rs" => Some("rust"),
+        "java" => Some("java"),
+        "pl" | "pm" | "perl" => Some("perl"),
         "md" | "markdown" | "mdown" | "mkd" | "mdx" => Some("markdown"),
         _ => None,
     }
@@ -70,6 +98,8 @@ pub fn extract_file(path: &str, bytes: &[u8]) -> Result<Option<FactBundle>> {
     match detect_language(path) {
         Some("python") => PythonExtractor.extract(path, bytes).map(Some),
         Some("rust") => RustExtractor.extract(path, bytes).map(Some),
+        Some("java") => JavaExtractor.extract(path, bytes).map(Some),
+        Some("perl") => PerlExtractor.extract(path, bytes).map(Some),
         Some("markdown") => MarkdownExtractor.extract(path, bytes).map(Some),
         _ => Ok(None),
     }
@@ -83,6 +113,9 @@ mod tests {
     fn detect_extensions() {
         assert_eq!(detect_language("a/b.py"), Some("python"));
         assert_eq!(detect_language("lib.rs"), Some("rust"));
+        assert_eq!(detect_language("App.java"), Some("java"));
+        assert_eq!(detect_language("script.pl"), Some("perl"));
+        assert_eq!(detect_language("Module.pm"), Some("perl"));
         assert_eq!(detect_language("readme.md"), Some("markdown"));
         assert_eq!(detect_language("README.MD"), Some("markdown"));
         assert_eq!(detect_language("notes.txt"), None);
@@ -108,5 +141,23 @@ mod tests {
             .nodes
             .iter()
             .any(|n| n.kind == prism_ir::NodeKind::Section));
+    }
+
+    #[test]
+    fn dispatch_java() {
+        let b = extract_file("T.java", b"public class T { void f() {} }\n")
+            .unwrap()
+            .unwrap();
+        assert_eq!(b.language, "java");
+        assert!(!b.nodes.is_empty());
+    }
+
+    #[test]
+    fn dispatch_perl() {
+        let b = extract_file("t.pl", b"sub f {}\n")
+            .unwrap()
+            .unwrap();
+        assert_eq!(b.language, "perl");
+        assert!(!b.nodes.is_empty());
     }
 }

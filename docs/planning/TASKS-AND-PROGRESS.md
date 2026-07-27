@@ -1,7 +1,7 @@
 # Prism — Tasks & Progress Board
 
 **Status date:** 2026-07-27  
-**Current phase:** **P12 gate PASS** (live ACC-1…ACC-7) · P11 Stage C cold-VM pending public tag · P8 **cut** · P0–P7+P9 complete · **P10 deferred**  
+**Current phase:** **P13 Core Refactor opening** (engineering half P13–P15) · P12 gate PASS (live ACC-1…ACC-7) · P11 Stage C cold-VM pending public tag · P8 **cut** · P0–P7+P9 complete · **P10 deferred**  
 **Source of truth for design order:** [PLANNING-AND-IMPLEMENTATION.md](./PLANNING-AND-IMPLEMENTATION.md)  
 **Source of truth for architecture:** [ARCHITECTURE-DESIGN-DOCUMENT.md](../architecture/ARCHITECTURE-DESIGN-DOCUMENT.md)  
 **Source of truth for stack/layout:** [TECH-STACK-AND-PROJECT-STRUCTURE.md](../architecture/TECH-STACK-AND-PROJECT-STRUCTURE.md)
@@ -11,6 +11,10 @@
 > **P11 (2026-07-26):** **Install & Distribution** opened; does **not** wait on P10.
 >
 > **P12 (2026-07-26):** **Accuracy & Grounding** opened in parallel with P11 Stage C after a doc-aware-graph (Graphify) head-to-head showed token-cheap but narrative-poor packs. Plan: [§19](./PLANNING-AND-IMPLEMENTATION.md#19-phase-12--accuracy--grounding-doc-aware-evidence).
+>
+> **P13–P15 (2026-07-27):** the **engineering half** opened after a measured bottleneck/risk re-analysis of the as-built code (19,960 LOC · 20 crates · 103 test fns): [**§20 P13 Core Refactor**](./PLANNING-AND-IMPLEMENTATION.md#20-phase-13--core-refactor--boundary-hardening) · [**§21 P14 Performance & Scale Proof**](./PLANNING-AND-IMPLEMENTATION.md#21-phase-14--performance--scale-proof) · [**§22 P15 Reliability, Governance & Release Trust**](./PLANNING-AND-IMPLEMENTATION.md#22-phase-15--reliability-governance--release-trust). These phases ship **no new user-visible capability**; their gates are parity, performance ceilings, and maintained claims. Planning sections renumbered: eval → §23, risks → §24, DoD → §25, appendix → §26.
+>
+> **Language expansion (2026-07-27):** **Java + Perl** T1 extractors delivered on the P1 continuation track — [§7.5](./PLANNING-AND-IMPLEMENTATION.md#75-language-expansion--java--perl-delivered-2026-07-27). Crates: `prism-extract-java`, `prism-extract-perl`; `tree-sitter` **0.24 → 0.26**; pipeline `p12-doc-v2-perl-java`.
 
 Use this file as the living checklist. Update checkbox state and the progress snapshot when a stage exits or a blocker moves.
 
@@ -33,8 +37,11 @@ Use this file as the living checklist. Update checkbox state and the progress sn
 | **P10** | Team / Distributed (optional, was P6) | ░░░░░░░░░░ **0%** | ⚪ Deferred / skipped for now |
 | **P11** | Install & Distribution (any system) | ▓▓▓▓▓▓▓▓▓░ **~90%** | 🟡 Stage A+B done; Stage C proven on simulated release — cold-VM pending public tag |
 | **P12** | Accuracy & Grounding (doc-aware evidence) | ▓▓▓▓▓▓▓▓▓▓ **100%** | ✅ Gate passed 2026-07-27 (live ACC-1…ACC-7) |
+| **P13** | Core Refactor & Boundary Hardening | ░░░░░░░░░░ **0%** | 📋 Planned 2026-07-27 — targets REF-1…REF-7 |
+| **P14** | Performance & Scale Proof | ░░░░░░░░░░ **0%** | 📋 Planned 2026-07-27 — targets PERF-1…PERF-6 |
+| **P15** | Reliability, Governance & Release Trust | ░░░░░░░░░░ **0%** | 📋 Planned 2026-07-27 — targets REL-1…REL-7 |
 
-**How to read progress:** **P0–P7, P9, and P12 are gated**. **P8 was cut** — agent/IDE needs are met by `prism setup` + MCP, not a VSIX. **P10** stays optional/skipped. **P11** remains the distribution track (cold-VM pending).
+**How to read progress:** **P0–P7, P9, and P12 are gated**. **P8 was cut** — agent/IDE needs are met by `prism setup` + MCP, not a VSIX. **P10** stays optional/skipped. **P11** remains the distribution track (cold-VM pending). **P13–P15 are planned, not started**; they are the engineering half and deliberately produce no new user-visible capability.
 
 ```mermaid
 flowchart LR
@@ -51,6 +58,10 @@ flowchart LR
     P9 --> P11[P11 Install & Distribution<br/>🟡 ~90%]
     P9 -.-> P10[P10 Distributed / Team<br/>skipped]
     P9 --> P12[P12 Accuracy & Grounding<br/>✅ done]
+    P12 --> P13[P13 Core Refactor<br/>📋 planned]
+    P13 --> P14[P14 Performance & Scale<br/>📋 planned]
+    P14 --> P15[P15 Reliability & Governance<br/>📋 planned]
+    P11 -.co-gate.-> P15
 
     style P0 fill:#b8e994,stroke:#78e08f,color:#000
     style P1 fill:#b8e994,stroke:#78e08f,color:#000
@@ -65,6 +76,9 @@ flowchart LR
     style P10 fill:#dfe6e9,stroke:#b2bec3,color:#000
     style P11 fill:#ffeaa7,stroke:#fdcb6e,color:#000
     style P12 fill:#b8e994,stroke:#78e08f,color:#000
+    style P13 fill:#a5d8ff,stroke:#74b9ff,color:#000
+    style P14 fill:#a5d8ff,stroke:#74b9ff,color:#000
+    style P15 fill:#a5d8ff,stroke:#74b9ff,color:#000
 ```
 ### Legend
 
@@ -84,7 +98,7 @@ flowchart LR
 | Capability | Required by | Today |
 |---|---|---|
 | Content-hash incremental store | P0 | ✅ live; measured on pilots |
-| Syntactic facts (T1) | P1 | ✅ Python + Rust extractors + goldens |
+| Syntactic facts (T1) | P1 | ✅ Python + Rust + **Java + Perl** extractors + goldens |
 | Documentation facts (Doc/Section) | P12-A | ✅ `prism-extract-markdown` + `asserted`; planted-secret docs skip verified |
 | MCP graph tools | P1 | ✅ `prism-mcp` stdio, 9 tools |
 | Query plan + Evidence Pack | P2 | ✅ plan + pack + EXPLAIN + MCP `compile_context` |
@@ -107,7 +121,7 @@ flowchart LR
 | Host adapters (`prism host`) | P11 | ✅ cursor/vscode/claude/generic |
 | Ensure-install assets + hooks | P11 | ✅ generated skills + `prism hook` |
 | Doc-QA + five-arm accuracy | P12-D | ✅ live adjudication PASS — [P12-FIVE-ARM-REPORT.md](../eval/P12-FIVE-ARM-REPORT.md) |
-| Analyzer-pipeline re-extract | P12-B | ✅ `ANALYZER_PIPELINE_VERSION=p12-doc-v1` invalidates content-hash-only skips |
+| Analyzer-pipeline re-extract | P12-B | ✅ `ANALYZER_PIPELINE_VERSION=p12-doc-v2-perl-java` (was `p12-doc-v1`; bumps on Java/Perl + doc layer) |
 | N1/N2 criterion benches | P6-A | ✅ Stage A exited — mini-fixture means recorded; **hard P95 CI ceiling still deferred** (pilot-scale) |
 | `schemas/mcp-tools/v1` | P6-A | ✅ catalog + per-tool JSON + conformance test |
 | `LICENSE` + `deny.toml` | P6-A | ✅ |
@@ -289,7 +303,7 @@ cd eval && uv sync && uv run prism-eval smoke
 - [x] Extractor design docs — [python.md](../architecture/extractors/python.md), [rust.md](../architecture/extractors/rust.md)
 - [x] Golden fact fixtures — `fixtures/languages/python/`, `fixtures/languages/rust/`
 - [x] Resolution-cheap policy — same-file + unresolved first-class (ABI + extractors)
-- [x] Crates — `prism-extract`, `prism-extract-python`, `prism-extract-rust`
+- [x] Crates — `prism-extract`, `prism-extract-python`, `prism-extract-rust` *(+ `-java`, `-perl`, `-markdown` on expansion track)*
 - [x] Fact IR — `prism-ir::facts` (`FactBundle`, kinds, spans)
 - [x] Indexer wired — parse-hook → extract → `KgStore::insert_facts` + `FileExtracted` events
 
@@ -1032,7 +1046,7 @@ flowchart LR
 | Live selection strips synthetic placeholders (ACC-2) | ✅ | `assert_no_placeholder_fragments` on `compile_context` |
 | Path-class first-party vs fixture/vendored (ACC-6) | ✅ | `path_class.rs` |
 | Doc-backed recipe roles (`product_thesis`, …) | ✅ | `prism-plan` recipes + goldens |
-| Analyzer pipeline version force re-extract | ✅ | `ANALYZER_PIPELINE_VERSION=p12-doc-v1` |
+| Analyzer pipeline version force re-extract | ✅ | `p12-doc-v1` (P12-B) → **`p12-doc-v2-perl-java`** (2026-07-27 lang expansion) |
 | Lexical seed index + ACC-3 ≥90% | ✅ | AG001–020 sample **PASS** (precision=1.0) |
 | Wrong-seed → ranked candidates + second-call recover | ✅ | unit-tested; MCP passes `candidates` |
 
@@ -1076,6 +1090,106 @@ flowchart LR
 
 ---
 
+## Language expansion — Java & Perl (delivered 2026-07-27)
+
+**Track:** P1 Stage A continuation (not a new phase). **Plan:** [§7.5](./PLANNING-AND-IMPLEMENTATION.md#75-language-expansion--java--perl-delivered-2026-07-27)
+
+| Task | Status | Notes |
+|---|---|---|
+| `prism-extract-java` (tree-sitter-java@0.23) | ✅ | classes, methods, imports, extends, calls |
+| `prism-extract-perl` (tree-sitter-perl@1.1) | ✅ | package, `use`, subs, calls |
+| Dispatch `.java`, `.pl`, `.pm`, `.perl` in `prism-extract` | ✅ | `detect_language` + `extract_file` |
+| Golden fixtures | ✅ | `fixtures/languages/java/`, `fixtures/languages/perl/` |
+| Conformance CI | ✅ | `scripts/plugins/conformance-check.sh` |
+| Workspace `tree-sitter` 0.24 → 0.26 | ✅ | required by `tree-sitter-perl` |
+| `ANALYZER_PIPELINE_VERSION` bump | ✅ | `p12-doc-v2-perl-java` — re-index to pick up new langs |
+| T2/T3/T4 for Java/Perl | ⬜ | explicit non-goal; Python remains semantic tier first |
+
+**Verify:** `./scripts/plugins/conformance-check.sh` · `cargo test -p prism-extract-java -p prism-extract-perl` · `prism index .`
+
+---
+
+## Phase 13 — Core Refactor & Boundary Hardening (planned)
+
+**Goal:** Make the codebase safe to change — one service layer, decomposed god files, typed refusals, enforced size budgets — with **pack parity** as proof that nothing moved.  
+**Duration:** 4–6 weeks · **Depends on:** P12 gate  
+**Phase gate:** REF-1…REF-7 met or waived with a dated ADR; CI rejects reintroduced god files and forbidden crate edges.  
+**Plan:** [§20](./PLANNING-AND-IMPLEMENTATION.md#20-phase-13--core-refactor--boundary-hardening)
+
+**Measured baseline (2026-07-27):** 19,960 LOC · 20 crates · 103 test fns · `main.rs` 1,549 LOC (`main()` ≈949) · `select.rs` 1,099 LOC (`select_from_kg` ≈516, no in-file tests) · `tools.rs` 874 LOC (168-line hand-built schema) · refusal codes in 12 files · `prism-cli` → 14 workspace crates.
+
+| Stage | Focus | Progress | State |
+|---|---|---:|---|
+| **A** | Seams before surgery (goldens, typed refusal IR, complexity census) | 0% | 📋 Planned |
+| **B** | Service layer extraction (`prism-engine`; adapters LSP→MCP→HTTP→CLI) | 0% | 📋 Planned |
+| **C** | God-file decomposition (`main.rs`, `select.rs`, `tools.rs`, `communities.rs`) | 0% | 📋 Planned |
+| **D** | Parity gate + enforced budgets & fitness rules | 0% | 📋 Planned |
+
+| Target | Meaning | Baseline |
+|---|---|---|
+| REF-1 | Pack parity on a frozen question set | no harness |
+| REF-2 | One service layer behind all four surfaces | 4 duplicated dispatchers |
+| REF-3 | File ≤600 LOC / fn ≤120 LOC (ADR to waive) | 1,549 / ~949 |
+| REF-4 | Typed `RefusalCode` in `prism-ir` | strings in 12 files |
+| REF-5 | Single source of truth for MCP schemas | schema + code builder |
+| REF-6 | `prism-cli` ≤6 workspace deps | 14 |
+| REF-7 | Characterization tests before decomposition | 0 in-file tests in hot files |
+
+---
+
+## Phase 14 — Performance & Scale Proof (planned)
+
+**Goal:** Prove N1/N2 on real repositories and defend them in CI; fix per-call store opens, uncached orientation, and shallow parallelism.  
+**Duration:** 4–6 weeks · **Depends on:** P13 (single boundary to optimize)  
+**Phase gate:** PERF-1…PERF-6 met on pinned pilots with hard CI ceilings; P12 ACC checklist re-run green.  
+**Plan:** [§21](./PLANNING-AND-IMPLEMENTATION.md#21-phase-14--performance--scale-proof)
+
+**Measured baseline (2026-07-27):** benches run an 8+8-file synthetic fixture while `fixtures/repos/snapshots/httpx` (12 MB) and `ripgrep` (10 MB) sit unused for perf · CI bench is a smoke (`--sample-size 10`) with the P95 ceiling explicitly deferred · `SqliteKgStore::open` per HTTP request · `repo_map` recomputes Louvain every call · exactly one `par_iter()` in the workspace.
+
+| Stage | Focus | Progress | State |
+|---|---|---:|---|
+| **A** | Pilot-scale harness, phase timings, profiles + query-plan audit | 0% | 📋 Planned |
+| **B** | Store session/pool, prepared statements, snapshot-keyed caches | 0% | 📋 Planned |
+| **C** | Pipeline parallelism + determinism + concurrency stress | 0% | 📋 Planned |
+| **D** | NFR gate: hard ceilings, memory/size budgets, regression guard | 0% | 📋 Planned |
+
+| Target | Meaning |
+|---|---|
+| PERF-1 / PERF-2 | N1 cold + incremental on pilot repos |
+| PERF-3 | N2 P95 <50 ms on pilots, enforced in CI |
+| PERF-4 | Warm orientation from a snapshot-keyed cache, invalidation tested |
+| PERF-5 | Peak memory + index size per KLOC published |
+| PERF-6 | CI fails >20% regression vs recorded baseline |
+
+---
+
+## Phase 15 — Reliability, Governance & Release Trust (planned)
+
+**Goal:** Bring the program’s claims back under maintenance and extend CI to what actually gates releases.  
+**Duration:** 3–5 weeks · **Depends on:** P14 · **Co-gates with:** P11 Stage C  
+**Phase gate:** REL-1…REL-7 met or waived with dated ADRs.  
+**Plan:** [§22](./PLANNING-AND-IMPLEMENTATION.md#22-phase-15--reliability-governance--release-trust)
+
+**Measured baseline (2026-07-27):** ADR-0005 expiry **P7** (passed) and ADR-0001 expiry **P8** (phase cut) are both live waivers without an enforceable review point · residual-risk register predates P12 (R4 still describes path-prefix communities) · `eval/baselines/p12_live_adjudication.py` is a top-5 graph hub but no CI job runs it · CI is `ubuntu-latest` only · no coverage or MSRV job.
+
+| Stage | Focus | Progress | State |
+|---|---|---:|---|
+| **A** | Governance sweep (waiver expiry, generated risk register, doc drift) | 0% | 📋 Planned |
+| **B** | Test & CI hardening (3-OS matrix, coverage ratchet, MSRV, harness, fuzz) | 0% | 📋 Planned |
+| **C** | Release trust (provenance, upgrade/rollback, P11-C co-gate) | 0% | 📋 Planned |
+
+| Target | Meaning |
+|---|---|
+| REL-1 | Zero expired/orphaned waivers; each has an owner |
+| REL-2 | Risk register generated from gate artifacts |
+| REL-3 | Eval/parity harness executed by CI |
+| REL-4 | macOS + Linux + Windows build/test matrix |
+| REL-5 | Coverage measured and ratcheted |
+| REL-6 | MSRV (1.85) verified by CI |
+| REL-7 | Release provenance beyond checksums (SBOM/signature) |
+
+---
+
 ## Cross-cutting workstreams (always on)
 
 Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
@@ -1083,7 +1197,7 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | ID | Workstream | P5 gate exit status |
 |---|---|---|
 | **W-STORE** | Storage & identity | ✅ + intel catalog |
-| **W-PLUGIN** | Plugin ABI | ✅ + contributor guide + conformance CI |
+| **W-PLUGIN** | Plugin ABI | ✅ + contributor guide + conformance CI (**+ Java/Perl goldens 2026-07-27**) |
 | **W-KG** | Knowledge graph | ✅ overlays + **Louvain communities** + hub v2 denylist |
 | **W-PLAN** | Query planning | ✅ executable `Slice` on debug |
 | **W-CC** | Context compiler | ✅ debug pack gates + **P12 honest `gaps[]`** (ACC-2) |
@@ -1165,3 +1279,4 @@ Track these every phase; each phase exit must refresh **W-EVAL** and **W-OBS**.
 | 2026-07-26 | **P12 live-pack polish:** doc prose cap + README `product_thesis` (no lexical steal); co-directory edges → live `louvain_v1+resolved_degree_hubs`; ACC-1 pack-answerability proxy 96%; community-label dual-review worksheet (n=20). Gate still OPEN for live ACC-1/5/7. |
 | 2026-07-27 | **MCP verified** on release binary: `repo_map` = Louvain; architecture `compile_context` ok (~2194/4000) with README thesis. Board: P12 ~92%; P6-A residuals clarified (no open Stage A tasks — WASM/OTLP/hard-P95 carryovers only). |
 | 2026-07-27 | **P12 gate PASS:** live adjudication (1A agent dual-pass + 2A Graphify) — ACC-1 80%, ACC-4 labels 95%, ACC-5 Δq=+43pts @ 0.46× tokens, ACC-7 precision 0.99 κ=1.0 n=20. Harness `p12_live_adjudication.py`; scorecard + five-arm report updated. |
+| 2026-07-27 | **Language expansion (Java + Perl):** `prism-extract-java`, `prism-extract-perl`, golden fixtures, conformance CI, `tree-sitter` 0.26 bump, dispatch for `.java`/`.pl`/`.pm`, `ANALYZER_PIPELINE_VERSION=p12-doc-v2-perl-java`. Plan [§7.5](./PLANNING-AND-IMPLEMENTATION.md#75-language-expansion--java--perl-delivered-2026-07-27). |

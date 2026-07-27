@@ -16,5 +16,7 @@ prism-ir = { workspace = true }
 prism-extract-python = { workspace = true }
 prism-extract-rust = { workspace = true }
 prism-extract-markdown = { workspace = true }
+prism-extract-java = { workspace = true }
+prism-extract-perl = { workspace = true }
 
 [dev-dependencies]

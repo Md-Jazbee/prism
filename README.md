@@ -162,6 +162,8 @@ uv run prism-eval p5-scorecard
 | `prism-extract` | LanguageExtractor ABI + dispatch |
 | `prism-extract-python` | tree-sitter Python T1 |
 | `prism-extract-rust` | tree-sitter Rust T1 |
+| `prism-extract-java` | tree-sitter Java T1 |
+| `prism-extract-perl` | tree-sitter Perl T1 |
 | `prism-precise` | Precise tier (T2) SCIP/LSP overlays |
 | `prism-semantic` | CFG/DFG/CPG shards + slicing (T3/T4) |
 | `prism-plan` | Intent recipes + query plan DAG |

@@ -1,0 +1,359 @@
+{
+  "schema_version": "0.0.1",
+  "analyzer": "tree-sitter-perl@1.1",
+  "tier": "T1",
+  "language": "perl",
+  "path": "simple_module.pl",
+  "nodes": [
+    {
+      "id": "file:simple_module.pl",
+      "kind": "File",
+      "name": "simple_module.pl",
+      "file_path": "simple_module.pl",
+      "span": {
+        "start_byte": 0,
+        "end_byte": 294,
+        "start_line": 0,
+        "start_col": 0,
+        "end_line": 20,
+        "end_col": 0
+      },
+      "language": "perl",
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "module:File::Basename",
+      "kind": "Module",
+      "name": "File::Basename",
+      "language": "perl",
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "module:Sample",
+      "kind": "Module",
+      "name": "Sample",
+      "language": "perl",
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "module:strict",
+      "kind": "Module",
+      "name": "strict",
+      "language": "perl",
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "module:warnings",
+      "kind": "Module",
+      "name": "warnings",
+      "language": "perl",
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "sym:simple_module.pl:function:helper:195",
+      "kind": "Symbol",
+      "name": "helper",
+      "file_path": "simple_module.pl",
+      "span": {
+        "start_byte": 191,
+        "end_byte": 242,
+        "start_line": 9,
+        "start_col": 0,
+        "end_line": 12,
+        "end_col": 1
+      },
+      "language": "perl",
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "symbol_kind": "function"
+      }
+    },
+    {
+      "id": "sym:simple_module.pl:function:main:248",
+      "kind": "Symbol",
+      "name": "main",
+      "file_path": "simple_module.pl",
+      "span": {
+        "start_byte": 244,
+        "end_byte": 289,
+        "start_line": 14,
+        "start_col": 0,
+        "end_line": 17,
+        "end_col": 1
+      },
+      "language": "perl",
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "symbol_kind": "function"
+      }
+    },
+    {
+      "id": "unresolved:missing_fn",
+      "kind": "Symbol",
+      "name": "missing_fn",
+      "language": "perl",
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "attrs": {
+        "unresolved": true
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge:CALLS:sym:simple_module.pl:function:main:248:sym:simple_module.pl:function:helper:195:259",
+      "kind": "Calls",
+      "src": "sym:simple_module.pl:function:main:248",
+      "dst": "sym:simple_module.pl:function:helper:195",
+      "file_path": "simple_module.pl",
+      "span": {
+        "start_byte": 259,
+        "end_byte": 265,
+        "start_line": 15,
+        "start_col": 4,
+        "end_line": 15,
+        "end_col": 10
+      },
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "attrs": {
+        "callee": "helper"
+      }
+    },
+    {
+      "id": "edge:CALLS:sym:simple_module.pl:function:main:248:sym:simple_module.pl:function:helper:195:259",
+      "kind": "Calls",
+      "src": "sym:simple_module.pl:function:main:248",
+      "dst": "sym:simple_module.pl:function:helper:195",
+      "file_path": "simple_module.pl",
+      "span": {
+        "start_byte": 259,
+        "end_byte": 265,
+        "start_line": 15,
+        "start_col": 4,
+        "end_line": 15,
+        "end_col": 10
+      },
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "attrs": {
+        "callee": "helper"
+      }
+    },
+    {
+      "id": "edge:CALLS:sym:simple_module.pl:function:main:248:unresolved:missing_fn:274",
+      "kind": "Calls",
+      "src": "sym:simple_module.pl:function:main:248",
+      "dst": "unresolved:missing_fn",
+      "file_path": "simple_module.pl",
+      "span": {
+        "start_byte": 274,
+        "end_byte": 284,
+        "start_line": 16,
+        "start_col": 4,
+        "end_line": 16,
+        "end_col": 14
+      },
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "attrs": {
+        "callee": "missing_fn"
+      }
+    },
+    {
+      "id": "edge:CALLS:sym:simple_module.pl:function:main:248:unresolved:missing_fn:274",
+      "kind": "Calls",
+      "src": "sym:simple_module.pl:function:main:248",
+      "dst": "unresolved:missing_fn",
+      "file_path": "simple_module.pl",
+      "span": {
+        "start_byte": 274,
+        "end_byte": 284,
+        "start_line": 16,
+        "start_col": 4,
+        "end_line": 16,
+        "end_col": 14
+      },
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "heuristic",
+      "attrs": {
+        "callee": "missing_fn"
+      }
+    },
+    {
+      "id": "edge:CONTAINS:file:simple_module.pl:sym:simple_module.pl:function:helper:195:195",
+      "kind": "Contains",
+      "src": "file:simple_module.pl",
+      "dst": "sym:simple_module.pl:function:helper:195",
+      "file_path": "simple_module.pl",
+      "span": {
+        "start_byte": 191,
+        "end_byte": 242,
+        "start_line": 9,
+        "start_col": 0,
+        "end_line": 12,
+        "end_col": 1
+      },
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:CONTAINS:file:simple_module.pl:sym:simple_module.pl:function:main:248:248",
+      "kind": "Contains",
+      "src": "file:simple_module.pl",
+      "dst": "sym:simple_module.pl:function:main:248",
+      "file_path": "simple_module.pl",
+      "span": {
+        "start_byte": 244,
+        "end_byte": 289,
+        "start_line": 14,
+        "start_col": 0,
+        "end_line": 17,
+        "end_col": 1
+      },
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:DEFINES:file:simple_module.pl:sym:simple_module.pl:function:helper:195:195",
+      "kind": "Defines",
+      "src": "file:simple_module.pl",
+      "dst": "sym:simple_module.pl:function:helper:195",
+      "file_path": "simple_module.pl",
+      "span": {
+        "start_byte": 195,
+        "end_byte": 201,
+        "start_line": 9,
+        "start_col": 4,
+        "end_line": 9,
+        "end_col": 10
+      },
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:DEFINES:file:simple_module.pl:sym:simple_module.pl:function:main:248:248",
+      "kind": "Defines",
+      "src": "file:simple_module.pl",
+      "dst": "sym:simple_module.pl:function:main:248",
+      "file_path": "simple_module.pl",
+      "span": {
+        "start_byte": 248,
+        "end_byte": 252,
+        "start_line": 14,
+        "start_col": 4,
+        "end_line": 14,
+        "end_col": 8
+      },
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "extracted"
+    },
+    {
+      "id": "edge:IMPORTS:file:simple_module.pl:module:File::Basename:170",
+      "kind": "Imports",
+      "src": "file:simple_module.pl",
+      "dst": "module:File::Basename",
+      "file_path": "simple_module.pl",
+      "span": {
+        "start_byte": 170,
+        "end_byte": 189,
+        "start_line": 7,
+        "start_col": 0,
+        "end_line": 7,
+        "end_col": 19
+      },
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "raw": "use File::Basename;"
+      }
+    },
+    {
+      "id": "edge:IMPORTS:file:simple_module.pl:module:Sample:128",
+      "kind": "Imports",
+      "src": "file:simple_module.pl",
+      "dst": "module:Sample",
+      "file_path": "simple_module.pl",
+      "span": {
+        "start_byte": 128,
+        "end_byte": 143,
+        "start_line": 4,
+        "start_col": 0,
+        "end_line": 4,
+        "end_col": 15
+      },
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "raw": "package Sample;"
+      }
+    },
+    {
+      "id": "edge:IMPORTS:file:simple_module.pl:module:strict:144",
+      "kind": "Imports",
+      "src": "file:simple_module.pl",
+      "dst": "module:strict",
+      "file_path": "simple_module.pl",
+      "span": {
+        "start_byte": 144,
+        "end_byte": 155,
+        "start_line": 5,
+        "start_col": 0,
+        "end_line": 5,
+        "end_col": 11
+      },
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "raw": "use strict;"
+      }
+    },
+    {
+      "id": "edge:IMPORTS:file:simple_module.pl:module:warnings:156",
+      "kind": "Imports",
+      "src": "file:simple_module.pl",
+      "dst": "module:warnings",
+      "file_path": "simple_module.pl",
+      "span": {
+        "start_byte": 156,
+        "end_byte": 169,
+        "start_line": 6,
+        "start_col": 0,
+        "end_line": 6,
+        "end_col": 13
+      },
+      "analyzer": "tree-sitter-perl@1.1",
+      "tier": "T1",
+      "confidence": "extracted",
+      "attrs": {
+        "raw": "use warnings;"
+      }
+    }
+  ]
+}

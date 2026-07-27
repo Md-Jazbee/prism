@@ -5,7 +5,9 @@ Small hand-authored snippets with expected `FactBundle` JSON for extractor confo
 | Language | Source | Expected |
 |---|---|---|
 | Python | `python/simple_module.py` | `python/expected.json` |
-| Rust | `rust/simple_mod.rs` | `rust/expected.json`
+| Rust | `rust/simple_mod.rs` | `rust/expected.json` |
+| Java | `java/simple_class.java` | `java/expected.json` |
+| Perl | `perl/simple_module.pl` | `perl/expected.json` |
 
 Each extractor crate runs a unit test that extracts the source and asserts equality against the golden JSON (after `FactBundle::normalize()`).
 

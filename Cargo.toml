@@ -10,6 +10,8 @@ members = [
     "crates/prism-extract-python",
     "crates/prism-extract-rust",
     "crates/prism-extract-markdown",
+    "crates/prism-extract-java",
+    "crates/prism-extract-perl",
     "crates/prism-mcp",
     "crates/prism-plan",
     "crates/prism-compile",
@@ -44,9 +46,11 @@ rusqlite = { version = "0.32", features = ["bundled"] }
 tempfile = "3"
 ignore = "0.4"
 hex = "0.4"
-tree-sitter = "0.24"
+tree-sitter = "0.26"
 tree-sitter-python = "0.23"
 tree-sitter-rust = "0.23"
+tree-sitter-java = "0.23"
+tree-sitter-perl = "1.1"
 criterion = { version = "0.5", features = ["html_reports"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "fs", "signal", "net"] }
 axum = { version = "0.8", features = ["macros"] }
@@ -68,6 +72,8 @@ prism-extract = { path = "crates/prism-extract" }
 prism-extract-python = { path = "crates/prism-extract-python" }
 prism-extract-rust = { path = "crates/prism-extract-rust" }
 prism-extract-markdown = { path = "crates/prism-extract-markdown" }
+prism-extract-java = { path = "crates/prism-extract-java" }
+prism-extract-perl = { path = "crates/prism-extract-perl" }
 prism-mcp = { path = "crates/prism-mcp" }
 prism-plan = { path = "crates/prism-plan" }
 prism-compile = { path = "crates/prism-compile" }
