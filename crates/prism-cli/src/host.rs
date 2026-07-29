@@ -65,6 +65,14 @@ fn mcp_server_entry(root: &Path, bin: &str) -> serde_json::Value {
     })
 }
 
+fn vscode_server_entry(root: &Path, bin: &str) -> serde_json::Value {
+    serde_json::json!({
+        "type": "stdio",
+        "command": bin,
+        "args": ["mcp", root.display().to_string()],
+    })
+}
+
 fn merge_mcp_json(path: &Path, root: &Path, bin: &str) -> Result<()> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
@@ -110,6 +118,70 @@ fn remove_mcp_server(path: &Path) -> Result<bool> {
     Ok(removed)
 }
 
+fn merge_vscode_mcp_json(path: &Path, root: &Path, bin: &str) -> Result<()> {
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    let mut root_obj: serde_json::Value = if path.exists() {
+        serde_json::from_str(&fs::read_to_string(path)?)
+            .unwrap_or_else(|_| serde_json::json!({ "servers": {} }))
+    } else {
+        serde_json::json!({ "servers": {} })
+    };
+    if !root_obj
+        .get("servers")
+        .map(|v| v.is_object())
+        .unwrap_or(false)
+    {
+        root_obj["servers"] = serde_json::json!({});
+    }
+    root_obj["servers"]["prism"] = vscode_server_entry(root, bin);
+    // Remove legacy Cursor-format entry if a previous install wrote it here.
+    if let Some(legacy) = root_obj.get_mut("mcpServers").and_then(|v| v.as_object_mut()) {
+        legacy.remove("prism");
+        if legacy.is_empty() {
+            root_obj.as_object_mut().map(|o| o.remove("mcpServers"));
+        }
+    }
+    fs::write(
+        path,
+        format!("{}\n", serde_json::to_string_pretty(&root_obj)?),
+    )?;
+    Ok(())
+}
+
+fn remove_vscode_mcp_server(path: &Path) -> Result<bool> {
+    if !path.exists() {
+        return Ok(false);
+    }
+    let mut root_obj: serde_json::Value = serde_json::from_str(&fs::read_to_string(path)?)
+        .unwrap_or_else(|_| serde_json::json!({ "servers": {} }));
+    let mut removed = false;
+    if root_obj
+        .get_mut("servers")
+        .and_then(|s| s.as_object_mut())
+        .map(|m| m.remove("prism").is_some())
+        .unwrap_or(false)
+    {
+        removed = true;
+    }
+    if root_obj
+        .get_mut("mcpServers")
+        .and_then(|s| s.as_object_mut())
+        .map(|m| m.remove("prism").is_some())
+        .unwrap_or(false)
+    {
+        removed = true;
+    }
+    if removed {
+        fs::write(
+            path,
+            format!("{}\n", serde_json::to_string_pretty(&root_obj)?),
+        )?;
+    }
+    Ok(removed)
+}
+
 fn mcp_has_prism_at(path: &Path) -> bool {
     if !path.exists() {
         return false;
@@ -121,6 +193,24 @@ fn mcp_has_prism_at(path: &Path) -> bool {
             v.get("mcpServers")
                 .and_then(|s| s.get("prism"))
                 .map(|_| true)
+        })
+        .unwrap_or(false)
+}
+
+fn vscode_mcp_has_prism_at(path: &Path) -> bool {
+    if !path.exists() {
+        return false;
+    }
+    fs::read_to_string(path)
+        .ok()
+        .and_then(|raw| serde_json::from_str::<serde_json::Value>(&raw).ok())
+        .map(|v| {
+            v.get("servers")
+                .and_then(|s| s.get("prism"))
+                .is_some()
+                || v.get("mcpServers")
+                    .and_then(|s| s.get("prism"))
+                    .is_some()
         })
         .unwrap_or(false)
 }
@@ -216,7 +306,7 @@ pub fn host_install(root: &Path, host: HostKind) -> Result<HostActionReport> {
         }
         HostKind::Vscode => {
             let path = root.join(".vscode/mcp.json");
-            merge_mcp_json(&path, root, &bin)?;
+            merge_vscode_mcp_json(&path, root, &bin)?;
             paths.push(path.display().to_string());
             format!("merged Prism MCP into {}", paths[0])
         }
@@ -279,7 +369,7 @@ pub fn host_uninstall(root: &Path, host: HostKind) -> Result<HostActionReport> {
         }
         HostKind::Vscode => {
             let path = root.join(".vscode/mcp.json");
-            let removed = remove_mcp_server(&path)?;
+            let removed = remove_vscode_mcp_server(&path)?;
             paths.push(path.display().to_string());
             if removed {
                 format!("removed prism from {}", paths[0])
@@ -351,11 +441,12 @@ pub fn host_status(root: &Path, host: Option<HostKind>) -> Result<Vec<HostStatus
             }
             HostKind::Vscode => {
                 let path = root.join(".vscode/mcp.json");
+                let registered = vscode_mcp_has_prism_at(&path);
                 HostStatus {
                     host: h.as_str().into(),
-                    registered: mcp_has_prism_at(&path),
+                    registered,
                     paths: vec![path.display().to_string()],
-                    detail: if mcp_has_prism_at(&path) {
+                    detail: if registered {
                         "prism MCP present".into()
                     } else {
                         "not registered".into()
@@ -408,13 +499,20 @@ pub fn register_default_mcp(root: &Path) -> Result<PathBuf> {
     } else {
         root.join(".vscode/mcp.json")
     };
-    merge_mcp_json(&target, root, &bin).with_context(|| format!("write {}", target.display()))?;
+    let vscode_target = root.join(".vscode/mcp.json");
+    if target == vscode_target {
+        merge_vscode_mcp_json(&target, root, &bin)
+            .with_context(|| format!("write {}", target.display()))?;
+    } else {
+        merge_mcp_json(&target, root, &bin)
+            .with_context(|| format!("write {}", target.display()))?;
+    }
     Ok(target)
 }
 
 pub fn mcp_has_prism(root: &Path) -> bool {
     mcp_has_prism_at(&root.join(".cursor/mcp.json"))
-        || mcp_has_prism_at(&root.join(".vscode/mcp.json"))
+        || vscode_mcp_has_prism_at(&root.join(".vscode/mcp.json"))
 }
 
 #[cfg(test)]
@@ -433,6 +531,52 @@ mod tests {
         assert!(st[0].registered);
         host_uninstall(root, HostKind::Cursor).unwrap();
         assert!(!mcp_has_prism(root));
+    }
+
+    #[test]
+    fn vscode_install_uninstall_roundtrip() {
+        let dir = tempdir().unwrap();
+        let root = dir.path();
+        let rep = host_install(root, HostKind::Vscode).unwrap();
+        assert!(rep.ok);
+        let raw = fs::read_to_string(root.join(".vscode/mcp.json")).unwrap();
+        let v: serde_json::Value = serde_json::from_str(&raw).unwrap();
+        assert!(v.get("servers").and_then(|s| s.get("prism")).is_some());
+        assert!(v
+            .get("servers")
+            .and_then(|s| s.get("prism"))
+            .and_then(|p| p.get("type"))
+            .and_then(|t| t.as_str())
+            .is_some_and(|t| t == "stdio"));
+        assert!(vscode_mcp_has_prism_at(&root.join(".vscode/mcp.json")));
+        host_uninstall(root, HostKind::Vscode).unwrap();
+        assert!(!vscode_mcp_has_prism_at(&root.join(".vscode/mcp.json")));
+    }
+
+    #[test]
+    fn vscode_install_migrates_legacy_mcp_servers_key() {
+        let dir = tempdir().unwrap();
+        let root = dir.path();
+        fs::create_dir_all(root.join(".vscode")).unwrap();
+        fs::write(
+            root.join(".vscode/mcp.json"),
+            r#"{
+  "mcpServers": {
+    "prism": {
+      "command": "prism",
+      "args": ["mcp", "/tmp"]
+    }
+  }
+}
+"#,
+        )
+        .unwrap();
+        host_install(root, HostKind::Vscode).unwrap();
+        let v: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(root.join(".vscode/mcp.json")).unwrap())
+                .unwrap();
+        assert!(v.get("servers").and_then(|s| s.get("prism")).is_some());
+        assert!(v.get("mcpServers").is_none());
     }
 
     #[test]
